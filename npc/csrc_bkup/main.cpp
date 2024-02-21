@@ -1,7 +1,7 @@
 #include <nvboard.h>
 #include <Vtop.h>
 
-static TOP_NAME dut;
+static TOP_NAME dut;                        // TOP_NAME is defined by macro TOPNAME in Makefile
 
 void nvboard_bind_all_pins(TOP_NAME* top);
 
