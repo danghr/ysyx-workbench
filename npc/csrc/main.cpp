@@ -7,7 +7,7 @@
 // TOP_NAME in this file is defined by macro TOPNAME in npc/Makefile
 static TOP_NAME dut;
 
-const unsigned int MAX_SIM_TIME = 100;
+const unsigned int MAX_SIM_TIME = 1000;
 
 void nvboard_bind_all_pins(TOP_NAME *top);
 
