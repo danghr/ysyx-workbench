@@ -7,8 +7,7 @@ INC_PATH ?=
 
 # Verilator command and flags
 VERILATOR = verilator
-VERILATOR_CFLAGS += -MMD --build -cc  \
-				-O3 --x-assign fast --x-initial fast --noassert
+VERILATOR_CFLAGS += -MMD --build -cc --trace -O3 --x-assign fast --x-initial fast --noassert \
 
 # Output directory
 BUILD_DIR = ./build
@@ -34,7 +33,8 @@ include $(NVBOARD_HOME)/scripts/nvboard.mk
 
 # Rules for verilator
 INCFLAGS = $(addprefix -I, $(INC_PATH))
-CXXFLAGS += $(INCFLAGS) -DTOP_NAME="\"V$(TOPNAME)\""	# TOP_NAME defined here
+CXXFLAGS += $(INCFLAGS) -DTOP_NAME="\"V$(TOPNAME)\""
+# -DTRACE_NAME="\"$(TRACE_DIR)/$(TOPNAME).vcd\""	# TRACE_NAME defined here
 
 # Target for $(BIN)
 $(BIN): $(VSRCS) $(CSRCS) $(NVBOARD_ARCHIVE)
