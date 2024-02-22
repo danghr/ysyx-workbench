@@ -19,7 +19,7 @@ int main(int argc, char **argv)
     VerilatedVcdC* tfp = new VerilatedVcdC;
     top->trace(tfp, 99);
     // tfp->dumpvars(1, "t");  // trace 1 level under "t"
-    tfp->open("TRACE_NAME");
+    tfp->open(TRACE_NAME);
 
     nvboard_bind_all_pins(top);
     nvboard_init();
