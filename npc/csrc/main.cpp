@@ -3,7 +3,7 @@
 #include "verilated.h"
 #include "verilated_vcd_c.h"
 
-#define MAX_CYCLES 1e9
+#define MAX_CYCLES 1e5
 #define MAX_SIM_TIME (MAX_CYCLES * 2)
 
 static TOP_NAME *top;   // Defined in npc/Makefile
