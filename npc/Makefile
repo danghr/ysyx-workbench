@@ -1,5 +1,5 @@
 # TOP module name. Affecting TOP_NAME in csrc/main.cpp and other C/C++ source files.
-TOPNAME = top
+TOPNAME = light
 # Constraint file
 NXDC_FILES = constr/top.nxdc
 # Include path for verilator
@@ -34,7 +34,8 @@ include $(NVBOARD_HOME)/scripts/nvboard.mk
 # Rules for verilator
 INCFLAGS = $(addprefix -I, $(INC_PATH))
 CXXFLAGS += $(INCFLAGS) -DTOP_NAME="\"V$(TOPNAME)\""
-CXXFLAGS += -DTRACE_NAME="\"\\\"$(TRACE_DIR)/$(TOPNAME).vcd\\\"\""	# TRACE_NAME defined here
+CXXFLAGS += -DTRACE_NAME="\"\\\"$(TRACE_DIR)/$(TOPNAME).vcd\\\"\""		# TRACE_NAME defined here
+CXXFLAGS += -DTOP_NAME_H_FILE="\"\\\"V$(TOPNAME).h\\\"\""				# TOP_NAME_H_FILE defined here
 
 # Target for $(BIN)
 $(BIN): $(VSRCS) $(CSRCS) $(NVBOARD_ARCHIVE)
