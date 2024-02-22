@@ -20,7 +20,7 @@ int main(int argc, char **argv)
     VerilatedVcdC* tfp = new VerilatedVcdC;
     top->trace(tfp, 99);
     // tfp->dumpvars(1, "t");  // trace 1 level under "t"
-    tfp->open("obj_dir/t_trace_top/simx.vcd");
+    tfp->open(TRACE_NAME);
 
     nvboard_bind_all_pins(top);
     nvboard_init();
