@@ -34,8 +34,7 @@ include $(NVBOARD_HOME)/scripts/nvboard.mk
 # Rules for verilator
 INCFLAGS = $(addprefix -I, $(INC_PATH))
 CXXFLAGS += $(INCFLAGS) -DTOP_NAME="\"V$(TOPNAME)\""
-CXXFLAGS += -DTRACE_NAME="\"\\\"some_trace\\\"\""
-# CXXFLAGS += -DTRACE_NAME=\"$(TRACE_DIR)/$(TOPNAME).vcd\"	# TRACE_NAME defined here
+CXXFLAGS += -DTRACE_NAME="\"\\\"$(TRACE_DIR)/$(TOPNAME).vcd\\\"\""	# TRACE_NAME defined here
 
 # Target for $(BIN)
 $(BIN): $(VSRCS) $(CSRCS) $(NVBOARD_ARCHIVE)
@@ -50,7 +49,7 @@ all:
 
 sim: $(BIN)
 	$(call git_commit, "sim RTL") # DO NOT REMOVE THIS LINE!!!
-	# @$^
+	@$^
 
 clean:
 	rm -rf $(BUILD_DIR)
