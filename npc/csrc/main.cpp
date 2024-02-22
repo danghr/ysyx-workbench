@@ -3,7 +3,7 @@
 #include "verilated.h"
 #include "verilated_vcd_c.h"
 
-#define MAX_CYCLES 1e6
+#define MAX_CYCLES 1e9
 #define MAX_SIM_TIME (MAX_CYCLES * 2)
 
 static TOP_NAME *top;   // Defined in npc/Makefile
@@ -15,7 +15,9 @@ void nvboard_bind_all_pins(TOP_NAME *top);
 
 void status_change() {
     top->eval();
+#ifdef TRACE_NAME
     tfp->dump(contextp->time());
+#endif
     nvboard_update();
     contextp->timeInc(1);
 }
@@ -36,11 +38,13 @@ int main(int argc, char **argv)
     contextp = new VerilatedContext;
     contextp->commandArgs(argc, argv);
     top = new TOP_NAME{contextp};
+#ifdef TRACE_NAME
     Verilated::traceEverOn(true);
     tfp = new VerilatedVcdC;
     top->trace(tfp, 99);
     // tfp->dumpvars(1, "t");  // trace 1 level under "t"
     tfp->open(TRACE_NAME);
+#endif
 
     nvboard_bind_all_pins(top);
     nvboard_init();
@@ -50,10 +54,12 @@ int main(int argc, char **argv)
     while (!contextp->gotFinish() && contextp->time() < MAX_SIM_TIME) {
         single_cycle();
     }
+#ifdef TRACE_NAME
     tfp->close();
+    delete tfp;
+#endif
     delete top;
     delete contextp;
-    delete tfp;
     nvboard_quit();
     return 0;
 }
