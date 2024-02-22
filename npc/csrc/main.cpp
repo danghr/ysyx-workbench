@@ -45,6 +45,8 @@ int main(int argc, char **argv)
     nvboard_bind_all_pins(top);
     nvboard_init();
 
+    reset(10);
+
     while (!contextp->gotFinish() && contextp->time() < MAX_SIM_TIME) {
         single_cycle();
     }
