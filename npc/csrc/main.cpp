@@ -5,7 +5,7 @@
 
 #define MAX_CYCLES 1e8
 #define MAX_SIM_TIME (MAX_CYCLES * 2)
-#define DO_TRACE
+// #define DO_TRACE
 
 static TOP_NAME *top;   // Defined in npc/Makefile
 VerilatedContext* contextp;
