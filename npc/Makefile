@@ -33,8 +33,8 @@ include $(NVBOARD_HOME)/scripts/nvboard.mk
 
 # Rules for verilator
 INCFLAGS = $(addprefix -I, $(INC_PATH))
-CXXFLAGS += $(INCFLAGS) -DTOP_NAME="\"V$(TOPNAME)\"" \
-			# -DTRACE_NAME="\"$(TRACE_DIR)/$(TOPNAME).vcd\""	# TRACE_NAME defined here
+CXXFLAGS += $(INCFLAGS) -DTOP_NAME="\"V$(TOPNAME)\""
+CXXFLAGS += -DTRACE_NAME="\"$(TRACE_DIR)/$(TOPNAME).vcd\""	# TRACE_NAME defined here
 
 # Target for $(BIN)
 $(BIN): $(VSRCS) $(CSRCS) $(NVBOARD_ARCHIVE)

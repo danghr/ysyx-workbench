@@ -3,8 +3,7 @@
 #include "verilated.h"
 #include "verilated_vcd_c.h"
 
-#define TRACE_NAME "./build/t_trace_top/top.vcd"
-// TOP_NAME in this file is defined by macro TOPNAME in npc/Makefile
+// TOP_NAME and TRACE_NAME in this file is defined in npc/Makefile
 static TOP_NAME *top;
 
 const unsigned int MAX_SIM_TIME = 1e6;
@@ -20,7 +19,7 @@ int main(int argc, char **argv)
     VerilatedVcdC* tfp = new VerilatedVcdC;
     top->trace(tfp, 99);
     // tfp->dumpvars(1, "t");  // trace 1 level under "t"
-    tfp->open(TRACE_NAME);
+    tfp->open("TRACE_NAME");
 
     nvboard_bind_all_pins(top);
     nvboard_init();
