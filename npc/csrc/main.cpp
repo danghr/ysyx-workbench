@@ -3,7 +3,7 @@
 #include "verilated.h"
 #include "verilated_vcd_c.h"
 
-// TOP_NAME and TRACE_NAME in this file is defined in npc/Makefile
+// TOP_NAME defined in npc/Makefile
 static TOP_NAME *top;
 
 const unsigned int MAX_SIM_TIME = 1e6;
