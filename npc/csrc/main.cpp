@@ -5,7 +5,7 @@
 
 #define TRACE_NAME "./build/t_trace_top/top.vcd"
 // TOP_NAME in this file is defined by macro TOPNAME in npc/Makefile
-static TOP_NAME dut;
+static TOP_NAME *top;
 
 const unsigned int MAX_SIM_TIME = 1000;
 
@@ -13,33 +13,33 @@ void nvboard_bind_all_pins(TOP_NAME *top);
 
 int main(int argc, char **argv)
 {
-    VerilatedContext *contextp = new VerilatedContext;
+    VerilatedContext* contextp = new VerilatedContext;
     contextp->commandArgs(argc, argv);
+    top = new TOP_NAME{contextp};
     Verilated::traceEverOn(true);
     VerilatedVcdC* tfp = new VerilatedVcdC;
-    dut.trace(tfp, 99);
+    top->trace(tfp, 99);
+    // tfp->dumpvars(1, "t");  // trace 1 level under "t"
+    tfp->open("obj_dir/t_trace_top/simx.vcd");
 
-    nvboard_bind_all_pins(&dut);
+    nvboard_bind_all_pins(top);
     nvboard_init();
 
-    tfp->open(TRACE_NAME);
-
-    while (!contextp->gotFinish() && contextp->time() < MAX_SIM_TIME)
-    {
+    while (!contextp->gotFinish() && contextp->time() < MAX_SIM_TIME) {
         contextp->timeInc(1);
         int a = rand() & 1;
         int b = rand() & 1;
-        dut.a = a;
-        dut.b = b;
-        dut.eval();
+        top->a = a;
+        top->b = b;
+        top->eval();
         tfp->dump(contextp->time());
-        printf("a = %d, b = %d, f = %d\n", dut.a, dut.b, dut.f);
+        printf("a = %d, b = %d, f = %d\n", a, b, top->f);
         nvboard_update();
-        assert(dut.f == (dut.a ^ dut.b));
+        assert(top->f == (a ^ b));
     }
     tfp->close();
-    nvboard_quit();
+    delete top;
     delete contextp;
-    delete tfp;
+    nvboard_quit();
     return 0;
 }
