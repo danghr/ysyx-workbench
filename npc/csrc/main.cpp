@@ -15,7 +15,7 @@ void nvboard_bind_all_pins(TOP_NAME *top);
 
 void status_change() {
     top->eval();
-#ifdef TRACE_NAME
+#ifdef DO_TRACE
     tfp->dump(contextp->time());
 #endif
     nvboard_update();
@@ -38,7 +38,7 @@ int main(int argc, char **argv)
     contextp = new VerilatedContext;
     contextp->commandArgs(argc, argv);
     top = new TOP_NAME{contextp};
-#ifdef TRACE_NAME
+#ifdef DO_TRACE
     Verilated::traceEverOn(true);
     tfp = new VerilatedVcdC;
     top->trace(tfp, 99);
@@ -54,7 +54,7 @@ int main(int argc, char **argv)
     while (!contextp->gotFinish() && contextp->time() < MAX_SIM_TIME) {
         single_cycle();
     }
-#ifdef TRACE_NAME
+#ifdef DO_TRACE
     tfp->close();
     delete tfp;
 #endif
