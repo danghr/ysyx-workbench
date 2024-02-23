@@ -3,11 +3,16 @@
 #include "verilated.h"
 #include "verilated_vcd_c.h"
 
-#define MAX_CYCLES 1e8
-#define MAX_SIM_TIME (MAX_CYCLES * 2)
+// Configuration of whether use tracing or sequential logic
 // #define _DO_TRACE
 // #define _SEQUENTIAL_LOGIC
-// #define _NVBOARD
+
+#define MAX_CYCLES 1e2
+#ifdef _SEQUENTIAL_LOGIC
+const int MAX_SIM_TIME = (MAX_CYCLES) * 2;
+#else
+const int MAX_SIM_TIME = (MAX_CYCLES);
+#endif
 
 static TOP_NAME *top;   // Defined in npc/Makefile
 VerilatedContext* contextp;
@@ -66,8 +71,8 @@ int main(int argc, char **argv)
 
     while (!contextp->gotFinish() && contextp->time() < MAX_SIM_TIME) {
         printf("ONE: %d\n", top->one);
-        assert(top->one == 1);
         status_change();
+        assert(top->one == 1);
     }
 
 #ifdef _DO_TRACE
