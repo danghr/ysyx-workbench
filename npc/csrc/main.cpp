@@ -65,6 +65,7 @@ int main(int argc, char **argv)
 #endif
 
     while (!contextp->gotFinish() && contextp->time() < MAX_SIM_TIME) {
+        printf("ONE: %d\n", top->one);
         assert(top->one == 1);
         status_change();
     }
