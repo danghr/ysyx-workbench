@@ -75,6 +75,8 @@ int main(int argc, char **argv)
         assert(top->out == top->in);
     }
 
+    printf("Simulation done\n");
+
 #ifdef _DO_TRACE
     tfp->close();
     delete tfp;
