@@ -1,7 +1,5 @@
-module top_module(
-    output zero
-);// Module body starts after semicolon
+module top_module( input in, output out );
 
-  assign zero = 0;
+assign out = in;
 
 endmodule
