@@ -1,5 +1,5 @@
 # TOP module name. Affecting TOP_NAME in csrc/main.cpp and other C/C++ source files.
-TOPNAME = light
+TOPNAME = top_module
 # Constraint file
 NXDC_FILES = constr/top.nxdc
 # Include path for verilator
