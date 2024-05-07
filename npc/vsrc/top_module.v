@@ -4,7 +4,7 @@ module top_module (
     input s,
     input w,
     output z,
-    output reg [1:0] state, next_state, counter
+    output reg [1:0] state, next_state, counter, next_counter
 );
 
     parameter A = 2'd0, B0 = 2'd1, B1 = 2'd2, B2 = 2'd3;
@@ -26,10 +26,11 @@ module top_module (
     end
 
     always @(posedge clk ) begin
-        if (state == B0) counter <= w ? 2'd1 : 2'd0;
-        else counter <= w ? counter + 2'd1 : counter;
+        counter <= next_counter;
+        if (state == B0) next_counter <= w ? 2'd1 : 2'd0;
+        else next_counter <= w ? next_counter + 2'd1 : next_counter;
     end
 
-    assign z = (state == B0) & (counter == 2'd2);
+    assign z = (state == B1) & (next_counter == 2'd2);
 
 endmodule
