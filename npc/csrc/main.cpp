@@ -41,9 +41,9 @@ void single_cycle() {
 }
 
 void reset(int n) {
-    top->rst = 1;
+    top->reset = 1;
     while(n-- > 0) single_cycle();
-    top->rst = 0;
+    top->reset = 0;
 }
 #endif
 
@@ -70,12 +70,10 @@ int main(int argc, char **argv)
 #endif
 
     while (!contextp->gotFinish() && contextp->time() < MAX_SIM_TIME) {
-        top->in = rand() % 2;
         status_change();
-        assert(top->out == top->in);
+        top->s = 1;
+        top->w = rand() % 2;
     }
-
-    printf("Simulation done\n");
 
 #ifdef _DO_TRACE
     tfp->close();
