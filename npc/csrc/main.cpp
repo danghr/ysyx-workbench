@@ -69,14 +69,56 @@ int main(int argc, char **argv)
 #endif
 
 #ifdef _SEQUENTIAL_LOGIC
-    reset(10);
+    reset(1);
 #endif
 
-    while (!contextp->gotFinish() && contextp->time() < MAX_SIM_TIME) {
-        top->s = 1;
-        top->w = rand() % 2;
-        single_cycle();
-    }
+    top->s = 1;
+    top->w = 0;
+    single_cycle();
+    
+    top->s = 0;
+    top->w = 1;
+    single_cycle();
+
+    top->s = 0;
+    top->w = 0;
+    single_cycle();
+
+    top->s = 0;
+    top->w = 1;
+    single_cycle();
+
+    top->s = 0;
+    top->w = 1;
+    single_cycle();
+
+    top->s = 0;
+    top->w = 1;
+    single_cycle();
+
+    top->s = 1;
+    top->w = 0;
+    single_cycle();
+
+    top->s = 1;
+    top->w = 0;
+    single_cycle();
+
+    top->s = 1;
+    top->w = 1;
+    single_cycle();
+
+    top->s = 0;
+    top->w = 1;
+    single_cycle();
+
+    top->s = 0;
+    top->w = 0;
+    single_cycle();
+
+    top->s = 0;
+    top->w = 0;
+    single_cycle();
 
 #ifdef _DO_TRACE
     tfp->close();
