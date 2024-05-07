@@ -4,6 +4,7 @@ module top_module (
     input s,
     input w,
     output z,
+    output debug_counter, debug_state,
     output reg [1:0] state, next_state, counter, next_counter
 );
 
@@ -31,6 +32,8 @@ module top_module (
         else next_counter <= w ? next_counter + 2'd1 : next_counter;
     end
 
-    assign z = (state == 2'b10);
+    assign debug_counter = (counter == 2'd2);
+    assign debug_state = (state == B1);
+    assign z = debug_counter & debug_state;
 
 endmodule
