@@ -4,12 +4,13 @@
 #include "verilated_vcd_c.h"
 
 #define _DO_TRACE
+#define _SEQUENTIAL_LOGIC
 
 // Configuration of whether use tracing or sequential logic
 // #define _DO_TRACE
 // #define _SEQUENTIAL_LOGIC
 
-#define MAX_CYCLES 1e2
+#define MAX_CYCLES 50
 #ifdef _SEQUENTIAL_LOGIC
 const int MAX_SIM_TIME = (MAX_CYCLES) * 2;
 #else
@@ -74,7 +75,7 @@ int main(int argc, char **argv)
     while (!contextp->gotFinish() && contextp->time() < MAX_SIM_TIME) {
         top->s = 1;
         top->w = rand() % 2;
-        status_change();
+        single_cycle();
     }
 
 #ifdef _DO_TRACE
