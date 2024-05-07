@@ -38,9 +38,8 @@ void status_change() {
 
 #ifdef _SEQUENTIAL_LOGIC
 void single_cycle() {
-
-    top->clk = 0; status_change();
     top->clk = 1; status_change();
+    top->clk = 0; status_change();
 }
 
 void reset(int n) {
