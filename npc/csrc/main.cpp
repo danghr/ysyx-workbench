@@ -70,9 +70,9 @@ int main(int argc, char **argv)
 #endif
 
     while (!contextp->gotFinish() && contextp->time() < MAX_SIM_TIME) {
-        status_change();
         top->s = 1;
         top->w = rand() % 2;
+        status_change();
     }
 
 #ifdef _DO_TRACE
