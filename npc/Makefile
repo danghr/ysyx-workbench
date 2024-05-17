@@ -1,7 +1,10 @@
 # TOP module name. Affecting TOP_NAME in csrc/main.cpp and other C/C++ source files.
 TOPNAME = top_module
+# Project path
+PROJ_PATH = $(shell pwd)
 # Constraint file
-NXDC_FILES = constr/top.nxdc
+NXDC_FILES = $(PROJ_PATH)/constr/top.nxdc
+SDC_FILES = $(PROJ_PATH)/constr/top.sdc
 # Include path for verilator
 INC_PATH ?=
 
@@ -10,7 +13,7 @@ VERILATOR = verilator
 VERILATOR_CFLAGS += -MMD --build -cc --trace -O3 --x-assign fast --x-initial fast --noassert \
 
 # Output directory
-BUILD_DIR = ./build
+BUILD_DIR = $(PROJ_PATH)/build
 OBJ_DIR = $(BUILD_DIR)/obj_dir
 TRACE_DIR = $(BUILD_DIR)/t_trace_${TOPNAME}
 BIN = $(BUILD_DIR)/$(TOPNAME)
@@ -51,6 +54,11 @@ all:
 sim: $(BIN)
 	$(call git_commit, "sim RTL") # DO NOT REMOVE THIS LINE!!!
 	@$^
+
+synth: sim
+	$(shell cd ../../yosys-sta)
+	$(shell make PROJ_PATH=$(PROJ_PATH) DESIGN=$(TOPNAME) SDC_FILE=$(SDC_FILES) RTL_FILES=$(VSRCS))
+	$(shell cd $(PROJ_PATH))
 
 clean:
 	rm -rf $(BUILD_DIR)
