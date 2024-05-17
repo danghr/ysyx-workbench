@@ -128,5 +128,6 @@ int main(int argc, char **argv)
 #ifdef _NVBOARD
     nvboard_quit();
 #endif
+    printf("Simulation done.\n");
     return 0;
 }
