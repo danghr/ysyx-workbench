@@ -9,8 +9,6 @@ module top_module (
 );
 
     parameter A = 2'd0, B0 = 2'd1, B1 = 2'd2, B2 = 2'd3;
-    // reg [1:0] state, next_state;
-    // reg [1:0] counter, next_counter;
 
     always @(posedge clk ) begin
         case (state)
