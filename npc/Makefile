@@ -1,10 +1,7 @@
 # TOP module name. Affecting TOP_NAME in csrc/main.cpp and other C/C++ source files.
 TOPNAME = top_module
-# Project path
-PROJ_PATH = $(shell pwd)
 # Constraint file
-NXDC_FILES = $(PROJ_PATH)/constr/top.nxdc
-SDC_FILES = $(PROJ_PATH)/constr/top.sdc
+NXDC_FILES = constr/top.nxdc
 # Include path for verilator
 INC_PATH ?=
 
@@ -13,9 +10,10 @@ VERILATOR = verilator
 VERILATOR_CFLAGS += -MMD --build -cc --trace -O3 --x-assign fast --x-initial fast --noassert \
 
 # Output directory
-BUILD_DIR = $(PROJ_PATH)/build
+BUILD_DIR = ./build
 OBJ_DIR = $(BUILD_DIR)/obj_dir
 TRACE_DIR = $(BUILD_DIR)/t_trace_${TOPNAME}
+STAT_DIR = $(BUILD_DIR)/stat
 BIN = $(BUILD_DIR)/$(TOPNAME)
 $(shell mkdir -p $(BUILD_DIR))
 $(shell mkdir -p $(OBJ_DIR))
@@ -25,6 +23,9 @@ $(shell mkdir -p $(TRACE_DIR))
 SRC_AUTO_BIND = $(abspath $(BUILD_DIR)/auto_bind.cpp)
 $(SRC_AUTO_BIND): $(NXDC_FILES)
 	python3 $(NVBOARD_HOME)/scripts/auto_pin_bind.py $^ $@
+
+# Remote server for yosys-sta
+YOSYS_STA_SERVER = yosys@console.danghr.com
 
 # Project source
 VSRCS = $(shell find $(abspath ./vsrc) -name "*.v")
@@ -55,10 +56,28 @@ sim: $(BIN)
 	$(call git_commit, "sim RTL") # DO NOT REMOVE THIS LINE!!!
 	@$^
 
-synth: sim
-	$(shell cd ../../yosys-sta)
-	$(shell make PROJ_PATH=$(PROJ_PATH) DESIGN=$(TOPNAME) SDC_FILE=$(SDC_FILES) RTL_FILES=$(VSRCS))
-	$(shell cd $(PROJ_PATH))
+sta: $(BIN)
+	rm -rf $(STAT_DIR)
+	tar -cvf $(BUILD_DIR)/top.tar -C ./vsrc .
+	scp $(BUILD_DIR)/top.tar $(YOSYS_STA_SERVER):~/
+	rm $(BUILD_DIR)/top.tar
+
+	ssh $(YOSYS_STA_SERVER) "\
+		rm -rf yosys-sta/yosys-result.tar && \
+		rm -rf yosys-sta/result && \
+		rm -rf yosys-sta/top && \
+		mkdir -p yosys-sta/top && \
+		cd yosys-sta/top && \
+		tar -xvf ~/top.tar && \
+		rm -rf ~/top.tar && \
+		cd .. && \
+		make sta DESIGN=$(TOPNAME) && \
+		tar -cvf yosys-result.tar -C ./result ."
+
+	scp $(YOSYS_STA_SERVER):~/yosys-sta/yosys-result.tar $(BUILD_DIR)/yosys-result.tar
+	mkdir $(STAT_DIR)
+	tar -xvf $(BUILD_DIR)/yosys-result.tar -C $(BUILD_DIR)/stat
+	rm $(BUILD_DIR)/yosys-result.tar
 
 clean:
 	rm -rf $(BUILD_DIR)
