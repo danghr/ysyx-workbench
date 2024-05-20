@@ -3,11 +3,14 @@
 #include "verilated.h"
 #include "verilated_vcd_c.h"
 
+#define _DO_TRACE
+#define _SEQUENTIAL_LOGIC
+
 // Configuration of whether use tracing or sequential logic
 // #define _DO_TRACE
 // #define _SEQUENTIAL_LOGIC
 
-#define MAX_CYCLES 1e2
+#define MAX_CYCLES 50
 #ifdef _SEQUENTIAL_LOGIC
 const int MAX_SIM_TIME = (MAX_CYCLES) * 2;
 #else
@@ -35,15 +38,14 @@ void status_change() {
 
 #ifdef _SEQUENTIAL_LOGIC
 void single_cycle() {
-
-    top->clk = 0; status_change();
     top->clk = 1; status_change();
+    top->clk = 0; status_change();
 }
 
 void reset(int n) {
-    top->rst = 1;
+    top->reset = 1;
     while(n-- > 0) single_cycle();
-    top->rst = 0;
+    top->reset = 0;
 }
 #endif
 
@@ -66,13 +68,56 @@ int main(int argc, char **argv)
 #endif
 
 #ifdef _SEQUENTIAL_LOGIC
-    reset(10);
+    reset(1);
 #endif
 
-    while (!contextp->gotFinish() && contextp->time() < MAX_SIM_TIME) {
-        status_change();
-        assert(top->zero == 0);
-    }
+    top->s = 1;
+    top->w = 0;
+    single_cycle();
+    
+    top->s = 0;
+    top->w = 1;
+    single_cycle();
+
+    top->s = 0;
+    top->w = 0;
+    single_cycle();
+
+    top->s = 0;
+    top->w = 1;
+    single_cycle();
+
+    top->s = 0;
+    top->w = 1;
+    single_cycle();
+
+    top->s = 0;
+    top->w = 1;
+    single_cycle();
+
+    top->s = 1;
+    top->w = 0;
+    single_cycle();
+
+    top->s = 1;
+    top->w = 0;
+    single_cycle();
+
+    top->s = 1;
+    top->w = 1;
+    single_cycle();
+
+    top->s = 0;
+    top->w = 1;
+    single_cycle();
+
+    top->s = 0;
+    top->w = 0;
+    single_cycle();
+
+    top->s = 0;
+    top->w = 0;
+    single_cycle();
 
 #ifdef _DO_TRACE
     tfp->close();
@@ -83,5 +128,6 @@ int main(int argc, char **argv)
 #ifdef _NVBOARD
     nvboard_quit();
 #endif
+    printf("Simulation done.\n");
     return 0;
 }
