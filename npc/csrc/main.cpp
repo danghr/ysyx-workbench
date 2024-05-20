@@ -11,7 +11,7 @@
 // #define _DO_TRACE
 // #define _SEQUENTIAL_LOGIC
 
-#define MAX_CYCLES 1000
+#define MAX_CYCLES 1000000
 #ifdef _SEQUENTIAL_LOGIC
 const int MAX_SIM_TIME = (MAX_CYCLES) * 2;
 #else
@@ -109,7 +109,6 @@ int main(int argc, char **argv)
         printf("[Simulation %d]\tY = %d / X0 = %d, X1 = %d, X2 = %d, X3 = %d / F = %d\n", i, top->Y, top->X0, top->X1, top->X2, top->X3, top->F);
         assert(top->F == value_should_be);
         contextp->timeInc(1);
-        sleep(1);
     }
     
     // =============================
