@@ -1,4 +1,6 @@
 module top_module (
+    input clk,
+    input reset,
     input  [1:0] X0,
     input  [1:0] X1,
     input  [1:0] X2,

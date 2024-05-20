@@ -3,8 +3,8 @@
 #include "verilated.h"
 #include "verilated_vcd_c.h"
 
-#define _DO_TRACE
-// #define _SEQUENTIAL_LOGIC
+// #define _DO_TRACE
+#define _SEQUENTIAL_LOGIC
 #define _NVBOARD
 
 // Configuration of whether use tracing or sequential logic
@@ -104,7 +104,7 @@ int main(int argc, char **argv)
             assert(false);
             break;
         }
-        status_change();
+        single_cycle();
         nvboard_update();
         printf("[Simulation %d]\tY = %d / X0 = %d, X1 = %d, X2 = %d, X3 = %d / F = %d\n", i, top->Y, top->X0, top->X1, top->X2, top->X3, top->F);
         assert(top->F == value_should_be);
