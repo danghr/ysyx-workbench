@@ -108,7 +108,7 @@ int main(int argc, char **argv)
         printf("[Simulation %d]\tY = %d / X0 = %d, X1 = %d, X2 = %d, X3 = %d / F = %d\n", i, top->Y, top->X0, top->X1, top->X2, top->X3, top->F);
         assert(top->F == value_should_be);
         contextp->timeInc(1);
-        sleep(0.1);
+        sleep(1);
     }
     
     // =============================
