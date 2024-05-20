@@ -3,7 +3,7 @@
 #include "verilated.h"
 #include "verilated_vcd_c.h"
 
-// #define _DO_TRACE
+#define _DO_TRACE
 // #define _SEQUENTIAL_LOGIC
 #define _NVBOARD
 
