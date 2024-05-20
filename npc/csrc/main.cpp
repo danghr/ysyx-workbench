@@ -11,7 +11,7 @@
 // #define _DO_TRACE
 // #define _SEQUENTIAL_LOGIC
 
-#define MAX_CYCLES 100
+#define MAX_CYCLES 1000
 #ifdef _SEQUENTIAL_LOGIC
 const int MAX_SIM_TIME = (MAX_CYCLES) * 2;
 #else
@@ -73,7 +73,7 @@ int main(int argc, char **argv)
 #endif
 
     // =============================
-    // === Begin simulation code ===
+    // === Begin simulation body ===
     // =============================
 
     srand(time(NULL));
@@ -111,7 +111,7 @@ int main(int argc, char **argv)
     }
     
     // =============================
-    // ==== End simulation code ====
+    // ==== End simulation body ====
     // =============================
 
 #ifdef _DO_TRACE
