@@ -4,13 +4,14 @@
 #include "verilated_vcd_c.h"
 
 #define _DO_TRACE
-#define _SEQUENTIAL_LOGIC
+// #define _SEQUENTIAL_LOGIC
+#define _NVBOARD
 
 // Configuration of whether use tracing or sequential logic
 // #define _DO_TRACE
 // #define _SEQUENTIAL_LOGIC
 
-#define MAX_CYCLES 50
+#define MAX_CYCLES 100
 #ifdef _SEQUENTIAL_LOGIC
 const int MAX_SIM_TIME = (MAX_CYCLES) * 2;
 #else
@@ -71,53 +72,46 @@ int main(int argc, char **argv)
     reset(1);
 #endif
 
-    top->s = 1;
-    top->w = 0;
-    single_cycle();
+    // =============================
+    // === Begin simulation code ===
+    // =============================
+
+    srand(time(NULL));
+
+    for(int i = 0; i < MAX_CYCLES; i++) {
+        top->X0 = rand() % 4;
+        top->X1 = rand() % 4;
+        top->X2 = rand() % 4;
+        top->X3 = rand() % 4;
+        top->Y = rand() % 4;
+
+        int value_should_be;
+        switch (top->Y)
+        {
+        case 0:
+            value_should_be = top->X0;
+            break;
+        case 1:
+            value_should_be = top->X1;
+            break;
+        case 2:
+            value_should_be = top->X2;
+            break;
+        case 3:
+            value_should_be = top->X3;
+            break;
+        default:
+            assert(false);
+            break;
+        }
+        status_change();
+        assert(top->Y == value_should_be);
+        contextp->timeInc(1);
+    }
     
-    top->s = 0;
-    top->w = 1;
-    single_cycle();
-
-    top->s = 0;
-    top->w = 0;
-    single_cycle();
-
-    top->s = 0;
-    top->w = 1;
-    single_cycle();
-
-    top->s = 0;
-    top->w = 1;
-    single_cycle();
-
-    top->s = 0;
-    top->w = 1;
-    single_cycle();
-
-    top->s = 1;
-    top->w = 0;
-    single_cycle();
-
-    top->s = 1;
-    top->w = 0;
-    single_cycle();
-
-    top->s = 1;
-    top->w = 1;
-    single_cycle();
-
-    top->s = 0;
-    top->w = 1;
-    single_cycle();
-
-    top->s = 0;
-    top->w = 0;
-    single_cycle();
-
-    top->s = 0;
-    top->w = 0;
-    single_cycle();
+    // =============================
+    // ==== End simulation code ====
+    // =============================
 
 #ifdef _DO_TRACE
     tfp->close();
