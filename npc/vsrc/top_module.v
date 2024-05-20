@@ -1,37 +1,16 @@
 module top_module (
-    input clk,
-    input reset,   // Synchronous reset
-    input s,
-    input w,
-    output z,
-    output debug_counter, debug_state,
-    output reg [1:0] state, next_state, counter, next_counter
+    input  [1:0] X0,
+    input  [1:0] X1,
+    input  [1:0] X2,
+    input  [1:0] X3,
+    input  [1:0] Y,     // Control of the mux
+    output [1:0] F      // Output
 );
 
-    parameter A = 2'd0, B0 = 2'd1, B1 = 2'd2, B2 = 2'd3;
-
-    always @(posedge clk ) begin
-        case (state)
-            A  : next_state = s ? B0 : A;
-            B0 : next_state = B1;
-            B1 : next_state = B2;
-            B2 : next_state = B0;
-        endcase
-    end
-
-    always @(posedge clk ) begin
-        if (reset) state <= A;
-        else state <= next_state;
-    end
-
-    always @(posedge clk ) begin
-        counter <= next_counter;
-        if (state == B0) next_counter <= w ? 2'd1 : 2'd0;
-        else next_counter <= w ? next_counter + 2'd1 : next_counter;
-    end
-
-    assign debug_counter = (counter == 2'd2);
-    assign debug_state = (state == B1);
-    assign z = debug_counter & debug_state;
+    MuxKey #(4 /* NR_KEY */, 2 /* KEY_LEN */, 2 /* DATA_LEN */) i0 (
+        .out(F),
+        .key(Y),
+        .lut({{2'b00, X0}, {2'b01, X1}, {2'b10, X2}, {2'b11, X3}})
+    );
 
 endmodule
