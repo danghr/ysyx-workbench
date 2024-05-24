@@ -9,7 +9,7 @@ module top_module (
     assign effect = en & (|x);
 
     Encode83 encode83(.x(x), .en(en), .y(encode));
-    Decode37digit decode37digit(.x({1'b0, encode}), .en(en), .out(digit_out[7:1]));
+    Decode37digit decode37digit(.x({1'b0, encode}), .en(effect), .out(digit_out[7:1]));
     assign digit_out[0] = 1'b1;     // Decimal point
 
 endmodule
