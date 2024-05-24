@@ -4,7 +4,7 @@
 #include "verilated_vcd_c.h"
 
 // #define _DO_TRACE
-#define _SEQUENTIAL_LOGIC
+// #define _SEQUENTIAL_LOGIC
 #define _NVBOARD
 
 // Configuration of whether use tracing or sequential logic
@@ -78,36 +78,9 @@ int main(int argc, char **argv)
 
     srand(time(NULL));
 
-    for(int i = 0; i < MAX_CYCLES; i++) {
-        top->X0 = rand() % 4;
-        top->X1 = rand() % 4;
-        top->X2 = rand() % 4;
-        top->X3 = rand() % 4;
-        top->Y = rand() % 4;
-
-        int value_should_be;
-        switch (top->Y)
-        {
-        case 0:
-            value_should_be = top->X0;
-            break;
-        case 1:
-            value_should_be = top->X1;
-            break;
-        case 2:
-            value_should_be = top->X2;
-            break;
-        case 3:
-            value_should_be = top->X3;
-            break;
-        default:
-            assert(false);
-            break;
-        }
-        single_cycle();
+    while (true) {
+        status_change();
         nvboard_update();
-        printf("[Simulation %d]\tY = %d / X0 = %d, X1 = %d, X2 = %d, X3 = %d / F = %d\n", i, top->Y, top->X0, top->X1, top->X2, top->X3, top->F);
-        assert(top->F == value_should_be);
         contextp->timeInc(1);
     }
     
