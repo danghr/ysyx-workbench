@@ -50,6 +50,7 @@ void reset(int n) {
 }
 #endif
 
+
 /***
  * Check if the result matches the reference value in the form of the 2's
  * complement representation within the given bits.
@@ -61,14 +62,19 @@ void reset(int n) {
  */
 template <typename T>   // Must be integer or unsigned integer
 bool check_2s_complement_bits(T result, T ref, int bits) {
+    // Convert to unsigned integer to avoid distraction
+    // from signed bit
     uint64_t result_conv = static_cast<uint64_t>(result);
     uint64_t ref_conv = static_cast<uint64_t>(ref);
 
+    // Shift left to remove extra bits
     result_conv <<= (64 - bits);
     ref_conv <<= (64 - bits);
 
+    // Return comparison result
     return result_conv == ref_conv;
 }
+
 
 int main(int argc, char **argv)
 {
@@ -110,8 +116,8 @@ int main(int argc, char **argv)
             top->b = values[j];
             status_change();
             printf("a = %d, b = %d, output = %d\n", values[i], values[j], top->y);
-            assert (check_2s_complement_bits<int>(top->y, values[i] + values[j], 4));
-            assert (top->zero == (top->y == 0));
+            assert(check_2s_complement_bits<int>(top->y, values[i] + values[j], 4));
+            assert(top->zero == (top->y == 0));
         }
     }
 
@@ -123,8 +129,8 @@ int main(int argc, char **argv)
             top->b = values[j];
             status_change();
             printf("a = %d, b = %d, a - b = %d\n", values[i], values[j], top->y);
-            assert (check_2s_complement_bits<int>(top->y, values[i] - values[j], 4));
-            assert (top->zero == (top->y == 0));
+            assert(check_2s_complement_bits<int>(top->y, values[i] - values[j], 4));
+            assert(top->zero == (top->y == 0));
         }
     }
 
@@ -134,8 +140,8 @@ int main(int argc, char **argv)
         top->a = values[i];
         status_change();
         printf("a = %d, ~a = %d\n", values[i], top->y);
-        assert (top->y == ~values[i]);
-        assert (top->zero == (top->y == 0));
+        assert(check_2s_complement_bits<int>(top->y, ~(values[i]), 4));
+        assert(top->zero == (top->y == 0));
     }
 
     // Test and
@@ -146,8 +152,8 @@ int main(int argc, char **argv)
             top->b = values[j];
             status_change();
             printf("a = %d, b = %d, a & b = %d\n", values[i], values[j], top->y);
-            assert (top->y == values[i] & values[j]);
-            assert (top->zero == (top->y == 0));
+            assert(check_2s_complement_bits<int>(top->y, values[i] & values[j], 4));
+            assert(top->zero == (top->y == 0));
         }
     }
 
@@ -159,8 +165,8 @@ int main(int argc, char **argv)
             top->b = values[j];
             status_change();
             printf("a = %d, b = %d, a | b = %d\n", values[i], values[j], top->y);
-            assert (top->y == values[i] | values[j]);
-            assert (top->zero == (top->y == 0));
+            assert(check_2s_complement_bits<int>(top->y, values[i] | values[j], 4));
+            assert(top->zero == (top->y == 0));
         }
     }
 
@@ -172,8 +178,8 @@ int main(int argc, char **argv)
             top->b = values[j];
             status_change();
             printf("a = %d, b = %d, a ^ b = %d\n", values[i], values[j], top->y);
-            assert (top->y == values[i] ^ values[j]);
-            assert (top->zero == (top->y == 0));
+            assert(check_2s_complement_bits<int>(top->y, values[i] ^ values[j], 4));
+            assert(top->zero == (top->y == 0));
         }
     }
 
@@ -185,8 +191,8 @@ int main(int argc, char **argv)
             top->b = values[j];
             status_change();
             printf("a = %d, b = %d, a < b = %d\n", values[i], values[j], top->y);
-            assert (top->y == (values[i] < values[j]));
-            assert (top->zero == (top->y == 0));
+            assert(top->y == (values[i] < values[j]));
+            assert(top->zero == (top->y == 0));
         }
     }
     
@@ -198,8 +204,8 @@ int main(int argc, char **argv)
             top->b = values[j];
             status_change();
             printf("a = %d, b = %d, a == b = %d\n", values[i], values[j], top->y);
-            assert (top->y == (values[i] == values[j]));
-            assert (top->zero == (top->y == 0));
+            assert(top->y == (values[i] == values[j]));
+            assert(top->zero == (top->y == 0));
         }
     }
 
