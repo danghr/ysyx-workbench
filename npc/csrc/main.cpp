@@ -78,12 +78,111 @@ int main(int argc, char **argv)
 
     srand(time(NULL));
 
-    while (true) {
+    // Values to be tested
+    const int VALUES_SIZE = 9;
+    int values[VALUES_SIZE] = {7, 6, 2, 1, 0, -1, -2, -7, -8};
+
+    // Test add
+    top->sel=0;
+    for (int i = 0; i < VALUES_SIZE; i++) { 
+        top->a = values[i];
+        for (int j = 0; j < VALUES_SIZE; j++) {
+            top->b = values[j];
+            status_change();
+            assert (top->y == values[i] + values[j]);
+            assert (top->zero == (top->y == 0));
+            printf("a = %d, b = %d, a + b = %d\n", values[i], values[j], top->y);
+        }
+    }
+
+    // Test sub
+    top->sel=1;
+    for (int i = 0; i < VALUES_SIZE; i++) { 
+        top->a = values[i];
+        for (int j = 0; j < VALUES_SIZE; j++) {
+            top->b = values[j];
+            status_change();
+            assert (top->y == values[i] - values[j]);
+            assert (top->zero == (top->y == 0));
+            printf("a = %d, b = %d, a - b = %d\n", values[i], values[j], top->y);
+        }
+    }
+
+    // Test not
+    top->sel=2;
+    for (int i = 0; i < VALUES_SIZE; i++) { 
+        top->a = values[i];
         status_change();
-        nvboard_update();
-        contextp->timeInc(1);
+        assert (top->y == ~values[i]);
+        assert (top->zero == (top->y == 0));
+        printf("a = %d, ~a = %d\n", values[i], top->y);
+    }
+
+    // Test and
+    top->sel=3;
+    for (int i = 0; i < VALUES_SIZE; i++) { 
+        top->a = values[i];
+        for (int j = 0; j < VALUES_SIZE; j++) {
+            top->b = values[j];
+            status_change();
+            assert (top->y == values[i] & values[j]);
+            assert (top->zero == (top->y == 0));
+            printf("a = %d, b = %d, a & b = %d\n", values[i], values[j], top->y);
+        }
+    }
+
+    // Test or
+    top->sel=4;
+    for (int i = 0; i < VALUES_SIZE; i++) { 
+        top->a = values[i];
+        for (int j = 0; j < VALUES_SIZE; j++) {
+            top->b = values[j];
+            status_change();
+            assert (top->y == values[i] | values[j]);
+            assert (top->zero == (top->y == 0));
+            printf("a = %d, b = %d, a | b = %d\n", values[i], values[j], top->y);
+        }
+    }
+
+    // Test xor
+    top->sel=5;
+    for (int i = 0; i < VALUES_SIZE; i++) { 
+        top->a = values[i];
+        for (int j = 0; j < VALUES_SIZE; j++) {
+            top->b = values[j];
+            status_change();
+            assert (top->y == values[i] ^ values[j]);
+            assert (top->zero == (top->y == 0));
+            printf("a = %d, b = %d, a ^ b = %d\n", values[i], values[j], top->y);
+        }
+    }
+
+    // Test compare
+    top->sel=6;
+    for (int i = 0; i < VALUES_SIZE; i++) { 
+        top->a = values[i];
+        for (int j = 0; j < VALUES_SIZE; j++) {
+            top->b = values[j];
+            status_change();
+            assert (top->y == (values[i] < values[j]));
+            assert (top->zero == (top->y == 0));
+            printf("a = %d, b = %d, a < b = %d\n", values[i], values[j], top->y);
+        }
     }
     
+    // Test equal
+    top->sel=7;
+    for (int i = 0; i < VALUES_SIZE; i++) { 
+        top->a = values[i];
+        for (int j = 0; j < VALUES_SIZE; j++) {
+            top->b = values[j];
+            status_change();
+            assert (top->y == (values[i] == values[j]));
+            assert (top->zero == (top->y == 0));
+            printf("a = %d, b = %d, a == b = %d\n", values[i], values[j], top->y);
+        }
+    }
+
     // =============================
     // ==== End simulation body ====
     // =============================
