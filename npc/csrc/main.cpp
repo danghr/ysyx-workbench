@@ -52,6 +52,28 @@ void reset(int n) {
 
 
 /***
+ * Convert 2's complement representation to unsigned integer, with all bits
+ * higher than the given bits set to 0.
+ * T must be integer or unsigned integer, and the number of bits must be
+ * less than or equal to the number of bits of T.
+ * @param number: The number to be converted
+ * @param bits: The number of bits of the result in the circuit
+ */
+template <typename T>
+uint64_t convert_2s_complement_to_unsigned(T number, int bits) {
+    // Convert to unsigned integer to avoid distraction
+    // from signed bit
+    uint64_t number_conv = static_cast<uint64_t>(number);
+
+    // Shift left to remove extra bits, then shift back to restore the value
+    number_conv <<= (64 - bits);
+    number_conv >>= (64 - bits);
+
+    // return the result
+    return number_conv;
+}
+
+/***
  * Check if the result matches the reference value in the form of the 2's
  * complement representation within the given bits.
  * T must be integer or unsigned integer, and the number of bits must be
@@ -60,16 +82,12 @@ void reset(int n) {
  * @param ref: The reference value
  * @param bits: The number of bits of the result in the circuit
  */
-template <typename T>   // Must be integer or unsigned integer
+template <typename T>
 bool check_2s_complement_bits(T result, T ref, int bits) {
     // Convert to unsigned integer to avoid distraction
     // from signed bit
-    uint64_t result_conv = static_cast<uint64_t>(result);
-    uint64_t ref_conv = static_cast<uint64_t>(ref);
-
-    // Shift left to remove extra bits
-    result_conv <<= (64 - bits);
-    ref_conv <<= (64 - bits);
+    uint64_t result_conv = convert_2s_complement_to_unsigned<T>(result, bits);
+    uint64_t ref_conv = convert_2s_complement_to_unsigned<T>(ref, bits);
 
     // Return comparison result
     return result_conv == ref_conv;
@@ -191,7 +209,9 @@ int main(int argc, char **argv)
             top->b = values[j];
             status_change();
             printf("a = %d, b = %d, a < b = %d\n", values[i], values[j], top->y);
-            assert(top->y == (values[i] < values[j]));
+            assert(top->y == (
+                convert_2s_complement_to_unsigned<int>(values[i], 4) - convert_2s_complement_to_unsigned<int>(values[j], 4) >= (1 << (4 - 1)))
+            );
             assert(top->zero == (top->y == 0));
         }
     }
