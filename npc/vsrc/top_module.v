@@ -9,7 +9,7 @@ module top_module (
     // Add
     wire [3:0] add_out;
     wire add_overflow, add_zero;
-    Adder adder (a, b, 1'b1, add_out, add_overflow, add_zero);
+    Adder adder (a, b - 1, 1'b0, add_out, add_overflow, add_zero);
 
     // Subtract
     wire [3:0] sub_out;
