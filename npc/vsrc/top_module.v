@@ -38,7 +38,7 @@ module top_module (
 
     // Equal
     wire [3:0] eq_out;
-    assign eq_out = {3'b000, ~sub_zero};
+    assign eq_out = {3'b000, |(a ^ b)};
 
     MuxKey #(8, 3, 4) mux (y, sel, {
         {3'b000, add_out}, 
