@@ -89,9 +89,9 @@ int main(int argc, char **argv)
         for (int j = 0; j < VALUES_SIZE; j++) {
             top->b = values[j];
             status_change();
+            printf("a = %d, b = %d, a + b = %d\n", values[i], values[j], top->y);
             assert (top->y == values[i] + values[j]);
             assert (top->zero == (top->y == 0));
-            printf("a = %d, b = %d, a + b = %d\n", values[i], values[j], top->y);
         }
     }
 
@@ -102,9 +102,9 @@ int main(int argc, char **argv)
         for (int j = 0; j < VALUES_SIZE; j++) {
             top->b = values[j];
             status_change();
+            printf("a = %d, b = %d, a - b = %d\n", values[i], values[j], top->y);
             assert (top->y == values[i] - values[j]);
             assert (top->zero == (top->y == 0));
-            printf("a = %d, b = %d, a - b = %d\n", values[i], values[j], top->y);
         }
     }
 
@@ -113,9 +113,9 @@ int main(int argc, char **argv)
     for (int i = 0; i < VALUES_SIZE; i++) { 
         top->a = values[i];
         status_change();
+        printf("a = %d, ~a = %d\n", values[i], top->y);
         assert (top->y == ~values[i]);
         assert (top->zero == (top->y == 0));
-        printf("a = %d, ~a = %d\n", values[i], top->y);
     }
 
     // Test and
@@ -125,9 +125,9 @@ int main(int argc, char **argv)
         for (int j = 0; j < VALUES_SIZE; j++) {
             top->b = values[j];
             status_change();
+            printf("a = %d, b = %d, a & b = %d\n", values[i], values[j], top->y);
             assert (top->y == values[i] & values[j]);
             assert (top->zero == (top->y == 0));
-            printf("a = %d, b = %d, a & b = %d\n", values[i], values[j], top->y);
         }
     }
 
@@ -138,9 +138,9 @@ int main(int argc, char **argv)
         for (int j = 0; j < VALUES_SIZE; j++) {
             top->b = values[j];
             status_change();
+            printf("a = %d, b = %d, a | b = %d\n", values[i], values[j], top->y);
             assert (top->y == values[i] | values[j]);
             assert (top->zero == (top->y == 0));
-            printf("a = %d, b = %d, a | b = %d\n", values[i], values[j], top->y);
         }
     }
 
@@ -151,9 +151,9 @@ int main(int argc, char **argv)
         for (int j = 0; j < VALUES_SIZE; j++) {
             top->b = values[j];
             status_change();
+            printf("a = %d, b = %d, a ^ b = %d\n", values[i], values[j], top->y);
             assert (top->y == values[i] ^ values[j]);
             assert (top->zero == (top->y == 0));
-            printf("a = %d, b = %d, a ^ b = %d\n", values[i], values[j], top->y);
         }
     }
 
@@ -164,9 +164,9 @@ int main(int argc, char **argv)
         for (int j = 0; j < VALUES_SIZE; j++) {
             top->b = values[j];
             status_change();
+            printf("a = %d, b = %d, a < b = %d\n", values[i], values[j], top->y);
             assert (top->y == (values[i] < values[j]));
             assert (top->zero == (top->y == 0));
-            printf("a = %d, b = %d, a < b = %d\n", values[i], values[j], top->y);
         }
     }
     
@@ -177,9 +177,9 @@ int main(int argc, char **argv)
         for (int j = 0; j < VALUES_SIZE; j++) {
             top->b = values[j];
             status_change();
+            printf("a = %d, b = %d, a == b = %d\n", values[i], values[j], top->y);
             assert (top->y == (values[i] == values[j]));
             assert (top->zero == (top->y == 0));
-            printf("a = %d, b = %d, a == b = %d\n", values[i], values[j], top->y);
         }
     }
 
