@@ -3,13 +3,12 @@
 #include "verilated.h"
 #include "verilated_vcd_c.h"
 
-// #define _DO_TRACE
+
+// Configuration of whether use tracing, sequential logic, or NVBoard
+#define _DO_TRACE
 // #define _SEQUENTIAL_LOGIC
 #define _NVBOARD
 
-// Configuration of whether use tracing or sequential logic
-// #define _DO_TRACE
-// #define _SEQUENTIAL_LOGIC
 
 #define MAX_CYCLES 1000000
 #ifdef _SEQUENTIAL_LOGIC
