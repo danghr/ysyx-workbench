@@ -68,7 +68,7 @@ module Adder (
 
     assign b_rev = (b ^ {4{rev}}) + {3'b000, rev};
     assign {carry, y} = a + b_rev;
-    assign overflow = (a[3] == b[3]) && (y[3] != a[3]);
+    assign overflow = (a[3] == b_rev[3]) && (y[3] != a[3]);
 
     assign zero = ~(|y);
     
