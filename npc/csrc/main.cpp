@@ -123,7 +123,7 @@ int main(int argc, char **argv)
             top->b = values[j];
             status_change();
             printf("a = %d, b = %d, a - b = %d\n", values[i], values[j], top->y);
-            assert (top->y == (values[i] - values[j]) % (1 << 4));
+            assert (check_2s_complement_bits<int>(top->y, values[i] - values[j], 4));
             assert (top->zero == (top->y == 0));
         }
     }
