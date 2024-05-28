@@ -57,14 +57,14 @@ endmodule
 module Adder (
     input [3:0] a,
     input [3:0] b,
-    input minus,
+    input rev,
     output [3:0] y,
     output overflow,
     output zero
 );
 
     wire [3:0] b_rev;
-    assign b_rev = (b ^ {4{minus}}) + {3'b000, minus};
+    assign b_rev = (b ^ {4{rev}}) + {3'b000, rev};
     assign {overflow, y} = a + b_rev;
     assign zero = ~(|y);
     

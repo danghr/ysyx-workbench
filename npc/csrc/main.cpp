@@ -50,6 +50,26 @@ void reset(int n) {
 }
 #endif
 
+/***
+ * Check if the result matches the reference value in the form of the 2's
+ * complement representation within the given bits.
+ * T must be integer or unsigned integer, and the number of bits must be
+ * less than or equal to the number of bits of T.
+ * @param result: The result to be checked
+ * @param ref: The reference value
+ * @param bits: The number of bits of the result in the circuit
+ */
+template <typename T>   // Must be integer or unsigned integer
+bool check_2s_complement_bits(T result, T ref, int bits) {
+    uint64_t result_conv = static_cast<uint64_t>(result);
+    uint64_t ref_conv = static_cast<uint64_t>(ref);
+
+    result_conv <<= (64 - bits);
+    ref_conv <<= (64 - bits);
+
+    return result_conv == ref_conv;
+}
+
 int main(int argc, char **argv)
 {
     contextp = new VerilatedContext;
@@ -80,7 +100,7 @@ int main(int argc, char **argv)
 
     // Values to be tested
     const int VALUES_SIZE = 9;
-    int8_t values[VALUES_SIZE] = {7, 6, 2, 1, 0, -1, -2, -7, -8};
+    int values[VALUES_SIZE] = {7, 6, 2, 1, 0, -1, -2, -7, -8};
 
     // Test add
     top->sel=0;
@@ -89,8 +109,8 @@ int main(int argc, char **argv)
         for (int j = 0; j < VALUES_SIZE; j++) {
             top->b = values[j];
             status_change();
-            printf("a = %d, b = %d, a + b = %d\n", values[i], values[j], top->y);
-            assert (top->y == (values[i] + values[j]) % (1 << 4));
+            printf("a = %d, b = %d, output = %d\n", values[i], values[j], top->y);
+            assert (check_2s_complement_bits<int>(top->y, values[i] + values[j], 4));
             assert (top->zero == (top->y == 0));
         }
     }
