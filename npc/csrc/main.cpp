@@ -80,7 +80,7 @@ int main(int argc, char **argv)
 
     // Values to be tested
     const int VALUES_SIZE = 9;
-    int values[VALUES_SIZE] = {7, 6, 2, 1, 0, -1, -2, -7, -8};
+    int8_t values[VALUES_SIZE] = {7, 6, 2, 1, 0, -1, -2, -7, -8};
 
     // Test add
     top->sel=0;
@@ -90,7 +90,7 @@ int main(int argc, char **argv)
             top->b = values[j];
             status_change();
             printf("a = %d, b = %d, a + b = %d\n", values[i], values[j], top->y);
-            assert (top->y == values[i] + values[j]);
+            assert (top->y == (values[i] + values[j]) % (1 << 4));
             assert (top->zero == (top->y == 0));
         }
     }
@@ -103,7 +103,7 @@ int main(int argc, char **argv)
             top->b = values[j];
             status_change();
             printf("a = %d, b = %d, a - b = %d\n", values[i], values[j], top->y);
-            assert (top->y == values[i] - values[j]);
+            assert (top->y == (values[i] - values[j]) % (1 << 4));
             assert (top->zero == (top->y == 0));
         }
     }
