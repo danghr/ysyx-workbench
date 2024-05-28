@@ -209,9 +209,7 @@ int main(int argc, char **argv)
             top->b = values[j];
             status_change();
             printf("a = %d, b = %d, a < b = %d\n", values[i], values[j], top->y);
-            assert(top->y == (
-                convert_2s_complement_to_unsigned<int>(values[i], 4) - convert_2s_complement_to_unsigned<int>(values[j], 4) >= (1 << (4 - 1)))
-            );
+            assert(top->y == (values[i] < values[j]));
             assert(top->zero == (top->y == 0));
         }
     }
