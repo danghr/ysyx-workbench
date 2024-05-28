@@ -64,8 +64,12 @@ module Adder (
 );
 
     wire [3:0] b_rev;
+    wire carry;
+
     assign b_rev = (b ^ {4{rev}}) + {3'b000, rev};
-    assign {overflow, y} = a + b_rev;
+    assign {carry, y} = a + b_rev;
+    assign overflow = (a[3] == b[3]) && (y[3] != a[3]);
+
     assign zero = ~(|y);
     
 endmodule
