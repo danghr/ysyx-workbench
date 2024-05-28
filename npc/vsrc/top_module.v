@@ -3,6 +3,7 @@ module top_module (
     input [3:0] b,
     input [2:0] sel,
     output [3:0] y,
+    output sub_overflow,
     output zero
 );
 
@@ -13,7 +14,7 @@ module top_module (
 
     // Subtract
     wire [3:0] sub_out;
-    wire sub_overflow, sub_zero;
+    wire sub_zero;
     Adder subber (a, b, 1'b1, sub_out, sub_overflow, sub_zero);
 
     // Reverse

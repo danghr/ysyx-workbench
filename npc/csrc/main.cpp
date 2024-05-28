@@ -207,7 +207,7 @@ int main(int argc, char **argv)
         for (int j = 0; j < VALUES_SIZE; j++) {
             top->b = values[j];
             status_change();
-            printf("a = %d, b = %d, a < b = %d\n", values[i], values[j], top->y);
+            printf("a = %d, b = %d, a < b = %d, overflow = %d\n", values[i], values[j], top->y, top->sub_overflow);
             assert(top->y == (values[i] < values[j]));
             assert(top->zero == (top->y == 0));
         }
