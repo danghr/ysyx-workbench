@@ -1,7 +1,1 @@
 top=top_module
-
-a (SW7, SW6, SW5, SW4)
-b (SW3, SW2, SW1, SW0)
-sel (SW15, SW14, SW13)
-y (LD3, LD2, LD1, LD0)
-zero (LD4)
