@@ -132,6 +132,7 @@ int main(int argc, char **argv)
     for (int i = 0; i < 255; i++) {
         int counter = 0;
         reset(5);
+        top->reset = 1;
         top->init_val = i;
         single_cycle();
         printf("Simulate %5d / Output val: %2x / Input val: %2x\n", i, top->out, i);
