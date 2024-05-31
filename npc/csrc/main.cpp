@@ -141,6 +141,7 @@ int main(int argc, char **argv)
 
         SIMULATE_UNTIL(counter >= 1e5) {
             counter++;
+            printf("Simulate %d\n", counter);
             top->reset = 0;
             uint8_t prev_value = top->out;
             uint8_t now_input_val = rand() % 2;
