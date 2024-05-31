@@ -128,7 +128,30 @@ int main(int argc, char **argv)
 
     srand(time(NULL));
 
-    // Test Shifting Register
+    // // **** Test Shifting Register ****
+    // for (int i = 0; i < 256; i++) {
+    //     int counter = 0;
+    //     reset(5);
+    //     top->reset = 1;
+    //     top->init_val = i;
+    //     single_cycle();
+    //     printf("Simulate %5d / Output val: %2x / Input val: %2x\n", i, top->out, i);
+    //     assert(top->out == i);
+
+    //     SIMULATE_UNTIL(counter >= 1e3) {
+    //         counter++;
+    //         printf("Simulate %5d-%5d / ", i, counter);
+    //         top->reset = 0;
+    //         uint8_t prev_value = top->out;
+    //         uint8_t now_input_val = rand() % 2;
+    //         top->in = now_input_val;
+    //         single_cycle();
+    //         printf("Output val: %2x / Input bit: %1x\n", top->out, now_input_val);
+    //         assert(top->out == ((prev_value >> 1) + (now_input_val << 7)) & 0xff);
+    //     }
+    // }
+
+    // **** Test Linear Feedback Shift Register ****
     for (int i = 0; i < 256; i++) {
         int counter = 0;
         reset(5);
@@ -143,11 +166,10 @@ int main(int argc, char **argv)
             printf("Simulate %5d-%5d / ", i, counter);
             top->reset = 0;
             uint8_t prev_value = top->out;
-            uint8_t now_input_val = rand() % 2;
-            top->in = now_input_val;
+            uint8_t leftmost_val = convert_2s_complement_to_unsigned((prev_value >> 4) ^ (prev_value >> 3) ^ (prev_value >> 2) ^ (prev_value), 1);
             single_cycle();
-            printf("Output val: %2x / Input bit: %1x\n", top->out, now_input_val);
-            assert(top->out == ((prev_value >> 1) + (now_input_val << 7)) & 0xff);
+            printf("Output val: %2x / XOR-ed bit: %1x\n", top->out, leftmost_val);
+            assert(top->out == ((prev_value >> 1) + (leftmost_val << 7)) & 0xff);
         }
     }
 
