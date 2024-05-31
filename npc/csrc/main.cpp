@@ -136,18 +136,18 @@ int main(int argc, char **argv)
         top->reset = 1;
         top->init_val = init_input_val;
         single_cycle();
-        printf("Simulate %d / Output val: %2x / Input val: %2x\n", i, top->out, init_input_val);
+        printf("Simulate %4d / Output val: %8s / Input val: %8s\n", i, top->out, init_input_val);
         assert(top->out == init_input_val);
 
         SIMULATE_UNTIL(counter >= 1e3) {
             counter++;
-            printf("Simulate %d-%d / ", i, counter);
+            printf("Simulate %4d-%4d / ", i, counter);
             top->reset = 0;
             uint8_t prev_value = top->out;
             uint8_t now_input_val = rand() % 2;
             top->in = now_input_val;
             single_cycle();
-            printf("Output val: %2x / Input bit: %1x\n", top->out, now_input_val);
+            printf("Output val: %8s / Input bit: %1s\n", top->out, now_input_val);
             assert(top->out == ((prev_value >> 1) + (now_input_val << 7)) & 0xff);
         }
     }
