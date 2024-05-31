@@ -129,7 +129,7 @@ int main(int argc, char **argv)
     srand(time(NULL));
 
     // Test Shifting Register
-    for (int i = 0; i < 255; i++) {
+    for (int i = 0; i < 256; i++) {
         int counter = 0;
         reset(5);
         top->reset = 1;
