@@ -24,8 +24,8 @@ module Mux21 (
         .out(out),
         .key(sel),
         .lut({
-            {2'b0, in[0]},
-            {2'b1, in[1]}
+            {1'b0, in[0]},
+            {1'b1, in[1]}
         })
     );
 endmodule
@@ -34,8 +34,8 @@ module BarrelShifter (
     input [7:0] din,    // Input data
     input [2:0] shamt,  // Shift amount
     input lr,           // Left or right
-    input al,           // Algorithmic or logical shift
-    output dout
+    input al,           // Arithmetic or logical shift
+    output [7:0] dout
 );
 
     wire [7:0] stage1, stage2;

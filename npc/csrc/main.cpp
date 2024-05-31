@@ -6,7 +6,7 @@
 
 // Configuration of whether use tracing, sequential logic, or NVBoard
 #define _DO_TRACE
-#define _SEQUENTIAL_LOGIC
+// #define _SEQUENTIAL_LOGIC
 // #define _NVBOARD
 
 
@@ -151,26 +151,82 @@ int main(int argc, char **argv)
     //     }
     // }
 
-    // **** Test Linear Feedback Shift Register ****
-    for (int i = 0; i < 256; i++) {
-        int counter = 0;
-        reset(5);
-        top->reset = 1;
-        top->init_val = i;
-        single_cycle();
-        printf("Simulate %5d / Output val: %2x / Input val: %2x\n", i, top->out, i);
-        assert(top->out == i);
+    // // **** Test Linear Feedback Shift Register ****
+    // for (int i = 0; i < 256; i++) {
+    //     int counter = 0;
+    //     reset(5);
+    //     top->reset = 1;
+    //     top->init_val = i;
+    //     single_cycle();
+    //     printf("Simulate %5d / Output val: %2x / Input val: %2x\n", i, top->out, i);
+    //     assert(top->out == i);
 
-        SIMULATE_UNTIL(counter >= 1e3) {
-            counter++;
-            printf("Simulate %5d-%5d / ", i, counter);
-            top->reset = 0;
-            uint8_t prev_value = top->out;
-            uint8_t leftmost_val = convert_2s_complement_to_unsigned((prev_value >> 4) ^ (prev_value >> 3) ^ (prev_value >> 2) ^ (prev_value), 1);
-            single_cycle();
-            printf("Output val: %2x / XOR-ed bit: %1x\n", top->out, leftmost_val);
-            assert(top->out == ((prev_value >> 1) + (leftmost_val << 7)) & 0xff);
-        }
+    //     SIMULATE_UNTIL(counter >= 1e3) {
+    //         counter++;
+    //         printf("Simulate %5d-%5d / ", i, counter);
+    //         top->reset = 0;
+    //         uint8_t prev_value = top->out;
+    //         uint8_t leftmost_val = convert_2s_complement_to_unsigned((prev_value >> 4) ^ (prev_value >> 3) ^ (prev_value >> 2) ^ (prev_value), 1);
+    //         single_cycle();
+    //         printf("Output val: %2x / XOR-ed bit: %1x\n", top->out, leftmost_val);
+    //         assert(top->out == ((prev_value >> 1) + (leftmost_val << 7)) & 0xff);
+    //     }
+    // }
+
+    // **** Test Barrel Shifter ****
+    for (int i = 0; i < 1e8; i++) {
+        // According to https://stackoverflow.com/questions/7622,
+        // Shifting a signed integer to is a undefined behavior,
+        // So we manually implement it using an unsigned integer.
+        // Logical/Arithmetic shift left: Add zeros to the right.
+        // Logical shift right: Add zeros to the left.
+        // Arithmetic shift right: Add the highest (sign) bit to the left.
+
+        uint8_t input_val = rand() % 512;
+        uint8_t shift_val = rand() % 8;
+        uint8_t ref_val;
+    
+
+        // Test logical shift left
+        ref_val = (input_val << shift_val) & 0xff;
+        top->din = input_val;
+        top->shamt = shift_val;
+        top->lr = 0;
+        top->al = 1;
+        status_change();
+        printf("Simulate %5d /    Logical Left  / Input val: %2x / Shift val: %2x / Output val: %2x / Reference val: %2x\n", i, input_val, shift_val, top->out, ref_val);
+        assert(top->out == ref_val);
+
+        // Test arithmetic shift left
+        ref_val = (input_val << shift_val) & 0xff;
+        top->din = input_val;
+        top->shamt = shift_val;
+        top->lr = 0;
+        top->al = 0;
+        status_change();
+        printf("Simulate %5d / Arithmetic Left  / Input val: %2x / Shift val: %2x / Output val: %2x / Reference val: %2x\n", i, input_val, shift_val, top->out, ref_val);
+        assert(top->out == ref_val); 
+
+        // Test logical shift right
+        ref_val = (input_val >> shift_val) & 0xff;
+        top->din = input_val;
+        top->shamt = shift_val;
+        top->lr = 1;
+        top->al = 1;
+        status_change();
+        printf("Simulate %5d /    Logical Right /  Input val: %2x / Shift val: %2x / Output val: %2x / Reference val: %2x\n", i, input_val, shift_val, top->out, ref_val);
+        assert(top->out == ref_val);
+
+        // Test arithmetic shift right
+        for (int i = 0; i < shift_val; i++)
+            ref_val = (ref_val & 0x80) | (ref_val >> 1);
+        top->din = input_val;
+        top->shamt = shift_val;
+        top->lr = 1;
+        top->al = 0;
+        status_change();
+        printf("Simulate %5d / Arithmetic Right /  Input val: %2x / Shift val: %2x / Output val: %2x / Reference val: %2x\n", i, input_val, shift_val, top->out, ref_val);
+        assert(top->out == ref_val);  
     }
 
     // =============================
