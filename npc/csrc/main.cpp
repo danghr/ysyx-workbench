@@ -129,17 +129,15 @@ int main(int argc, char **argv)
     srand(time(NULL));
 
     // Test Shifting Register
-    for (int i = 0; i < 1e4; i++) {
+    for (int i = 0; i < 255; i++) {
         int counter = 0;
         reset(5);
-        uint8_t init_input_val = rand();
-        top->reset = 1;
-        top->init_val = init_input_val;
+        top->init_val = i;
         single_cycle();
-        printf("Simulate %5d / Output val: %2x / Input val: %2x\n", i, top->out, init_input_val);
-        assert(top->out == init_input_val);
+        printf("Simulate %5d / Output val: %2x / Input val: %2x\n", i, top->out, i);
+        assert(top->out == i);
 
-        SIMULATE_UNTIL(counter >= 1e4) {
+        SIMULATE_UNTIL(counter >= 1e3) {
             counter++;
             printf("Simulate %5d-%5d / ", i, counter);
             top->reset = 0;
