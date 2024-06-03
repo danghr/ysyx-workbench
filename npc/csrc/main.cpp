@@ -201,8 +201,8 @@ int main(int argc, char **argv)
         ref_val = (input_val << shift_val) & 0xff;
         top->din = input_val;
         top->shamt = shift_val;
-        top->lr = 0;
-        top->al = 1;
+        top->lr = 1;
+        top->al = 0;
         status_change();
         printf("Simulate %5d /    Logical Left  / Input val: %2x / Shift val: %2x / Output val: %2x / Reference val: %2x\n", i, input_val, shift_val, top->out, ref_val);
         ASSERT(top->out == ref_val);
@@ -211,8 +211,8 @@ int main(int argc, char **argv)
         ref_val = (input_val << shift_val) & 0xff;
         top->din = input_val;
         top->shamt = shift_val;
-        top->lr = 0;
-        top->al = 0;
+        top->lr = 1;
+        top->al = 1;
         status_change();
         printf("Simulate %5d / Arithmetic Left  / Input val: %2x / Shift val: %2x / Output val: %2x / Reference val: %2x\n", i, input_val, shift_val, top->out, ref_val);
         ASSERT(top->out == ref_val); 
@@ -221,8 +221,8 @@ int main(int argc, char **argv)
         ref_val = (input_val >> shift_val) & 0xff;
         top->din = input_val;
         top->shamt = shift_val;
-        top->lr = 1;
-        top->al = 1;
+        top->lr = 0;
+        top->al = 0;
         status_change();
         printf("Simulate %5d /    Logical Right /  Input val: %2x / Shift val: %2x / Output val: %2x / Reference val: %2x\n", i, input_val, shift_val, top->out, ref_val);
         ASSERT(top->out == ref_val);
@@ -232,8 +232,8 @@ int main(int argc, char **argv)
             ref_val = (ref_val & 0x80) | (ref_val >> 1);
         top->din = input_val;
         top->shamt = shift_val;
-        top->lr = 1;
-        top->al = 0;
+        top->lr = 0;
+        top->al = 1;
         status_change();
         printf("Simulate %5d / Arithmetic Right /  Input val: %2x / Shift val: %2x / Output val: %2x / Reference val: %2x\n", i, input_val, shift_val, top->out, ref_val);
         ASSERT(top->out == ref_val);  
