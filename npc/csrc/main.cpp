@@ -251,7 +251,7 @@ int main(int argc, char **argv)
         top->lr = 0;
         top->al = 0;
         status_change();
-        printf("Simulate %5d /    Logical Right /  Input val: %2x / Shift val: %2x / Output val: %2x / Reference val: %2x\n", i, input_val, shift_val, top->out, ref_val);
+        printf("Simulate %5d /    Logical Right / Input val: %2x / Shift val: %2x / Output val: %2x / Reference val: %2x\n", i, input_val, shift_val, top->out, ref_val);
         ASSERT(top->out == ref_val);
 
         // Test arithmetic shift right
@@ -263,7 +263,7 @@ int main(int argc, char **argv)
         top->lr = 0;
         top->al = 1;
         status_change();
-        printf("Simulate %5d / Arithmetic Right /  Input val: %2x / Shift val: %2x / Output val: %2x / Reference val: %2x\n", i, input_val, shift_val, top->out, ref_val);
+        printf("Simulate %5d / Arithmetic Right / Input val: %2x / Shift val: %2x / Output val: %2x / Reference val: %2x\n", i, input_val, shift_val, top->out, ref_val);
         ASSERT(top->out == ref_val);  
     }
 
