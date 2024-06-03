@@ -242,6 +242,9 @@ int main(int argc, char **argv)
     // =============================
     // ==== End simulation body ====
     // =============================
+    
+    // An extra cycle to dump the trace of the last signal
+    status_change();
 
 EXIT:
 #ifdef _DO_TRACE
