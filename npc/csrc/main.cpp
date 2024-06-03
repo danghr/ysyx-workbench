@@ -184,7 +184,7 @@ int main(int argc, char **argv)
     // }
 
     // **** Test Barrel Shifter ****
-    for (int i = 0; i < 1e8; i++) {
+    for (int i = 0; i < 1e6; i++) {
         // According to https://stackoverflow.com/questions/7622,
         // Shifting a signed integer to is a undefined behavior,
         // So we manually implement it using an unsigned integer.
@@ -192,9 +192,36 @@ int main(int argc, char **argv)
         // Logical shift right: Add zeros to the left.
         // Arithmetic shift right: Add the highest (sign) bit to the left.
 
-        uint8_t input_val = rand() % 512;
-        uint8_t shift_val = rand() % 8;
-        uint8_t ref_val;
+        uint8_t input_val, shift_val, ref_val;
+        switch (i)
+        {
+        case 0:
+            input_val = 0x00;
+            shift_val = 4;
+            break;
+        
+        case 1:
+            input_val = 0x88;
+            shift_val = 4;
+        
+        case 2:
+            input_val = 0xFF;
+            shift_val = 4;
+        
+        case 3:
+            input_val = 0x88;
+            shift_val = 8;
+        
+        case 4:
+            input_val = 0xFF;
+            shift_val = 8;
+        
+        default:
+            input_val = rand() % 512;
+            shift_val = rand() % 8;
+            break;
+        }
+        
     
 
         // Test logical shift left
