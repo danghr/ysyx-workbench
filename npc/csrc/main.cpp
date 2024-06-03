@@ -193,7 +193,7 @@ int main(int argc, char **argv)
         // Arithmetic shift right: Add the highest (sign) bit to the left.
 
         uint8_t input_val = rand() % 512;
-        uint8_t shift_val = rand() % 2;
+        uint8_t shift_val = rand() % 8;
         uint8_t ref_val;
     
 
