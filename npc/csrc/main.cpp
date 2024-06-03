@@ -9,9 +9,14 @@
 // #define _SEQUENTIAL_LOGIC
 // #define _NVBOARD
 
+
+// Assertion macro
+// Use GOTO to save the waveform when an assertion fails
+bool ASSERTION_FAILED = false;
 #define ASSERT(cond) \
     if (!(cond)) { \
         printf("Assertion failed at %s:%d\n", __FILE__, __LINE__); \
+        ASSERTION_FAILED = true; \
         goto EXIT; \
     }
 
@@ -249,5 +254,5 @@ EXIT:
     nvboard_quit();
 #endif
     printf("Simulation done.\n");
-    return 0;
+    return ASSERTION_FAILED ? 1 : 0;
 }
