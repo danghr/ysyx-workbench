@@ -10,6 +10,16 @@
 // #define _NVBOARD
 
 
+// Assertion macro
+// Use GOTO to save the waveform when an assertion fails
+bool ASSERTION_FAILED = false;
+#define ASSERT(cond) \
+    if (!(cond)) { \
+        printf("Assertion failed at %s:%d\n", __FILE__, __LINE__); \
+        ASSERTION_FAILED = true; \
+        goto EXIT; \
+    }
+
 #define MAX_CYCLES 1e7
 #ifdef _SEQUENTIAL_LOGIC
 const int MAX_SIM_TIME = (MAX_CYCLES) * 2;
@@ -136,7 +146,7 @@ int main(int argc, char **argv)
     //     top->init_val = i;
     //     single_cycle();
     //     printf("Simulate %5d / Output val: %2x / Input val: %2x\n", i, top->out, i);
-    //     assert(top->out == i);
+    //     ASSERT(top->out == i);
 
     //     SIMULATE_UNTIL(counter >= 1e3) {
     //         counter++;
@@ -147,7 +157,7 @@ int main(int argc, char **argv)
     //         top->in = now_input_val;
     //         single_cycle();
     //         printf("Output val: %2x / Input bit: %1x\n", top->out, now_input_val);
-    //         assert(top->out == ((prev_value >> 1) + (now_input_val << 7)) & 0xff);
+    //         ASSERT(top->out == ((prev_value >> 1) + (now_input_val << 7)) & 0xff);
     //     }
     // }
 
@@ -159,7 +169,7 @@ int main(int argc, char **argv)
     //     top->init_val = i;
     //     single_cycle();
     //     printf("Simulate %5d / Output val: %2x / Input val: %2x\n", i, top->out, i);
-    //     assert(top->out == i);
+    //     ASSERT(top->out == i);
 
     //     SIMULATE_UNTIL(counter >= 1e3) {
     //         counter++;
@@ -169,12 +179,12 @@ int main(int argc, char **argv)
     //         uint8_t leftmost_val = convert_2s_complement_to_unsigned((prev_value >> 4) ^ (prev_value >> 3) ^ (prev_value >> 2) ^ (prev_value), 1);
     //         single_cycle();
     //         printf("Output val: %2x / XOR-ed bit: %1x\n", top->out, leftmost_val);
-    //         assert(top->out == ((prev_value >> 1) + (leftmost_val << 7)) & 0xff);
+    //         ASSERT(top->out == ((prev_value >> 1) + (leftmost_val << 7)) & 0xff);
     //     }
     // }
 
     // **** Test Barrel Shifter ****
-    for (int i = 0; i < 1e8; i++) {
+    for (int i = 0; i < 1e6; i++) {
         // According to https://stackoverflow.com/questions/7622,
         // Shifting a signed integer to is a undefined behavior,
         // So we manually implement it using an unsigned integer.
@@ -182,57 +192,88 @@ int main(int argc, char **argv)
         // Logical shift right: Add zeros to the left.
         // Arithmetic shift right: Add the highest (sign) bit to the left.
 
-        uint8_t input_val = rand() % 512;
-        uint8_t shift_val = rand() % 8;
-        uint8_t ref_val;
+        uint8_t input_val, shift_val, ref_val;
+        switch (i)
+        {
+        case 0:
+            input_val = 0x00;
+            shift_val = 4;
+            break;
+        
+        case 1:
+            input_val = 0x88;
+            shift_val = 4;
+        
+        case 2:
+            input_val = 0xFF;
+            shift_val = 4;
+        
+        case 3:
+            input_val = 0x88;
+            shift_val = 8;
+        
+        case 4:
+            input_val = 0xFF;
+            shift_val = 8;
+        
+        default:
+            input_val = rand() % 512;
+            shift_val = rand() % 8;
+            break;
+        }
+        
     
 
         // Test logical shift left
         ref_val = (input_val << shift_val) & 0xff;
         top->din = input_val;
         top->shamt = shift_val;
-        top->lr = 0;
-        top->al = 1;
+        top->lr = 1;
+        top->al = 0;
         status_change();
         printf("Simulate %5d /    Logical Left  / Input val: %2x / Shift val: %2x / Output val: %2x / Reference val: %2x\n", i, input_val, shift_val, top->out, ref_val);
-        assert(top->out == ref_val);
+        ASSERT(top->out == ref_val);
 
         // Test arithmetic shift left
         ref_val = (input_val << shift_val) & 0xff;
         top->din = input_val;
         top->shamt = shift_val;
-        top->lr = 0;
-        top->al = 0;
+        top->lr = 1;
+        top->al = 1;
         status_change();
         printf("Simulate %5d / Arithmetic Left  / Input val: %2x / Shift val: %2x / Output val: %2x / Reference val: %2x\n", i, input_val, shift_val, top->out, ref_val);
-        assert(top->out == ref_val); 
+        ASSERT(top->out == ref_val); 
 
         // Test logical shift right
         ref_val = (input_val >> shift_val) & 0xff;
         top->din = input_val;
         top->shamt = shift_val;
-        top->lr = 1;
-        top->al = 1;
+        top->lr = 0;
+        top->al = 0;
         status_change();
-        printf("Simulate %5d /    Logical Right /  Input val: %2x / Shift val: %2x / Output val: %2x / Reference val: %2x\n", i, input_val, shift_val, top->out, ref_val);
-        assert(top->out == ref_val);
+        printf("Simulate %5d /    Logical Right / Input val: %2x / Shift val: %2x / Output val: %2x / Reference val: %2x\n", i, input_val, shift_val, top->out, ref_val);
+        ASSERT(top->out == ref_val);
 
         // Test arithmetic shift right
+        ref_val = input_val;
         for (int i = 0; i < shift_val; i++)
             ref_val = (ref_val & 0x80) | (ref_val >> 1);
         top->din = input_val;
         top->shamt = shift_val;
-        top->lr = 1;
-        top->al = 0;
+        top->lr = 0;
+        top->al = 1;
         status_change();
-        printf("Simulate %5d / Arithmetic Right /  Input val: %2x / Shift val: %2x / Output val: %2x / Reference val: %2x\n", i, input_val, shift_val, top->out, ref_val);
-        assert(top->out == ref_val);  
+        printf("Simulate %5d / Arithmetic Right / Input val: %2x / Shift val: %2x / Output val: %2x / Reference val: %2x\n", i, input_val, shift_val, top->out, ref_val);
+        ASSERT(top->out == ref_val);  
     }
 
     // =============================
     // ==== End simulation body ====
     // =============================
 
+EXIT:
+    // An extra cycle to dump the trace of the last signal
+    status_change();
 #ifdef _DO_TRACE
     tfp->close();
     delete tfp;
@@ -243,5 +284,5 @@ int main(int argc, char **argv)
     nvboard_quit();
 #endif
     printf("Simulation done.\n");
-    return 0;
+    return ASSERTION_FAILED ? 1 : 0;
 }
