@@ -228,8 +228,9 @@ int main(int argc, char **argv)
         ASSERT(top->out == ref_val);
 
         // Test arithmetic shift right
+        ref_val = input_val;
         for (int i = 0; i < shift_val; i++)
-            ref_val = (input_val & 0x80) | (input_val >> 1);
+            ref_val = (ref_val & 0x80) | (ref_val >> 1);
         top->din = input_val;
         top->shamt = shift_val;
         top->lr = 0;
