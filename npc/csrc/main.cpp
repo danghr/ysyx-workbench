@@ -9,6 +9,11 @@
 // #define _SEQUENTIAL_LOGIC
 // #define _NVBOARD
 
+#define ASSERT(cond) \
+    if (!(cond)) { \
+        printf("Assertion failed at %s:%d\n", __FILE__, __LINE__); \
+        goto EXIT; \
+    }
 
 #define MAX_CYCLES 1e7
 #ifdef _SEQUENTIAL_LOGIC
@@ -136,7 +141,7 @@ int main(int argc, char **argv)
     //     top->init_val = i;
     //     single_cycle();
     //     printf("Simulate %5d / Output val: %2x / Input val: %2x\n", i, top->out, i);
-    //     assert(top->out == i);
+    //     ASSERT(top->out == i);
 
     //     SIMULATE_UNTIL(counter >= 1e3) {
     //         counter++;
@@ -147,7 +152,7 @@ int main(int argc, char **argv)
     //         top->in = now_input_val;
     //         single_cycle();
     //         printf("Output val: %2x / Input bit: %1x\n", top->out, now_input_val);
-    //         assert(top->out == ((prev_value >> 1) + (now_input_val << 7)) & 0xff);
+    //         ASSERT(top->out == ((prev_value >> 1) + (now_input_val << 7)) & 0xff);
     //     }
     // }
 
@@ -159,7 +164,7 @@ int main(int argc, char **argv)
     //     top->init_val = i;
     //     single_cycle();
     //     printf("Simulate %5d / Output val: %2x / Input val: %2x\n", i, top->out, i);
-    //     assert(top->out == i);
+    //     ASSERT(top->out == i);
 
     //     SIMULATE_UNTIL(counter >= 1e3) {
     //         counter++;
@@ -169,7 +174,7 @@ int main(int argc, char **argv)
     //         uint8_t leftmost_val = convert_2s_complement_to_unsigned((prev_value >> 4) ^ (prev_value >> 3) ^ (prev_value >> 2) ^ (prev_value), 1);
     //         single_cycle();
     //         printf("Output val: %2x / XOR-ed bit: %1x\n", top->out, leftmost_val);
-    //         assert(top->out == ((prev_value >> 1) + (leftmost_val << 7)) & 0xff);
+    //         ASSERT(top->out == ((prev_value >> 1) + (leftmost_val << 7)) & 0xff);
     //     }
     // }
 
@@ -195,7 +200,7 @@ int main(int argc, char **argv)
         top->al = 1;
         status_change();
         printf("Simulate %5d /    Logical Left  / Input val: %2x / Shift val: %2x / Output val: %2x / Reference val: %2x\n", i, input_val, shift_val, top->out, ref_val);
-        assert(top->out == ref_val);
+        ASSERT(top->out == ref_val);
 
         // Test arithmetic shift left
         ref_val = (input_val << shift_val) & 0xff;
@@ -205,7 +210,7 @@ int main(int argc, char **argv)
         top->al = 0;
         status_change();
         printf("Simulate %5d / Arithmetic Left  / Input val: %2x / Shift val: %2x / Output val: %2x / Reference val: %2x\n", i, input_val, shift_val, top->out, ref_val);
-        assert(top->out == ref_val); 
+        ASSERT(top->out == ref_val); 
 
         // Test logical shift right
         ref_val = (input_val >> shift_val) & 0xff;
@@ -215,7 +220,7 @@ int main(int argc, char **argv)
         top->al = 1;
         status_change();
         printf("Simulate %5d /    Logical Right /  Input val: %2x / Shift val: %2x / Output val: %2x / Reference val: %2x\n", i, input_val, shift_val, top->out, ref_val);
-        assert(top->out == ref_val);
+        ASSERT(top->out == ref_val);
 
         // Test arithmetic shift right
         for (int i = 0; i < shift_val; i++)
@@ -226,13 +231,14 @@ int main(int argc, char **argv)
         top->al = 0;
         status_change();
         printf("Simulate %5d / Arithmetic Right /  Input val: %2x / Shift val: %2x / Output val: %2x / Reference val: %2x\n", i, input_val, shift_val, top->out, ref_val);
-        assert(top->out == ref_val);  
+        ASSERT(top->out == ref_val);  
     }
 
     // =============================
     // ==== End simulation body ====
     // =============================
 
+EXIT:
 #ifdef _DO_TRACE
     tfp->close();
     delete tfp;
