@@ -136,6 +136,8 @@ int main(int argc, char **argv)
     // === Begin simulation body ===
     // =============================
 
+    reset(10);
+
     while (true) {
         status_change();
     }
