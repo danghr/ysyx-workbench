@@ -1,56 +1,39 @@
-// // Shift register
-// module top_module (
-//     input clk,
-//     input reset,
-//     input in,
-//     input [7:0] init_val,
-//     output reg [7:0] out
-// );
-
-//     ShiftReg sr (
-//         .clk(clk),
-//         .reset(reset),
-//         .in(in),
-//         .init_val(init_val),
-//         .out(out)
-//     );
-
-// endmodule
-
-
-// // Linear Feedback Shift register
-// module top_module (
-//     input clk,
-//     input reset,
-//     input [7:0] init_val,
-//     output reg [7:0] out
-// );
-
-//     LFShiftReg lf (
-//         .clk(clk),
-//         .reset(reset),
-//         .init_val(init_val),
-//         .out(out)
-//     );
-
-// endmodule
-
-
-// Barrel Shifter
 module top_module (
-    input [7:0] din,    // Input data
-    input [2:0] shamt,  // Shift amount
-    input lr,           // Left or right
-    input al,           // Arithmetic or logical shift
-    output [7:0] out
+    input clk,
+    input reset,
+    input ps2_clk,
+    input ps2_data,
+    output ready,
+    output overflow,
+    output reg [7:0] data
 );
 
-    BarrelShifter bs (
-        .din(din),
-        .shamt(shamt),
-        .lr(lr),
-        .al(al),
-        .dout(out)
+    reg nextdata_n;
+    wire [7:0] ps2ctrl_data;
+
+    ps2_keyboard ps2_keyboard_inst (
+        .clk(clk),
+        .resetn(~reset),
+        .ps2_clk(ps2_clk),
+        .ps2_data(ps2_data),
+        .data(ps2ctrl_data),
+        .ready(ready),
+        .nextdata_n(nextdata_n),
+        .overflow(overflow)
     );
+
+    always @(posedge clk ) begin
+        if (reset) begin
+            data <= 8'b0;
+            nextdata_n <= 1'b1;
+        end else if (ready) begin
+            data <= ps2ctrl_data;
+            nextdata_n <= 1'b0;
+            $display("[PS/2 Keyboard Controller] Receive %x", data);
+        end else begin
+            data <= data;
+            nextdata_n <= 1'b1;
+        end
+    end
 
 endmodule
