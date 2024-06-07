@@ -2,3 +2,5 @@ top=top_module
 
 ps2_clk PS2_CLK
 ps2_data PS2_DAT
+ready LD15
+overflow LD14
