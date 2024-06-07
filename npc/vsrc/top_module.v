@@ -26,7 +26,7 @@ module top_module (
         if (reset) begin
             data <= 8'b0;
             nextdata_n <= 1'b1;
-        end else if (ready) begin
+        end else if (ready & ~nextdata_n) begin
             data <= ps2ctrl_data;
             nextdata_n <= 1'b0;
             $display("[PS/2 Keyboard Controller] Receive %x", data);
