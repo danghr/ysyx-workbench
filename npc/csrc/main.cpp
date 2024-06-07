@@ -139,7 +139,7 @@ int main(int argc, char **argv)
     reset(10);
 
     while (true) {
-        status_change();
+        single_cycle();
     }
 
     // =============================
