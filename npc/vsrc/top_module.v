@@ -75,9 +75,10 @@ module top_module (
             en_data <= 1'b0;
             state <= RELEASED;
         end else begin
+            // Only count when the key is pressed. Do not count when the key is being pressed or released.
             int_count <= int_count + {7'b0, (state == RELEASED && next_state == PRESSING)};
-            int_ascii <= data;
-            int_data <= data;
+            int_ascii <= (state == RELEASED && next_state == PRESSING) ? data : int_ascii;
+            int_data <= (state == RELEASED && next_state == PRESSING) ? data : int_data;
             en_data <= (state == PRESSING);
             state <= next_state;
         end
