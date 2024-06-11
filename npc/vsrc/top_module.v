@@ -55,13 +55,14 @@ module top_module (
         .out(show_data[6:0])
     );
 
-    parameter RELEASED = 1'b0, PRESSING = 1'b1;
-    reg state, next_state;
+    parameter RELEASED = 2'b00, PRESSING = 2'b01, RELEASING = 2'b10;
+    reg [1:0] state, next_state;
 
     always @(*) begin
         case (state)
             RELEASED : next_state = ready ? PRESSING : RELEASED;
-            PRESSING : next_state = (ready & (data == 8'hF0)) ? RELEASED : PRESSING;
+            PRESSING : next_state = (ready & (data == 8'hF0)) ? RELEASING : PRESSING;
+            RELEASING : next_state = ready ? RELEASED : RELEASING;
             default : next_state = RELEASED;
         endcase
     end
