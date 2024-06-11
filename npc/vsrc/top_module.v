@@ -85,7 +85,7 @@ module top_module (
             en_data <= (state == PRESSING);
             state <= next_state;
             if (state != next_state)
-                $display("[Top Module] State: %b / Next state: %b", state, next_state);
+                $display("[Top Module] State: %b => %b", state, next_state);
         end
     end
 
