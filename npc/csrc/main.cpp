@@ -136,7 +136,7 @@ int main(int argc, char **argv)
     // === Begin simulation body ===
     // =============================
 
-    reset(10);
+    reset(1);
 
     while (true) {
         single_cycle();
