@@ -5,7 +5,7 @@ module top_module (
     input ps2_data,
     output ready,
     output overflow,
-    output reg [7:0] data,
+    output [7:0] data,
     output reg [13:0] show_count,
     output reg [13:0] show_ascii,
     output reg [13:0] show_data,
