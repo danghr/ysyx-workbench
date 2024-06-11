@@ -66,7 +66,7 @@ module top_module (
             RELEASED : next_state = ready ? PRESSING : RELEASED;
             PRESSING : next_state = (ready & (data == 8'hF0)) ? RELEASING : PRESSING;
             RELEASING : next_state = ready ? RELEASED : RELEASING;
-            default : next_state = RELEASED;
+            default : next_state = state;
         endcase
     end
 
