@@ -8,7 +8,10 @@ module top_module (
     output reg [7:0] data,
     output reg [13:0] show_count,
     output reg [13:0] show_ascii,
-    output reg [13:0] show_data
+    output reg [13:0] show_data,
+    output released,
+    output pressing,
+    output releasing
 );
 
     keyboard_inst keyboard_inst_inst (
@@ -83,6 +86,10 @@ module top_module (
             state <= next_state;
         end
     end
+
+    assign released = (state == RELEASED);
+    assign pressing = (state == PRESSING);
+    assign releasing = (state == RELEASING);
 
 endmodule
 
