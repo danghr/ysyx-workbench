@@ -84,6 +84,7 @@ module top_module (
             int_data <= (state == RELEASED && next_state == PRESSING) ? data : int_data;
             en_data <= (state == PRESSING);
             state <= next_state;
+            $display("[Top Module] State: %b / Next state: %b", state, next_state);
         end
     end
 
