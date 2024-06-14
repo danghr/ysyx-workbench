@@ -7,6 +7,7 @@ module top_module (
     output overflow,
     output [7:0] data,
     output [13:0] disable_high_2_digit,
+    output [7:0] dots,
     output reg [13:0] show_count,
     output reg [13:0] show_ascii,
     output reg [13:0] show_data,
@@ -16,6 +17,7 @@ module top_module (
 );
 
     assign disable_high_2_digit = 14'h3FFF;
+    assign dots = 8'b11110101;
 
     reg [7:0] int_count, int_ascii, int_data;
     reg en_data, nextdata_n;
