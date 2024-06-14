@@ -63,17 +63,6 @@ module DecimalCounter (
                     end         
                 end else
                     count[3:0] <= count[3:0] + 4'd1;
-                for (i = 0; i < 8; i = i + 1) begin : count_loop
-                    if (count[i*4 +: 4] == 4'h9) begin
-                        count[i*4 +: 4] <= 4'b0;
-                        if (i != 7) begin
-                            count[(i+1)*4 +: 4] <= count[(i+1)*4 +: 4] + 4'b1;
-                        end
-                    end else begin
-                        count[i*4 +: 4] <= count[i*4 +: 4] + 4'b1;
-                        break;
-                    end
-                end
             end else count <= count;
             state <= next_state;
         end
