@@ -33,9 +33,10 @@ module top_module (
 
     ScancodeToASCII scancode_to_ascii_inst (
         .clk(clk),
-        .scan_code(int_ascii),
-        .ascii_code(int_data)
+        .scan_code(int_data),
+        .ascii_code(int_ascii)
     );
+
 
     Decode47digit decode47digit_inst_11 (
         .x(int_count[15:12]),

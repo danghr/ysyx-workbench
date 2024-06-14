@@ -12,7 +12,6 @@ module ScancodeToASCII (
     end
 
     always @(posedge clk ) begin
-        
         ascii_code <= scan_to_ascii[scan_code];
     end
 
