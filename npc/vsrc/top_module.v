@@ -53,9 +53,9 @@ module top_module (
 
     always @(*) begin
         case (state)
-            RELEASED : next_state = ready ? PRESSING : RELEASED;
-            PRESSING : next_state = (ready & (data == 8'hF0)) ? RELEASING : PRESSING;
-            RELEASING : next_state = (ready & (data != 8'hF0)) ? RELEASED : RELEASING;
+            RELEASED : next_state = (ready & nextdata_n) ? PRESSING : RELEASED;
+            PRESSING : next_state = ((ready & nextdata_n) & (data == 8'hF0)) ? RELEASING : PRESSING;
+            RELEASING : next_state = ((ready & nextdata_n) & (data != 8'hF0)) ? RELEASED : RELEASING;
             default : next_state = state;
         endcase
     end
