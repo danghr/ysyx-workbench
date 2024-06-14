@@ -144,7 +144,7 @@ module decimal_counter (
                 count <= count + 8'h1;
                 if (count[3:0] == 4'ha) begin
                     count[3:0] <= 4'b0;
-                    if (count[7:4] == 4'ha) begin
+                    if (count[7:4] == 4'h9) begin
                         count[7:4] <= 4'b0;
                     end else count[7:4] <= count[7:4] + 4'b1;
                 end
