@@ -6,9 +6,8 @@ module top_module (
     output ready,
     output overflow,
     output [7:0] data,
-    output [13:0] disable_high_2_digit,
     output [7:0] dots,
-    output reg [13:0] show_count,
+    output reg [27:0] show_count,
     output reg [13:0] show_ascii,
     output reg [13:0] show_data,
     output released,
@@ -16,12 +15,32 @@ module top_module (
     output releasing
 );
 
-    assign disable_high_2_digit = 14'h3FFF;
     assign dots = 8'b11101010;
 
-    reg [7:0] int_count, int_ascii, int_data;
+    wire [15:0] int_count;
+    reg [7:0] int_ascii, int_data;
     reg en_data, nextdata_n;
 
+    wire [15:0] unused;
+
+    wire count_en = (state == RELEASED && next_state == PRESSING); 
+    DecimalCounter decimal_counter_inst (
+        .clk(clk),
+        .reset(reset),
+        .en(count_en),
+        .count({unused, int_count})
+    );
+
+    Decode47digit decode47digit_inst_11 (
+        .x(int_count[15:12]),
+        .en(1'b1),
+        .out(show_count[27:21])
+    );
+    Decode47digit decode47digit_inst_12 (
+        .x(int_count[11:8]),
+        .en(1'b1),
+        .out(show_count[20:14])
+    );
     Decode47digit decode47digit_inst_1 (
         .x(int_count[7:4]),
         .en(1'b1),
@@ -76,18 +95,9 @@ module top_module (
         .overflow(overflow)
     );
 
-    wire count_en = (state == RELEASED && next_state == PRESSING); 
-    DecimalCounter decimal_counter_inst (
-        .clk(clk),
-        .reset(reset),
-        .en(count_en),
-        .count(int_count)
-    );
-
     always @(posedge clk ) begin
         if (reset) begin
             nextdata_n <= 1'b1;
-            int_count <= 8'b0;
             int_ascii <= 8'b0;
             int_data <= 8'b0;
             en_data <= 1'b0;
