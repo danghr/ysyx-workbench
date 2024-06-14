@@ -16,14 +16,15 @@ module DecimalCounter (
         endcase
     end
 
+    integer i;
+
     always @(posedge clk) begin
         if (reset) begin
             count <= 32'b0;
             state <= IDLE;
         end else begin
             if (state == IDLE & next_state == COUNTING) begin
-                integer i;
-                for (i = 0; i < 8; i = i + 1) begin
+                for (i = 0; i < 8; i = i + 1) begin : count_loop
                     if (count[i*4 +: 4] == 4'h9) begin
                         count[i*4 +: 4] <= 4'b0;
                         if (i != 7) begin
@@ -31,7 +32,6 @@ module DecimalCounter (
                         end
                     end else begin
                         count[i*4 +: 4] <= count[i*4 +: 4] + 4'b1;
-                        break;
                     end
                 end
             end else count <= count;
