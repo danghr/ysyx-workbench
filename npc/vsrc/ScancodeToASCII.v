@@ -8,7 +8,7 @@ module ScancodeToASCII (
     
     initial begin
         $readmemh("scancode_to_ascii", scan_to_ascii);
-        $display("Scancode Test: %h", scan_to_ascii[21]);
+        $display("Scancode test, should be 0x71: 0x%h", scan_to_ascii[21]);
     end
 
     always @(posedge clk ) begin
