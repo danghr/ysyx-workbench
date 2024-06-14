@@ -4,7 +4,7 @@ module ScancodeToASCII (
     output reg [7:0] ascii_code
 );
 
-    reg [7:0] scan_to_ascii[0:255];
+    reg [7:0] scan_to_ascii[0:254];
     
     initial begin
         $readmemh("scancode_to_ascii.txt", scan_to_ascii);
