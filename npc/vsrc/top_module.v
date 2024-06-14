@@ -85,7 +85,6 @@ module top_module (
                 int_count <= int_count + {7'b0, (state == RELEASED && next_state == PRESSING)};
                 int_ascii <= (state == RELEASED && next_state == PRESSING) ? data : int_ascii;
                 int_data <= (state == RELEASED && next_state == PRESSING) ? data : int_data;
-                en_data <= (state == PRESSING);
                 $display("[PS/2 Keyboard Controller] Receive %x", data);
             end else begin
                 nextdata_n <= 1'b1;
@@ -95,6 +94,7 @@ module top_module (
                 en_data <= en_data;
             end
             state <= next_state;
+            en_data <= (next_state == PRESSING);
             if (state != next_state)
                 $display("[Top Module] State: %b => %b", state, next_state);
         end
