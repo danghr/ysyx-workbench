@@ -17,7 +17,7 @@ module top_module (
 );
 
     assign disable_high_2_digit = 14'h3FFF;
-    assign dots = 8'b11110101;
+    assign dots = 8'b11101010;
 
     reg [7:0] int_count, int_ascii, int_data;
     reg en_data, nextdata_n;
