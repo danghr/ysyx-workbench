@@ -6,6 +6,7 @@ module top_module (
     output ready,
     output overflow,
     output [7:0] data,
+    output [13:0] disable_high_2_digit,
     output reg [13:0] show_count,
     output reg [13:0] show_ascii,
     output reg [13:0] show_data,
@@ -13,6 +14,8 @@ module top_module (
     output pressing,
     output releasing
 );
+
+    assign disable_high_2_digit = 14'h3FFF;
 
     reg [7:0] int_count, int_ascii, int_data;
     reg en_data, nextdata_n;
