@@ -31,6 +31,12 @@ module top_module (
         .count({unused, int_count})
     );
 
+    ScancodeToASCII scancode_to_ascii_inst (
+        .clk(clk),
+        .scan_code(int_ascii),
+        .ascii_code(int_data)
+    );
+
     Decode47digit decode47digit_inst_11 (
         .x(int_count[15:12]),
         .en(1'b1),
@@ -105,12 +111,10 @@ module top_module (
         end else begin
             if (ready & nextdata_n) begin
                 nextdata_n <= 1'b0;
-                int_ascii <= (state == RELEASED && next_state == PRESSING) ? data : int_ascii;
                 int_data <= (state == RELEASED && next_state == PRESSING) ? data : int_data;
                 $display("[PS/2 Keyboard Controller] Receive %x", data);
             end else begin
                 nextdata_n <= 1'b1;
-                int_ascii <= int_ascii;
                 int_data <= int_data;
                 en_data <= en_data;
             end
