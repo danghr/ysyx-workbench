@@ -142,7 +142,7 @@ module decimal_counter (
         end else begin
             if (state == IDLE & next_state == COUNTING) begin
                 count <= count + 8'h1;
-                if (count[3:0] == 4'ha) begin
+                if (count[3:0] == 4'h9) begin
                     count[3:0] <= 4'b0;
                     if (count[7:4] == 4'h9) begin
                         count[7:4] <= 4'b0;
