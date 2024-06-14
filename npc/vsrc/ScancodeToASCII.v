@@ -7,7 +7,7 @@ module ScancodeToASCII (
     reg [7:0] scan_to_ascii[0:255];
     
     initial begin
-        $readmemh("scancode_to_ascii", scan_to_ascii);
+        $readmemh("scancode_to_ascii.txt", scan_to_ascii);
         $display("Scancode test, should be 0x71: 0x%h", scan_to_ascii[21]);
     end
 
