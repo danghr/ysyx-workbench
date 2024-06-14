@@ -14,18 +14,8 @@ module top_module (
     output releasing
 );
 
-    keyboard_inst keyboard_inst_inst (
-        .clk(clk),
-        .reset(reset),
-        .ps2_clk(ps2_clk),
-        .ps2_data(ps2_data),
-        .ready(ready),
-        .overflow(overflow),
-        .data(data)
-    );
-
     reg [7:0] int_count, int_ascii, int_data;
-    reg en_data;
+    reg en_data, nextdata_n;
 
     Decode47digit decode47digit_inst_1 (
         .x(int_count[7:4]),
@@ -70,43 +60,6 @@ module top_module (
         endcase
     end
 
-    always @(posedge clk ) begin
-        if (reset) begin
-            int_count <= 8'b0;
-            int_ascii <= 8'b0;
-            int_data <= 8'b0;
-            en_data <= 1'b0;
-            state <= RELEASED;
-        end else begin
-            // Only count when the key is pressed. Do not count when the key is being pressed or released.
-            int_count <= int_count + {7'b0, (state == RELEASED && next_state == PRESSING)};
-            int_ascii <= (state == RELEASED && next_state == PRESSING) ? data : int_ascii;
-            int_data <= (state == RELEASED && next_state == PRESSING) ? data : int_data;
-            en_data <= (state == PRESSING);
-            state <= next_state;
-            if (state != next_state)
-                $display("[Top Module] State: %b => %b", state, next_state);
-        end
-    end
-
-    assign released = (state == RELEASED);
-    assign pressing = (state == PRESSING);
-    assign releasing = (state == RELEASING);
-
-endmodule
-
-module keyboard_inst (
-    input clk,
-    input reset,
-    input ps2_clk,
-    input ps2_data,
-    output ready,
-    output overflow,
-    output reg [7:0] data
-);
-
-    reg nextdata_n;
-
     ps2_keyboard ps2_keyboard_inst (
         .clk(clk),
         .resetn(~reset),
@@ -121,12 +74,34 @@ module keyboard_inst (
     always @(posedge clk ) begin
         if (reset) begin
             nextdata_n <= 1'b1;
-        end else if (ready & nextdata_n) begin
-            nextdata_n <= 1'b0;
-            $display("[PS/2 Keyboard Controller] Receive %x", data);
+            int_count <= 8'b0;
+            int_ascii <= 8'b0;
+            int_data <= 8'b0;
+            en_data <= 1'b0;
+            state <= RELEASED;
         end else begin
-            nextdata_n <= 1'b1;
+            if (ready & nextdata_n) begin
+                nextdata_n <= 1'b0;
+                int_count <= int_count + {7'b0, (state == RELEASED && next_state == PRESSING)};
+                int_ascii <= (state == RELEASED && next_state == PRESSING) ? data : int_ascii;
+                int_data <= (state == RELEASED && next_state == PRESSING) ? data : int_data;
+                en_data <= (state == PRESSING);
+                $display("[PS/2 Keyboard Controller] Receive %x", data);
+            end else begin
+                nextdata_n <= 1'b1;
+                int_count <= int_count;
+                int_ascii <= int_ascii;
+                int_data <= int_data;
+                en_data <= en_data;
+            end
+            state <= next_state;
+            if (state != next_state)
+                $display("[Top Module] State: %b => %b", state, next_state);
         end
     end
+
+    assign released = (state == RELEASED);
+    assign pressing = (state == PRESSING);
+    assign releasing = (state == RELEASING);
 
 endmodule
