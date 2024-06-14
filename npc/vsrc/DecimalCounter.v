@@ -16,24 +16,53 @@ module DecimalCounter (
         endcase
     end
 
+    integer i;
+
     always @(posedge clk) begin
         if (reset) begin
             count <= 32'b0;
             state <= IDLE;
         end else begin
             if (state == IDLE & next_state == COUNTING) begin
-                integer i;
-                for (i = 0; i < 8; i = i + 1) begin
-                    if (count[i*4 +: 4] == 4'h9) begin
-                        count[i*4 +: 4] <= 4'b0;
-                        if (i != 7) begin
-                            count[(i+1)*4 +: 4] <= count[(i+1)*4 +: 4] + 4'b1;
+                if (count[3:0] == 4'd9) begin
+                    if (count[7:4] == 4'd9) begin
+                        if (count[11:8] == 4'd9) begin
+                            if (count[15:12] == 4'd9) begin
+                                if (count[19:16] == 4'd9) begin
+                                    if (count[23:20] == 4'd9) begin
+                                        if (count[27:24] == 4'd9) begin
+                                            if (count[31:28] == 4'd9) begin
+                                                count <= 32'b0;
+                                            end else begin
+                                                count[31:28] <= count[31:28] + 4'd1;
+                                                count[27:24] <= 4'd0;
+                                            end
+                                        end else begin
+                                            count[27:24] <= count[27:24] + 4'd1;
+                                            count[23:20] <= 4'd0;
+                                        end
+                                    end else begin
+                                        count[23:20] <= count[23:20] + 4'd1;
+                                        count[19:16] <= 4'd0;
+                                    end
+                                end else begin
+                                    count[19:16] <= count[19:16] + 4'd1;
+                                    count[15:12] <= 4'd0;
+                                end
+                            end else begin
+                                count[15:12] <= count[15:12] + 4'd1;
+                                count[11:8] <= 4'd0;
+                            end
+                        end else begin
+                            count[11:8] <= count[11:8] + 4'd1;
+                            count[7:4] <= 4'd0;
                         end
                     end else begin
-                        count[i*4 +: 4] <= count[i*4 +: 4] + 4'b1;
-                        break;
-                    end
-                end
+                        count[7:4] <= count[7:4] + 4'd1;
+                        count[3:0] <= 4'd0;
+                    end         
+                end else
+                    count[3:0] <= count[3:0] + 4'd1;
             end else count <= count;
             state <= next_state;
         end
