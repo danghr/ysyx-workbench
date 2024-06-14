@@ -7,7 +7,7 @@ module ScancodeToASCII (
     reg [7:0] scan_to_ascii[0:255];
     
     initial begin
-        $readmemh("keyboard_to_ascii", scan_to_ascii);
+        $readmemh("scancode_to_ascii", scan_to_ascii);
         $display("Scancode Test: %h", scan_to_ascii[21]);
     end
 
