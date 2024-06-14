@@ -8,7 +8,7 @@ module ScancodeToASCII (
     
     initial begin
         $readmemh("keyboard_to_ascii", scan_to_ascii);
-        $display("Scancode Test: %h", scan_to_ascii[31]);
+        $display("Scancode Test: %h", scan_to_ascii[21]);
     end
 
     always @(posedge clk ) begin
