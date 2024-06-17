@@ -120,7 +120,7 @@ static int cmd_si(char *args) {
   }
   Log("Argument: %s", arg);
   cpu_exec(steps);
-  assert(0);
+  return 0;
 }
 
 static int cmd_info(char *args) {
