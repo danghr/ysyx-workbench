@@ -105,8 +105,21 @@ static int cmd_si(char *args) {
   // the strtok function should be called with NULL
   // See `man 3 strtok'
   char *arg = strtok(NULL, " ");
+  uint64_t steps = 1;
+  if (arg != NULL) {
+    // Check whether the parameter is a valid number
+    char **endptr = NULL;
+    steps = strtoull(arg, /* String to be parsed */ 
+                     endptr, /* Address of the first invalid character */
+                     10 /* Base, force decimal */
+                    );
+    if (!(*arg != '\0' && **endptr == '\0')) {
+      printf("Invalid argument '%s' for si\n", arg);
+      return 1;
+    }
+  }
   Log("Argument: %s", arg);
-  Log("cmd_si not implemented. args = %s", args);
+  cpu_exec(steps);
   assert(0);
 }
 
