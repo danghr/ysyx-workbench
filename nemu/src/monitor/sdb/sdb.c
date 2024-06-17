@@ -108,15 +108,17 @@ static int cmd_si(char *args) {
   uint64_t steps = 1;
   if (arg != NULL) {
     // Check whether the parameter is a valid number
-    char **endptr = NULL;
+    char **endptr = malloc(sizeof(char*));
     steps = strtoull(arg, /* String to be parsed */ 
                      endptr, /* Address of the first invalid character */
                      10 /* Base, force decimal */
                     );
     if (!(*arg != '\0' && **endptr == '\0')) {
       printf("Invalid argument '%s' for si\n", arg);
+      free(endptr);
       return 1;
     }
+    free(endptr);
   }
   Log("Argument: %s", arg);
   cpu_exec(steps);
