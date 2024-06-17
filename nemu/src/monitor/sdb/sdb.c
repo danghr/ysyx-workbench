@@ -54,6 +54,10 @@ static int cmd_q(char *args) {
 
 static int cmd_help(char *args);
 
+static int cmd_si(char *args);
+static int cmd_info(char *args);
+static int cmd_x(char *args);
+
 static struct {
   const char *name;
   const char *description;
@@ -64,6 +68,9 @@ static struct {
   { "q", "Exit NEMU", cmd_q },
 
   /* TODO: Add more commands */
+  { "si", "Continue the execution for N instructions. Format: `si [N]'. N=1 if not specified", cmd_si },
+  { "info", "Print the program status. `info r' prints register status, and `info w' prints watchpoint status", cmd_info },
+  { "x", "Scan memory. Format: `x N EXPR'. Print 4*N bytes of memory starting from the value of EXPR", cmd_x },
 
 };
 
@@ -90,6 +97,21 @@ static int cmd_help(char *args) {
     printf("Unknown command '%s'\n", arg);
   }
   return 0;
+}
+
+static int cmd_si(char *args) {
+  Log("cmd_si not implemented. args = %s", args);
+  assert(0);
+}
+
+static int cmd_info(char *args) {
+  Log("cmd_info not implemented. args = %s", args);
+  assert(0);
+}
+
+static int cmd_x(char *args) {
+  Log("cmd_x not implemented. args = %s", args);
+  assert(0);
 }
 
 void sdb_set_batch_mode() {
