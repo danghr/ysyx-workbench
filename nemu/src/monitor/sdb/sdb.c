@@ -100,8 +100,29 @@ static int cmd_help(char *args) {
 }
 
 static int cmd_si(char *args) {
-  Log("cmd_si not implemented. args = %s", args);
-  assert(0);
+  // Extract the first argument
+  // Note that since we are parsing the same argument command,
+  // the strtok function should be called with NULL
+  // See `man 3 strtok'
+  char *arg = strtok(NULL, " ");
+  uint64_t steps = 1;
+  if (arg != NULL) {
+    // Check whether the parameter is a valid number
+    char **endptr = malloc(sizeof(char*));
+    steps = strtoull(arg, /* String to be parsed */ 
+                     endptr, /* Address of the first invalid character */
+                     10 /* Base, force decimal */
+                    );
+    if (!(*arg != '\0' && **endptr == '\0')) {
+      printf("Invalid argument '%s' for si\n", arg);
+      free(endptr);
+      return 1;
+    }
+    free(endptr);
+  }
+  printf("Executing %" PRId64 " instruction(s)\n", steps);
+  cpu_exec(steps);
+  return 0;
 }
 
 static int cmd_info(char *args) {
