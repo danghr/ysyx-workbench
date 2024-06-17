@@ -100,6 +100,12 @@ static int cmd_help(char *args) {
 }
 
 static int cmd_si(char *args) {
+  // Extract the first argument
+  // Note that since we are parsing the same argument command,
+  // the strtok function should be called with NULL
+  // See `man 3 strtok'
+  char *arg = strtok(NULL, " ");
+  Log("Argument: %s", arg);
   Log("cmd_si not implemented. args = %s", args);
   assert(0);
 }
