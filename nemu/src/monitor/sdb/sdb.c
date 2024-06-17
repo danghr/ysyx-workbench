@@ -120,7 +120,7 @@ static int cmd_si(char *args) {
     }
     free(endptr);
   }
-  Log("Argument: %s", arg);
+  printf("Executing %" PRId64 " steps\n", steps);
   cpu_exec(steps);
   return 0;
 }
