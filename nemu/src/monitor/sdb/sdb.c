@@ -120,7 +120,7 @@ static int cmd_si(char *args) {
     }
     free(endptr);
   }
-  printf("Executing %" PRId64 " steps\n", steps);
+  printf("Executing %" PRId64 " step(s)\n", steps);
   cpu_exec(steps);
   return 0;
 }
