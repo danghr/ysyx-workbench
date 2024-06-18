@@ -113,14 +113,17 @@ static int cmd_si(char *args) {
                      endptr, /* Address of the first invalid character */
                      10 /* Base, force decimal */
                     );
-    if (!(*arg != '\0' && **endptr == '\0')) {
+    if (!(*arg != '\0' && **endptr == '\0')) {  // Refer to `man 3 stroull'
       printf("Invalid argument '%s' for si\n", arg);
       free(endptr);
       return 1;
     }
     free(endptr);
   }
+  // PRId64: macro for printing int64_t
   printf("Executing %" PRId64 " instruction(s)\n", steps);
+
+  // Call the execution function
   cpu_exec(steps);
   return 0;
 }
