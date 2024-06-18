@@ -16,6 +16,8 @@
 #include <isa.h>
 #include "local-include/reg.h"
 
+#define ARRAY_SIZE(arr)		(sizeof(arr) / sizeof((arr)[0]))
+
 const char *regs[] = {
   "$0", "ra", "sp", "gp", "tp", "t0", "t1", "t2",
   "s0", "s1", "a0", "a1", "a2", "a3", "a4", "a5",
@@ -23,7 +25,13 @@ const char *regs[] = {
   "s8", "s9", "s10", "s11", "t3", "t4", "t5", "t6"
 };
 
+extern CPU_state cpu;
+
 void isa_reg_display() {
+  assert(ARRAY_SIZE(regs) == ARRAY_SIZE(cpu.gpr));
+  for (int i = 0; i < ARRAY_SIZE(regs); i ++) {
+    printf("%-6s 0x%-12x %d\n", regs[i], cpu.gpr[i], cpu.gpr[i]);
+  }
 }
 
 word_t isa_reg_str2val(const char *s, bool *success) {

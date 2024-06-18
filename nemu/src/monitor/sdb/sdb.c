@@ -113,21 +113,50 @@ static int cmd_si(char *args) {
                      endptr, /* Address of the first invalid character */
                      10 /* Base, force decimal */
                     );
-    if (!(*arg != '\0' && **endptr == '\0')) {
+    if (!(*arg != '\0' && **endptr == '\0')) {  // Refer to `man 3 stroull'
       printf("Invalid argument '%s' for si\n", arg);
       free(endptr);
       return 1;
     }
     free(endptr);
   }
-  printf("Executing %" PRId64 " step(s)\n", steps);
+  // PRId64: macro for printing int64_t
+  printf("Executing %" PRId64 " instruction(s)\n", steps);
+
+  // Call the execution function
   cpu_exec(steps);
   return 0;
 }
 
 static int cmd_info(char *args) {
-  Log("cmd_info not implemented. args = %s", args);
-  assert(0);
+  // Extract the first argument
+  char *arg = strtok(NULL, " ");
+
+  // Check whether the parameter is leagal
+  if (arg == NULL) {
+    printf("info: missing argument\n");
+    return 1;
+  }
+  char *more_arg = strtok(NULL, " ");
+  if (more_arg != NULL) {
+    printf("info: too many arguments\n");
+    return 1;
+  }
+
+  if (strcmp(arg, "r") == 0) {
+    // Print the register status
+    printf("Register status\n");
+    isa_reg_display();
+  } else if (strcmp(arg, "w") == 0) {
+    // Print the watchpoint status
+    printf("Watchpoint status\n");
+    printf("Not implemented\n");
+    assert(0);
+  } else {
+    printf("Unknown argument '%s' for info\n", arg);
+    return 1;
+  }
+  return 0;
 }
 
 static int cmd_x(char *args) {
