@@ -30,7 +30,11 @@ extern CPU_state cpu;
 void isa_reg_display() {
   assert(ARRAY_SIZE(regs) == ARRAY_SIZE(cpu.gpr));
   for (int i = 0; i < ARRAY_SIZE(regs); i ++) {
+#ifdef CONFIG_RV64
+    printf("%-6s 0x%-20x %lld\n", regs[i], cpu.gpr[i], cpu.gpr[i]);
+#else
     printf("%-6s 0x%-12x %d\n", regs[i], cpu.gpr[i], cpu.gpr[i]);
+#endif
   }
 }
 
