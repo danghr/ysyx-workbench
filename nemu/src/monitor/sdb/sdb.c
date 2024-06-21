@@ -129,8 +129,34 @@ static int cmd_si(char *args) {
 }
 
 static int cmd_info(char *args) {
-  Log("cmd_info not implemented. args = %s", args);
-  assert(0);
+  // Extract the first argument
+  char *arg = strtok(NULL, " ");
+
+  // Check whether the parameter is leagal
+  if (arg == NULL) {
+    printf("info: missing argument\n");
+    return 1;
+  }
+  char *more_arg = strtok(NULL, " ");
+  if (more_arg != NULL) {
+    printf("info: too many arguments\n");
+    return 1;
+  }
+
+  if (strcmp(arg, "r") == 0) {
+    // Print the register status
+    printf("Register status\n");
+    isa_reg_display();
+  } else if (strcmp(arg, "w") == 0) {
+    // Print the watchpoint status
+    printf("Watchpoint status\n");
+    printf("Not implemented\n");
+    assert(0);
+  } else {
+    printf("Unknown argument '%s' for info\n", arg);
+    return 1;
+  }
+  return 0;
 }
 
 static int cmd_x(char *args) {
