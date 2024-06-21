@@ -160,14 +160,12 @@ static int cmd_info(char *args) {
 }
 
 static int cmd_x(char *args) {
-flag:
   // Extract the two arguments
   char *arg_len = strtok(NULL, " ");
   char *arg_expr = strtok(NULL, "\0");
   printf("/%s/%s/\n", arg_len, arg_expr);
   Log("cmd_x not implemented. args = %s", args);
-  goto flag;
-  assert(0);
+  return 1;
 }
 
 void sdb_set_batch_mode() {
