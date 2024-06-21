@@ -16,8 +16,6 @@
 #include <isa.h>
 #include "local-include/reg.h"
 
-#define ARRAY_SIZE(arr)		(sizeof(arr) / sizeof((arr)[0]))
-
 const char *regs[] = {
   "$0", "ra", "sp", "gp", "tp", "t0", "t1", "t2",
   "s0", "s1", "a0", "a1", "a2", "a3", "a4", "a5",
@@ -28,14 +26,23 @@ const char *regs[] = {
 extern CPU_state cpu;
 
 void isa_reg_display() {
-  assert(ARRAY_SIZE(regs) == ARRAY_SIZE(cpu.gpr));
-  for (int i = 0; i < ARRAY_SIZE(regs); i ++) {
-#ifdef CONFIG_RV64
+  for (int i = 0;
+       i < MUXDEF(CONFIG_RVE, 16, 32) /* See src/riscv32/include/isa_def.h */;
+       i++
+      ) {
+    /* 64-bit registers for RV64. See include/common.h and RISC-V ISA I Sec. 4.1 */
+#ifdef CONFIG_RV64  
     printf("%-4s  0x%016x  %lld\n", regs[i], cpu.gpr[i], cpu.gpr[i]);
 #else
     printf("%-4s  0x%08x  %d\n", regs[i], cpu.gpr[i], cpu.gpr[i]);
 #endif
   }
+
+#ifdef CONFIG_RV64
+  printf("pc    0x%016x\n", cpu.pc);
+#else
+  printf("pc    0x%08x\n", cpu.pc);
+#endif
 }
 
 word_t isa_reg_str2val(const char *s, bool *success) {
