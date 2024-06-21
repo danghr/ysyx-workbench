@@ -162,8 +162,9 @@ static int cmd_info(char *args) {
 static int cmd_x(char *args) {
   // Extract the two arguments
   char *arg_len = strtok(NULL, " ");
-  char *arg_expr = strtok(NULL, "\0");
-  printf("/%s/%s/\n", arg_len, arg_expr);
+  char *arg_expr = strtok(NULL, "\0");  // Accept expression until the end of the string
+  int len = atoi(arg_len);
+  printf("/%d/%s/\n", len, arg_expr);
   Log("cmd_x not implemented. args = %s", args);
   return 1;
 }
