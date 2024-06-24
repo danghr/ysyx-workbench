@@ -178,13 +178,12 @@ static int cmd_x(char *args) {
   printf("%016x  ", addr);
 #endif
   char *buffer = malloc(sizeof(char) * len);
-  int i;
-  for(i = 0; i < len; i++) {
+  buffer[len] = '\0';
+  for(int i = 0; i < len; i++) {
     uint8_t data = paddr_read(addr + i, 1);
     printf("%02x ", data);
-    buffer[i] = (char)data;
+    buffer[len - i - 1] = (char)data;
   }
-  buffer[i] = '\0';
   printf("  %s\n", buffer);
   free(buffer);
   return 0;
