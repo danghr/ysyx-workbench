@@ -175,7 +175,7 @@ static int cmd_x(char *args) {
   char *buffer = malloc(sizeof(char) * len);
   int i;
   for(i = 0; i < len; i++) {
-    uint8_t data = paddr_read(addr, 1);
+    uint8_t data = paddr_read(addr + i, 1);
     printf("%02x", data);
     buffer[i] = (char)data;
   }
