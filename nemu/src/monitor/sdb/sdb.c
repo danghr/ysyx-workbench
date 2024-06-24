@@ -15,6 +15,7 @@
 
 #include <isa.h>
 #include <cpu/cpu.h>
+#include <memory/paddr.h>
 #include <readline/readline.h>
 #include <readline/history.h>
 #include "sdb.h"
@@ -160,8 +161,54 @@ static int cmd_info(char *args) {
 }
 
 static int cmd_x(char *args) {
-  Log("cmd_x not implemented. args = %s", args);
-  assert(0);
+  // Extract the two arguments and check their validity
+  char *arg_len = strtok(NULL, " ");
+  char *arg_expr = strtok(NULL, "\0");  // Parse until the end of the string
+  if (arg_expr == NULL) {
+    printf("x: missing argument\n");
+    return 1;
+  }
+  if (strtok(NULL, "\0") != NULL) {
+    printf("x: too many arguments\n");
+    return 1;
+  }
+
+  // Parse the length
+  int len = atoi(arg_len);
+  if (len <= 0) {
+    printf("x: invalid argument '%s'\n", arg_len);
+    return 1;
+  }
+
+  // Parse the address
+  // TODO: Change to value of expressions
+  paddr_t addr = strtoull(arg_expr, NULL, 16 /* Base, force hexadecimal */);
+#ifdef CONFIG_ISA64
+  printf("0x%016x    ", addr);
+#else
+  printf("0x%08x    ", addr);
+#endif
+
+  // Allocate a buffer for the scanned value
+  uint8_t *buffer = malloc(sizeof(char) * len);
+  
+  // Read the value from the memory byte by byte
+  // Note that the memory is little-endian
+  // so we place the bytes reversely
+  // to print the result in human-readable order
+  for(int i = 0; i < len; i++)
+    buffer[len - i - 1] = paddr_read(addr + i, 1);
+
+  // Print the scanned value byte by byte
+  for (int i = 0; i < len; i++)
+    printf("%02x ", buffer[i]);
+  printf("    ");
+  for (int i = 0; i < len; i++)
+    printf("%c", (char)buffer[i]);
+  printf("\n");
+  
+  free(buffer);
+  return 0;
 }
 
 void sdb_set_batch_mode() {
