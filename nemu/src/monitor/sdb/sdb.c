@@ -186,12 +186,14 @@ static int cmd_x(char *args) {
 #ifdef CONFIG_ISA64
   printf("0x%016x    ", addr);
 #else
-  printf("0x%08x    ", addr);
+  printf("| <= 0x%08x |    ", addr);
 #endif
 
   // Allocate a buffer for the scanned value
   uint8_t *buffer = malloc(sizeof(char) * len);
   // Read the value from the memory byte by byte
+  // Note that the memory is little-endian
+  // so we place the 
   for(int i = 0; i < len; i++)
     buffer[len - i - 1] = paddr_read(addr + i, 1);
 
