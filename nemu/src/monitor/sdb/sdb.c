@@ -161,40 +161,52 @@ static int cmd_info(char *args) {
 }
 
 static int cmd_x(char *args) {
-  // Extract the two arguments
+  // Extract the two arguments and check their validity
   char *arg_len = strtok(NULL, " ");
-  char *arg_expr = strtok(NULL, "\0");  // Accept expression until the end of the string
+  char *arg_expr = strtok(NULL, "\0");  // Parse until the end of the string
   if (arg_expr == NULL) {
-    printf("Missing argument\n");
+    printf("x: missing argument\n");
     return 1;
   }
   if (strtok(NULL, "\0") != NULL) {
-    printf("Too many arguments\n");
+    printf("x: too many arguments\n");
     return 1;
   }
+
+  // Parse the length
   int len = atoi(arg_len);
-  printf("Command: [%d][%s]\n", len, arg_expr);
+  if (len <= 0) {
+    printf("x: invalid argument '%s'\n", arg_len);
+    return 1;
+  }
+
+  // Parse the address
   // TODO: Change to value of expressions
-  char **endptr = malloc(sizeof(char*));
-  paddr_t addr = strtoull(arg_expr, /* String to be parsed */ 
-                          endptr, /* Address of the first invalid character */
-                          16 /* Base, force hexadecimal */
-                         );
+  paddr_t addr = strtoull(arg_expr, NULL, 16 /* Base, force hexadecimal */);
 #ifdef CONFIG_ISA64
   printf("0x%016x    ", addr);
 #else
   printf("0x%08x    ", addr);
 #endif
+
+  // Allocate a buffer for the scanned value
   char *buffer = malloc(sizeof(char) * len);
+  // Assign end of string
   buffer[len] = '\0';
+  // Read the value from the memory byte by byte
   for(int i = 0; i < len; i++) {
     uint8_t data = paddr_read(addr + i, 1);
     buffer[len - i - 1] = (char)data;
   }
-  for (int i = 0; i < len; i++) {
+
+  // Print the scanned value byte by byte
+  for (int i = 0; i < len; i++)
     printf("%02x ", (uint8_t)buffer[i]);
-  }
-  printf("  %s\n", buffer);
+  printf("    ");
+  for (int i = 0; i < len; i++)
+    printf("%c", (char)buffer[i]);
+  printf("\n");
+  
   free(buffer);
   return 0;
 }
