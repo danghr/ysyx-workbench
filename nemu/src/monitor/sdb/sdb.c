@@ -190,18 +190,14 @@ static int cmd_x(char *args) {
 #endif
 
   // Allocate a buffer for the scanned value
-  char *buffer = malloc(sizeof(char) * len);
-  // Assign end of string
-  buffer[len] = '\0';
+  uint8_t *buffer = malloc(sizeof(char) * len);
   // Read the value from the memory byte by byte
-  for(int i = 0; i < len; i++) {
-    uint8_t data = paddr_read(addr + i, 1);
-    buffer[len - i - 1] = (char)data;
-  }
+  for(int i = 0; i < len; i++)
+    buffer[len - i - 1] = paddr_read(addr + i, 1);
 
   // Print the scanned value byte by byte
   for (int i = 0; i < len; i++)
-    printf("%02x ", (uint8_t)buffer[i]);
+    printf("%02x ", buffer[i]);
   printf("    ");
   for (int i = 0; i < len; i++)
     printf("%c", (char)buffer[i]);
