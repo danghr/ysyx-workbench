@@ -15,6 +15,7 @@
 
 #include <isa.h>
 #include <cpu/cpu.h>
+#include <memory/paddr.h>
 #include <readline/readline.h>
 #include <readline/history.h>
 #include "sdb.h"
@@ -164,9 +165,24 @@ static int cmd_x(char *args) {
   char *arg_len = strtok(NULL, " ");
   char *arg_expr = strtok(NULL, "\0");  // Accept expression until the end of the string
   int len = atoi(arg_len);
-  printf("/%d/%s/\n", len, arg_expr);
-  Log("cmd_x not implemented. args = %s", args);
-  return 1;
+  printf("Command: [%d][%s]\n", len, arg_expr);
+  // TODO: Change to value of expressions
+  char **endptr = malloc(sizeof(char*));
+  paddr_t addr = strtoull(arg_expr, /* String to be parsed */ 
+                          endptr, /* Address of the first invalid character */
+                          16 /* Base, force hexadecimal */
+                         );
+  char *buffer = malloc(sizeof(char) * len);
+  int i;
+  for(i = 0; i < len; i++) {
+    uint8_t data = paddr_read(addr, 1);
+    printf("%02x", data);
+    buffer[i] = (char)data;
+  }
+  buffer[i] = '\0';
+  printf("  %s\n", buffer);
+  free(buffer);
+  return 0;
 }
 
 void sdb_set_batch_mode() {
