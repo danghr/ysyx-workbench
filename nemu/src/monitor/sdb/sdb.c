@@ -186,7 +186,7 @@ static int cmd_x(char *args) {
 #ifdef CONFIG_ISA64
   printf("0x%016x    ", addr);
 #else
-  printf("| <= 0x%08x |    ", addr);
+  printf("| %d Bytes <= 0x%08x |    ", len, addr);
 #endif
 
   // Allocate a buffer for the scanned value
