@@ -164,6 +164,14 @@ static int cmd_x(char *args) {
   // Extract the two arguments
   char *arg_len = strtok(NULL, " ");
   char *arg_expr = strtok(NULL, "\0");  // Accept expression until the end of the string
+  if (arg_expr == NULL) {
+    printf("Missing argument\n");
+    return 1;
+  }
+  if (strtok(NULL, "\0") != NULL) {
+    printf("Too many arguments\n");
+    return 1;
+  }
   int len = atoi(arg_len);
   printf("Command: [%d][%s]\n", len, arg_expr);
   // TODO: Change to value of expressions
@@ -173,16 +181,18 @@ static int cmd_x(char *args) {
                           16 /* Base, force hexadecimal */
                          );
 #ifdef CONFIG_ISA64
-  printf("%016x  ", addr);
+  printf("0x%016x    ", addr);
 #else
-  printf("%016x  ", addr);
+  printf("0x%08x    ", addr);
 #endif
   char *buffer = malloc(sizeof(char) * len);
   buffer[len] = '\0';
   for(int i = 0; i < len; i++) {
     uint8_t data = paddr_read(addr + i, 1);
-    printf("%02x ", data);
     buffer[len - i - 1] = (char)data;
+  }
+  for (int i = 0; i < len; i++) {
+    printf("%02x ", (uint8_t)buffer[i]);
   }
   printf("  %s\n", buffer);
   free(buffer);
