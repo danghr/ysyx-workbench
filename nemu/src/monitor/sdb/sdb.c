@@ -172,11 +172,16 @@ static int cmd_x(char *args) {
                           endptr, /* Address of the first invalid character */
                           16 /* Base, force hexadecimal */
                          );
+#ifdef CONFIG_ISA64
+  printf("%016x  ", addr);
+#else
+  printf("%016x  ", addr);
+#endif
   char *buffer = malloc(sizeof(char) * len);
   int i;
   for(i = 0; i < len; i++) {
     uint8_t data = paddr_read(addr + i, 1);
-    printf("%02x", data);
+    printf("%02x ", data);
     buffer[i] = (char)data;
   }
   buffer[i] = '\0';
