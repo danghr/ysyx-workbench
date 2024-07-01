@@ -160,6 +160,166 @@ static bool make_token(char *e) {
   return true;
 }
 
+bool eval(int p, int q, int64_t *ret) {
+  // Function called by program.
+  // Assertion is fine as these conditions should never be reached.
+  // nr_token has already been checked by function `expr'. 
+  assert(q < nr_token);
+  assert(p <= q);
+
+  if (p == q) {
+    // Single token, should only be a number
+    // Convert the string to number
+    char str[32] = tokens[p].str;
+    if (tokens[p].type != TK_NUMBER && tokens[p].type != TK_HEX) {
+      printf("Invalid expression. Token %s is not a number.\n", &str);
+      return false;
+    }
+    char *endptr;
+#ifdef CONFIG_ISA64
+    *ret = (int64_t)strtoll(str, endptr, 0);
+#else
+    *ret = (int64_t)strtol(str, endptr, 0);
+#endif
+    assert(*endptr == '\0');
+    return true;
+  }
+
+  // Check if the expression is surrounded by parentheses
+  int parentheses_cnt = 0;
+  for (int i = p + 1; i < q; i++) {
+    if (tokens[i].type == '(') parentheses_cnt++;
+    if (tokens[i].type == ')') parentheses_cnt--;
+    if (parentheses_cnt < 0) {
+      printf("Invalid expression. Mismatched parentheses.\n");
+      return false;
+    }
+  }
+  if (parentheses_cnt != 0) {
+    printf("Invalid expression. Mismatched parentheses.\n");
+    return false;
+  }
+
+  // Check if the expression is surrounded by parentheses
+  if (tokens[p].type == '(' && tokens[q].type == ')') {
+    return eval(p + 1, q - 1, ret);
+  }
+
+  // Handle unary operators
+  if (q - p == 1) {
+    if (tokens[p].type == '-' && (tokens[q].type == TK_NUMBER || tokens[q].type == TK_HEX)) {
+      // Negative number
+      int64_t num;
+      if (!eval(q, q, &num))
+        return false;
+      *ret = -num;
+      return true;
+    }
+    else if (tokens[p].type == '*') {
+      // Dereference
+      word_t addr;
+      if (!eval(q, q, &addr)) return false;
+      *ret = vaddr_read(addr, 4);
+      return true;
+    }
+  }
+
+  // Find the major operator
+  // i.e., the operator with the least prirority
+  // as it needs to be computed last
+  int major_op = -1;
+  int in_parentheses = 0;
+  for (int i = p; i <= q; i++) {
+    // Skip all expressions in parentheses
+    if (tokens[i].type == '(') in_parentheses++;
+    if (tokens[i].type == ')') in_parentheses--;
+    if (in_parentheses > 0)
+      continue;
+
+    // Skip all numbers
+    if (tokens[i].type == TK_NUMBER || tokens[i].type == TK_HEX)
+      continue;
+
+    /***************************
+     * Find the major operator *
+     ***************************/
+
+    // + and - are the lowest priority operators
+    // We need to record the last one among them
+    if (tokens[i].type == '+' || tokens[i].type == '-') {
+      // Check whether it is a negative number
+      // A negative number should be the first token
+      // or the token after a left parenthesis
+      // or the token after an operator
+      if (i == p ||
+          tokens[i - 1].type == '(' ||
+          tokens[i - 1].type == '+' ||
+          tokens[i - 1].type == '-' ||
+          tokens[i - 1].type == '*' ||
+          tokens[i - 1].type == '/') {
+        // Only negative symbol is allowed
+        if (tokens[i].type != '-') {
+          printf("Invalid expression. Unknown operator %s.\n", tokens[i].str);
+          return false;
+        }
+        continue;
+      }
+      // Now we have a valid + or - (as minus) operator
+      // It automatically overrides the previous operator
+      // no matter it is +, -, * or /;
+      if (major_op < i)
+        major_op = i;
+    } else if (tokens[i].type == '*' || tokens[i].type == '/') {
+      // Check whether it is a dereference
+      // Similar to negative numbers,
+      // a dereference operator should be the first token
+      // or the token after a left parenthesis
+      // or the token after an operator
+      if (i == p ||
+          tokens[i - 1].type == '(' ||
+          tokens[i - 1].type == '+' ||
+          tokens[i - 1].type == '-' ||
+          tokens[i - 1].type == '*' ||
+          tokens[i - 1].type == '/') {
+        // Only negative symbol is allowed
+        if (tokens[i].type != '*') {
+          printf("Invalid expression. Unknown operator %s.\n", tokens[i].str);
+          return false;
+        }
+        continue;
+      }
+      // Now we have a valid * (as multiplication) or / operator
+      // It automatically overrides the previous operator
+      // if it is * or /;
+      if (major_op < i && (tokens[i].type == '*' || tokens[i].type == '/'))
+        major_op = i;
+    } else {
+      printf("Invalid expression. Unknown operator %s.\n", tokens[i].str);
+      return false;
+    }
+  }
+
+  if (major_op == -1) {
+    printf("Invalid expression. No major operator found.\n");
+    return false;
+  }
+
+  // Evaluate the left and right expressions
+  int64_t left, right;
+  if (!eval(p, major_op - 1, &left) ||
+      !eval(major_op + 1, q, &right))
+    return false;
+  
+  // Compute the result
+  switch (tokens[major_op].type) {
+    case '+': *ret = left + right; break;
+    case '-': *ret = left - right; break;
+    case '*': *ret = left * right; break;
+    case '/': *ret = left / right; break;
+    default: assert(0);  // Should not be reached
+  }
+  return true;
+}
 
 word_t expr(char *e, bool *success) {
   if (!make_token(e)) {
