@@ -21,10 +21,12 @@
 #include <regex.h>
 
 enum {
+  // Starting from 256 avoids conflict with ASCII code
   TK_NOTYPE = 256, TK_EQ,
 
   /* TODO: Add more token types */
-
+  TK_NUMBER, // Numbers
+  TK_HEX, // Hexadecimal numbers
 };
 
 static struct rule {
