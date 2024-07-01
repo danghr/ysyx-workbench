@@ -342,9 +342,9 @@ word_t expr(char *e, bool *success) {
   assert(nr_token > 0);
   assert(nr_token < 32);
 
-  word_t result;
+  int64_t result;
   // Use signed integer to support negative numbers
-  if (!eval(0, nr_token - 1, (int64_t *)&result)) {
+  if (!eval(0, nr_token - 1, &result)) {
     *success = false;
     return 0;
   }
