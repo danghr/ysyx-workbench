@@ -280,9 +280,7 @@ bool eval(int p, int q, int64_t *ret) {
       // Check whether it is a negative number
       // A negative number should be the first token
       // or the token after a left parenthesis
-      // or the token after an operator
-      printf("Checking symbol %d ('%s') at location %d\n",
-        tokens[i].type, (char *)(&tokens[i].type), i);
+      // or the token after an operato
       if (i == p ||
           tokens[i - 1].type == '(' ||
           tokens[i - 1].type == '+' ||
@@ -298,7 +296,7 @@ bool eval(int p, int q, int64_t *ret) {
           );
           return false;
         }
-        printf("Negative symbol found at location %d\n", i);
+        Log("Negative symbol found at location %d\n", i);
         // Skip negative symbols
         continue;
       }
@@ -328,6 +326,7 @@ bool eval(int p, int q, int64_t *ret) {
           );
           return false;
         }
+        Log("Dereference symbol found at location %d\n", i);
         // Skip dereference symbols
         continue;
       }
