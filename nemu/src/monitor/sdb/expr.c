@@ -201,6 +201,7 @@ bool eval(int p, int q, int64_t *ret) {
       return false;
     }
     if (i > p && i < q && parentheses_cnt == 0) {
+      // Avoid situations like (...)+(...)
       surrounded_by_parentheses = false;
       break;
     }
@@ -350,7 +351,7 @@ bool eval(int p, int q, int64_t *ret) {
     return false;
   }
 
-  Log("Major operator found at %d, type '%s", major_op, (char *)(&tokens[major_op].type));
+  Log("Major operator found at %d, type '%s'", major_op, (char *)(&tokens[major_op].type));
 
   // Evaluate the left and right expressions
   int64_t left, right;
