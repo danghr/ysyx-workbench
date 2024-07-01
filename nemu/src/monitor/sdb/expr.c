@@ -162,6 +162,7 @@ static bool make_token(char *e) {
 }
 
 bool eval(int p, int q, int64_t *ret) {
+  Log("Evaluating tokens from %d to %d", p, q);
   // Function called by program.
   // Assertion is fine as these conditions should never be reached.
   // nr_token has already been checked by function `expr'. 
