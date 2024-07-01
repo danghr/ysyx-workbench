@@ -325,8 +325,10 @@ bool eval(int p, int q, int64_t *ret) {
       // Now we have a valid * (as multiplication) or / operator
       // It automatically overrides the previous operator
       // if it is * or /;
-      if (major_op < i && (tokens[i].type == '*' || tokens[i].type == '/'))
-        major_op = i;
+      if (
+        major_op == -1 || 
+        (major_op < i && (tokens[major_op].type == '*' || tokens[major_op].type == '/'))
+      ) major_op = i;
     } else {
       printf("Invalid expression. Cannot find major operator.\n");
       return false;
