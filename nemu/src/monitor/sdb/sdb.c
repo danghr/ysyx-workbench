@@ -115,7 +115,7 @@ static int cmd_si(char *args) {
                      10 /* Base, force decimal */
                     );
     if (!(*arg != '\0' && **endptr == '\0')) {  // Refer to `man 3 stroull'
-      printf("Invalid argument '%s' for si\n", arg);
+      printf("si: Invalid argument '%s' for si\n", arg);
       free(endptr);
       return 1;
     }
@@ -135,12 +135,12 @@ static int cmd_info(char *args) {
 
   // Check whether the parameter is leagal
   if (arg == NULL) {
-    printf("info: missing argument\n");
+    printf("info: Missing argument\n");
     return 1;
   }
   char *more_arg = strtok(NULL, " ");
   if (more_arg != NULL) {
-    printf("info: too many arguments\n");
+    printf("info: Too many arguments\n");
     return 1;
   }
 
@@ -154,7 +154,7 @@ static int cmd_info(char *args) {
     printf("Not implemented\n");
     assert(0);
   } else {
-    printf("Unknown argument '%s' for info\n", arg);
+    printf("info: Invalid argument '%s'\n", arg);
     return 1;
   }
   return 0;
@@ -165,18 +165,18 @@ static int cmd_x(char *args) {
   char *arg_len = strtok(NULL, " ");
   char *arg_expr = strtok(NULL, "\0");  // Parse until the end of the string
   if (arg_expr == NULL) {
-    printf("x: missing argument\n");
+    printf("x: Missing argument\n");
     return 1;
   }
   if (strtok(NULL, "\0") != NULL) {
-    printf("x: too many arguments\n");
+    printf("x: Too many arguments\n");
     return 1;
   }
 
   // Parse the length
   int len = atoi(arg_len);
   if (len <= 0) {
-    printf("x: invalid argument '%s'\n", arg_len);
+    printf("x: Invalid argument '%s'\n", arg_len);
     return 1;
   }
 
@@ -191,7 +191,7 @@ static int cmd_x(char *args) {
 
   // Allocate a buffer for the scanned value
   uint8_t *buffer = malloc(sizeof(char) * len);
-  
+
   // Read the value from the memory byte by byte
   // Note that the memory is little-endian
   // so we place the bytes reversely

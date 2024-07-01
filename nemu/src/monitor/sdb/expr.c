@@ -14,6 +14,8 @@
 ***************************************************************************************/
 
 #include <isa.h>
+#include <common.h>
+#include <memory/paddr.h>
 
 /* We use the POSIX regex functions to process regular expressions.
  * Type 'man regex' for more information about POSIX regex functions.
@@ -21,10 +23,12 @@
 #include <regex.h>
 
 enum {
+  // Starting from 256 avoids conflict with ASCII code
   TK_NOTYPE = 256, TK_EQ,
 
   /* TODO: Add more token types */
-
+  TK_NUMBER, // Numbers
+  TK_HEX, // Hexadecimal numbers
 };
 
 static struct rule {
@@ -38,6 +42,13 @@ static struct rule {
 
   {" +", TK_NOTYPE},    // spaces
   {"\\+", '+'},         // plus
+  {"\\-", '-'},         // minus / negative number
+  {"\\*", '*'},         // multiply / pointer dereference
+  {"\\/", '/'},         // divide
+  {"\\(", '('},         // left parenthesis
+  {"\\)", ')'},         // right parenthesis
+  {"0x[0-9a-fA-F]+", TK_HEX}, // hexadecimal numbers
+  {"[0-9]+", TK_NUMBER}, // numbers
   {"==", TK_EQ},        // equal
 };
 
@@ -75,6 +86,11 @@ static bool make_token(char *e) {
   int i;
   regmatch_t pmatch;
 
+  for (int i = 0; i < 32; i++) {
+    tokens[i].type = -1;
+    tokens[i].str[0] = '\0';
+  }
+
   nr_token = 0;
 
   while (e[position] != '\0') {
@@ -94,8 +110,42 @@ static bool make_token(char *e) {
          * of tokens, some extra actions should be performed.
          */
 
+        if(nr_token >= 32) {  // The `tokens' array only supports 32 elements
+          printf("Too many tokens\n");
+          nr_token = 0;
+          return false;
+        }
+
         switch (rules[i].token_type) {
-          default: TODO();
+          case TK_NOTYPE: break;  // Do nothing, drop spaces
+
+          case '+':
+          case '-':
+          case '*':
+          case '/':
+          case '(':
+          case ')':
+            assert(substr_len == 1);  // Should only matche one character
+            tokens[nr_token].type = rules[i].token_type;
+            nr_token++;
+            break;
+          
+          case TK_HEX:
+          case TK_NUMBER:
+            // The length of the number should be less than the buffer
+            assert(substr_len < 32);
+            tokens[nr_token].type = rules[i].token_type;
+
+            // Copy the number string to the token and record the string
+            // for further conversion
+            strncpy(tokens[nr_token].str, substr_start, substr_len);
+            // Note that strncpy does not automatically add null character
+            // at the end of the string, so we need to manually do that
+            tokens[nr_token].str[substr_len] = '\0';
+            
+            nr_token++;
+            break;
+          default: assert(0);   // Should not be reached
         }
 
         break;
@@ -111,6 +161,175 @@ static bool make_token(char *e) {
   return true;
 }
 
+bool eval(int p, int q, int64_t *ret) {
+  // Function called by program.
+  // Assertion is fine as these conditions should never be reached.
+  // nr_token has already been checked by function `expr'. 
+  assert(q < nr_token);
+  assert(p <= q);
+
+  if (p == q) {
+    // Single token, should only be a number
+    // Convert the string to number
+    if (tokens[p].type != TK_NUMBER && tokens[p].type != TK_HEX) {
+      printf("Invalid expression. Token %s is not a number.\n", tokens[p].str);
+      return false;
+    }
+    char str[32];
+    strcpy(str, tokens[p].str);
+    char *endptr;
+#ifdef CONFIG_ISA64
+    *ret = (int64_t)strtoll(str, &endptr, 0);
+#else
+    *ret = (int64_t)strtol(str, &endptr, 0);
+#endif
+    assert(*endptr == '\0');
+    return true;
+  }
+
+  // Check if the expression is surrounded by parentheses
+  int parentheses_cnt = 0;
+  for (int i = p + 1; i < q; i++) {
+    if (tokens[i].type == '(') parentheses_cnt++;
+    if (tokens[i].type == ')') parentheses_cnt--;
+    if (parentheses_cnt < 0) {
+      printf("Invalid expression. Mismatched parentheses.\n");
+      return false;
+    }
+  }
+  if (parentheses_cnt != 0) {
+    printf("Invalid expression. Mismatched parentheses.\n");
+    return false;
+  }
+
+  // Check if the expression is surrounded by parentheses
+  if (tokens[p].type == '(' && tokens[q].type == ')') {
+    return eval(p + 1, q - 1, ret);
+  }
+
+  // Handle unary operators
+  if (q - p == 1) {
+    if (tokens[p].type == '-' && (tokens[q].type == TK_NUMBER || tokens[q].type == TK_HEX)) {
+      // Negative number
+      int64_t num;
+      if (!eval(q, q, &num))
+        return false;
+      *ret = -num;
+      return true;
+    }
+    else if (tokens[p].type == '*') {
+      // Dereference
+      int64_t addr;
+      if (!eval(q, q, &addr)) return false;
+      if (addr < 0) {
+#ifdef CONFIG_ISA64
+        printf("Invalid expression. Accessing negative address %016lx.\n", addr);
+#else
+        printf("Invalid expression. Accessing negative address %08lx.\n", addr);
+#endif
+        return false;
+      }
+      *ret = paddr_read((word_t)addr, 4);
+      return true;
+    }
+  }
+
+  // Find the major operator
+  // i.e., the operator with the least prirority
+  // as it needs to be computed last
+  int major_op = -1;
+  int in_parentheses = 0;
+  for (int i = p; i <= q; i++) {
+    // Skip all expressions in parentheses
+    if (tokens[i].type == '(') in_parentheses++;
+    if (tokens[i].type == ')') in_parentheses--;
+    if (in_parentheses > 0)
+      continue;
+
+    // Skip all numbers
+    if (tokens[i].type == TK_NUMBER || tokens[i].type == TK_HEX)
+      continue;
+
+    /***************************
+     * Find the major operator *
+     ***************************/
+
+    // + and - are the lowest priority operators
+    // We need to record the last one among them
+    if (tokens[i].type == '+' || tokens[i].type == '-') {
+      // Check whether it is a negative number
+      // A negative number should be the first token
+      // or the token after a left parenthesis
+      // or the token after an operator
+      if (i == p ||
+          tokens[i - 1].type == '(' ||
+          tokens[i - 1].type == '+' ||
+          tokens[i - 1].type == '-' ||
+          tokens[i - 1].type == '*' ||
+          tokens[i - 1].type == '/') {
+        // Only negative symbol is allowed
+        if (tokens[i].type != '-') {
+          printf("Invalid expression. Unknown operator %s.\n", tokens[i].str);
+          return false;
+        }
+        continue;
+      }
+      // Now we have a valid + or - (as minus) operator
+      // It automatically overrides the previous operator
+      // no matter it is +, -, * or /;
+      if (major_op < i)
+        major_op = i;
+    } else if (tokens[i].type == '*' || tokens[i].type == '/') {
+      // Check whether it is a dereference
+      // Similar to negative numbers,
+      // a dereference operator should be the first token
+      // or the token after a left parenthesis
+      // or the token after an operator
+      if (i == p ||
+          tokens[i - 1].type == '(' ||
+          tokens[i - 1].type == '+' ||
+          tokens[i - 1].type == '-' ||
+          tokens[i - 1].type == '*' ||
+          tokens[i - 1].type == '/') {
+        // Only negative symbol is allowed
+        if (tokens[i].type != '*') {
+          printf("Invalid expression. Unknown operator %s.\n", tokens[i].str);
+          return false;
+        }
+        continue;
+      }
+      // Now we have a valid * (as multiplication) or / operator
+      // It automatically overrides the previous operator
+      // if it is * or /;
+      if (major_op < i && (tokens[i].type == '*' || tokens[i].type == '/'))
+        major_op = i;
+    } else {
+      printf("Invalid expression. Unknown operator %s.\n", tokens[i].str);
+      return false;
+    }
+  }
+
+  if (major_op == -1) {
+    printf("Invalid expression. No major operator found.\n");
+    return false;
+  }
+
+  // Evaluate the left and right expressions
+  int64_t left, right;
+  if (!eval(p, major_op - 1, &left) ||
+      !eval(major_op + 1, q, &right))
+    return false;
+  
+  // Compute the result
+  switch (tokens[major_op].type) {
+    case '+': *ret = left + right; break;
+    case '-': *ret = left - right; break;
+    case '*': *ret = left * right; break;
+    case '/': *ret = left / right; break;
+    default: assert(0);  // Should not be reached
+  }
+  return true;
+}
 
 word_t expr(char *e, bool *success) {
   if (!make_token(e)) {
@@ -119,7 +338,17 @@ word_t expr(char *e, bool *success) {
   }
 
   /* TODO: Insert codes to evaluate the expression. */
-  TODO();
+  // Now we have nr_tokens tokens
+  assert(nr_token > 0);
+  assert(nr_token < 32);
 
-  return 0;
+  word_t result;
+  // Use signed integer to support negative numbers
+  if (!eval(0, nr_token - 1, (int64_t *)&result)) {
+    *success = false;
+    return 0;
+  }
+
+  *success = true;
+  return result;
 }
