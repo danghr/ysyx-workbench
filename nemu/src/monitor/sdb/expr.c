@@ -323,6 +323,7 @@ bool eval(int p, int q, int64_t *ret) {
     return false;
   
   // Compute the result
+  printf("Computing result: %ld %c %ld\n", left, (char)tokens[major_op].type, right);
   switch (tokens[major_op].type) {
     case '+': *ret = left + right; break;
     case '-': *ret = left - right; break;
