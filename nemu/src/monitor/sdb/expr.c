@@ -183,7 +183,7 @@ bool eval(int p, int q, int64_t *ret) {
     *ret = (int64_t)strtol(tokens[p].str, &endptr, 0);
 #endif
     assert(*endptr == '\0');
-    Log("Returning value %ld\n", *ret);
+    Log("Returning value %ld", *ret);
     return true;
   }
 
@@ -215,7 +215,7 @@ bool eval(int p, int q, int64_t *ret) {
       if (!eval(q, q, &num))
         return false;
       *ret = -num;
-      Log("Returning value %ld\n", *ret);
+      Log("Returning value %ld", *ret);
       return true;
     }
     else if (tokens[p].type == '*') {
@@ -231,7 +231,7 @@ bool eval(int p, int q, int64_t *ret) {
         return false;
       }
       *ret = paddr_read((word_t)addr, 4);
-      Log("Returning value %ld\n", *ret);
+      Log("Returning value %ld", *ret);
       return true;
     }
   }
@@ -330,7 +330,7 @@ bool eval(int p, int q, int64_t *ret) {
     case '/': *ret = left / right; break;
     default: assert(0);  // Should not be reached
   }
-  Log("Returning value %ld\n", *ret);
+  Log("Returning value %ld", *ret);
   return true;
 }
 
