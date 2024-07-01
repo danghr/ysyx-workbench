@@ -187,6 +187,9 @@ bool eval(int p, int q, int64_t *ret) {
     return true;
   }
 
+  /*********************************
+   *** Step 1: Check parentheses ***
+   *********************************/
   // Check if the expression is surrounded by parentheses
   int parentheses_cnt = 0;
   for (int i = p + 1; i <= q; i++) {
@@ -208,33 +211,47 @@ bool eval(int p, int q, int64_t *ret) {
     return eval(p + 1, q - 1, ret);
   }
 
-  // Handle unary operators
-  if (tokens[p].type == '-') {
-    // Negative number
-    int64_t num;
-    if (!eval(p + 1, q, &num))
-      return false;
-    *ret = -num;
-    Log("Returning value of tokens from %d to %d is %ld", p, q, *ret);
-    return true;
-  }
-  else if (tokens[p].type == '*') {
-    // Dereference
-    int64_t addr;
-    if (!eval(p + 1, q, &addr)) return false;
-    if (addr < 0) {
-#ifdef CONFIG_ISA64
-      printf("Invalid expression. Accessing negative address 0x%016llx.\n", addr);
-#else
-      printf("Invalid expression. Accessing negative address 0x%08lx.\n", addr);
-#endif
-      return false;
+  /*************************************
+   *** Step 2: Check unary operators ***
+   *************************************/
+  // Two allowed types here: -x and -(xxx)
+  if (
+    (tokens[p].type == '-' || tokens[p].type == '*') && 
+    (
+      (p + 1 == q && (tokens[q].type == TK_NUMBER || tokens[q].type == TK_HEX)) ||
+      (tokens[p + 1].type == '(' && tokens[q].type == ')')
+    )
+  ) {
+    if (tokens[p].type == '-') {
+      // Negative number
+      int64_t num;
+      if (!eval(p + 1, q, &num))
+        return false;
+      *ret = -num;
+      Log("Returning value of tokens from %d to %d is %ld", p, q, *ret);
+      return true;
     }
-    *ret = paddr_read((word_t)addr, 4);
-    Log("Returning value of tokens from %d to %d is %ld", p, q, *ret);
-    return true;
+    else if (tokens[p].type == '*') {
+      // Dereference
+      int64_t addr;
+      if (!eval(p + 1, q, &addr)) return false;
+      if (addr < 0) {
+#ifdef CONFIG_ISA64
+        printf("Invalid expression. Accessing negative address 0x%016llx.\n", addr);
+#else
+        printf("Invalid expression. Accessing negative address 0x%08lx.\n", addr);
+#endif
+        return false;
+      }
+      *ret = paddr_read((word_t)addr, 4);
+      Log("Returning value of tokens from %d to %d is %ld", p, q, *ret);
+      return true;
+    }
   }
 
+  /************************************
+   *** Step 3: Find major operators ***
+   ************************************/
   // Find the major operator
   // i.e., the operator with the least prirority
   // as it needs to be computed last
@@ -251,10 +268,6 @@ bool eval(int p, int q, int64_t *ret) {
     if (tokens[i].type == TK_NUMBER || tokens[i].type == TK_HEX)
       continue;
 
-    /***************************
-     * Find the major operator *
-     ***************************/
-
     // + and - are the lowest priority operators
     // We need to record the last one among them
     if (tokens[i].type == '+' || tokens[i].type == '-') {
@@ -267,7 +280,8 @@ bool eval(int p, int q, int64_t *ret) {
           tokens[i - 1].type == '+' ||
           tokens[i - 1].type == '-' ||
           tokens[i - 1].type == '*' ||
-          tokens[i - 1].type == '/') {
+          tokens[i - 1].type == '/'
+      ) {
         // Only negative symbol is allowed
         if (tokens[i].type != '-') {
           printf(
@@ -276,6 +290,7 @@ bool eval(int p, int q, int64_t *ret) {
           );
           return false;
         }
+        // Skip negative symbols
         continue;
       }
       // Now we have a valid + or - (as minus) operator
@@ -294,15 +309,17 @@ bool eval(int p, int q, int64_t *ret) {
           tokens[i - 1].type == '+' ||
           tokens[i - 1].type == '-' ||
           tokens[i - 1].type == '*' ||
-          tokens[i - 1].type == '/') {
-        // Only negative symbol is allowed
+          tokens[i - 1].type == '/'
+      ) {
+        // Only dereference symbol is allowed
         if (tokens[i].type != '*') {
           printf(
-            "Invalid expression. Unknown operator type %d ('%s') at location %d. It should be '*' for negative numbers.\n",
+            "Invalid expression. Unknown operator type %d ('%s') at location %d. It should be '*' for dereference symbols.\n",
             tokens[i].type, (char *)(&tokens[i].type), i
           );
           return false;
         }
+        // Skip dereference symbols
         continue;
       }
       // Now we have a valid * (as multiplication) or / operator
@@ -311,9 +328,7 @@ bool eval(int p, int q, int64_t *ret) {
       if (major_op < i && (tokens[i].type == '*' || tokens[i].type == '/'))
         major_op = i;
     } else {
-      printf("Invalid expression. Unknown operator type %d ('%s') at location %d.\n",
-        tokens[i].type, (char *)(&tokens[i].type), i
-      );
+      printf("Invalid expression. Cannot find major operator.\n");
       return false;
     }
   }
@@ -322,6 +337,8 @@ bool eval(int p, int q, int64_t *ret) {
     printf("Invalid expression. No major operator found.\n");
     return false;
   }
+
+  Log("Major operator found at %d, type '%s", major_op, (char *)(&tokens[major_op].type));
 
   // Evaluate the left and right expressions
   int64_t left, right;
