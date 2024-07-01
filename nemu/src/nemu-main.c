@@ -27,7 +27,7 @@ int check_expr(int argc, char *argv[]) {
   bool success = false;
   word_t result = expr("*0x80000000", &success);
   if (success)
-    printf("%u\n", result);
+    printf("%x\n", result);
   else
     printf("Invalid expression\n");
   exit(0);
