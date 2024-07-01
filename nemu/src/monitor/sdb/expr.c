@@ -86,10 +86,10 @@ static bool make_token(char *e) {
   int i;
   regmatch_t pmatch;
 
-  // for (int i = 0; i < 32; i++) {
-  //   tokens[i].type = -1;
-  //   tokens[i].str[0] = '\0';
-  // }
+  for (int i = 0; i < 32; i++) {
+    tokens[i].type = -1;
+    tokens[i].str[0] = '\0';
+  }
 
   nr_token = 0;
 
