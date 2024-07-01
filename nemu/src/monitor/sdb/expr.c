@@ -271,7 +271,10 @@ bool eval(int p, int q, int64_t *ret) {
           tokens[i - 1].type == '/') {
         // Only negative symbol is allowed
         if (tokens[i].type != '-') {
-          printf("Invalid expression. Unknown operator type %d (%s) at location %d.\n", tokens[i].type, (char *)(&tokens[i].type), i);
+          printf(
+            "Invalid expression. Unknown operator type %d ('%s') at location %d. It should be '-' for negative numbers.\n",
+            tokens[i].type, (char *)(&tokens[i].type), i
+          );
           return false;
         }
         continue;
@@ -295,7 +298,10 @@ bool eval(int p, int q, int64_t *ret) {
           tokens[i - 1].type == '/') {
         // Only negative symbol is allowed
         if (tokens[i].type != '*') {
-          printf("Invalid expression. Unknown operator type %d (%s) at location %d.\n", tokens[i].type, (char *)(&tokens[i].type), i);
+          printf(
+            "Invalid expression. Unknown operator type %d ('%s') at location %d. It should be '*' for negative numbers.\n",
+            tokens[i].type, (char *)(&tokens[i].type), i
+          );
           return false;
         }
         continue;
@@ -306,7 +312,9 @@ bool eval(int p, int q, int64_t *ret) {
       if (major_op < i && (tokens[i].type == '*' || tokens[i].type == '/'))
         major_op = i;
     } else {
-      printf("Invalid expression. Unknown operator type %d (%s) at location %d.\n", tokens[i].type, (char *)(&tokens[i].type), i);
+      printf("Invalid expression. Unknown operator type %d ('%s') at location %d.\n",
+        tokens[i].type, (char *)(&tokens[i].type), i
+      );
       return false;
     }
   }
