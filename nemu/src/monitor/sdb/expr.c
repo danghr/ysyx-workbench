@@ -176,13 +176,11 @@ bool eval(int p, int q, int64_t *ret) {
       printf("Invalid expression. Token %s is not a number.\n", tokens[p].str);
       return false;
     }
-    char str[32];
-    strcpy(str, tokens[p].str);
     char *endptr;
 #ifdef CONFIG_ISA64
-    *ret = (int64_t)strtoll(str, &endptr, 0);
+    *ret = (int64_t)strtoll(tokens[p].str, &endptr, 0);
 #else
-    *ret = (int64_t)strtol(str, &endptr, 0);
+    *ret = (int64_t)strtol(tokens[p].str, &endptr, 0);
 #endif
     assert(*endptr == '\0');
     return true;
