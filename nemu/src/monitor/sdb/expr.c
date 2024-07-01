@@ -162,7 +162,6 @@ static bool make_token(char *e) {
 }
 
 bool eval(int p, int q, int64_t *ret) {
-  printf("Processing %d-%d\n", p, q);
   // Function called by program.
   // Assertion is fine as these conditions should never be reached.
   // nr_token has already been checked by function `expr'. 
@@ -314,7 +313,6 @@ bool eval(int p, int q, int64_t *ret) {
     printf("Invalid expression. No major operator found.\n");
     return false;
   }
-  printf("Major op: %d, %c\n", major_op, (char)tokens[major_op].type);
 
   // Evaluate the left and right expressions
   int64_t left, right;
@@ -323,7 +321,6 @@ bool eval(int p, int q, int64_t *ret) {
     return false;
   
   // Compute the result
-  printf("Computing result: %ld %c %ld\n", left, (char)tokens[major_op].type, right);
   switch (tokens[major_op].type) {
     case '+': *ret = left + right; break;
     case '-': *ret = left - right; break;
@@ -351,8 +348,6 @@ word_t expr(char *e, bool *success) {
     *success = false;
     return 0;
   }
-
-  printf("Result: %u\n", result);
 
   *success = true;
   return result;
