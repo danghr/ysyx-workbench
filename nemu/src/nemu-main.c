@@ -41,6 +41,8 @@ int main(int argc, char *argv[]) {
   init_monitor(argc, argv);
 #endif
 
+  check_expr(argc, argv);
+
   /* Start engine. */
   engine_start();
 
