@@ -352,6 +352,8 @@ word_t expr(char *e, bool *success) {
     return 0;
   }
 
+  printf("Result: %u\n", result);
+
   *success = true;
   return result;
 }
