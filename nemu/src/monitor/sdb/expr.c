@@ -183,6 +183,7 @@ bool eval(int p, int q, int64_t *ret) {
     *ret = (int64_t)strtol(tokens[p].str, &endptr, 0);
 #endif
     assert(*endptr == '\0');
+    Log("Value of token %d (%s) is %ld", p, tokens[p].str, *ret);
     return true;
   }
 
