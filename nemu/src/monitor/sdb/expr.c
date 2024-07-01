@@ -192,12 +192,17 @@ bool eval(int p, int q, int64_t *ret) {
    *********************************/
   // Check if the expression is surrounded by parentheses
   int parentheses_cnt = 0;
+  bool surrounded_by_parentheses = true;
   for (int i = p; i <= q; i++) {
     if (tokens[i].type == '(') parentheses_cnt++;
     if (tokens[i].type == ')') parentheses_cnt--;
     if (parentheses_cnt < 0) {
       printf("Invalid expression. Mismatched parentheses, more ')' than '('.\n");
       return false;
+    }
+    if (i > p && i < q && parentheses_cnt == 0) {
+      surrounded_by_parentheses = false;
+      break;
     }
   }
   if (parentheses_cnt != 0) {
@@ -207,7 +212,7 @@ bool eval(int p, int q, int64_t *ret) {
   }
 
   // Check if the expression is surrounded by parentheses
-  if (tokens[p].type == '(' && tokens[q].type == ')') {
+  if (tokens[p].type == '(' && tokens[q].type == ')' && surrounded_by_parentheses) {
     return eval(p + 1, q - 1, ret);
   }
 
