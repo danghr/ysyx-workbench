@@ -189,16 +189,17 @@ bool eval(int p, int q, int64_t *ret) {
 
   // Check if the expression is surrounded by parentheses
   int parentheses_cnt = 0;
-  for (int i = p + 1; i < q; i++) {
+  for (int i = p + 1; i <= q; i++) {
     if (tokens[i].type == '(') parentheses_cnt++;
     if (tokens[i].type == ')') parentheses_cnt--;
     if (parentheses_cnt < 0) {
-      printf("Invalid expression. Mismatched parentheses.\n");
+      printf("Invalid expression. Mismatched parentheses, more ')' than '('.\n");
       return false;
     }
   }
   if (parentheses_cnt != 0) {
-    printf("Invalid expression. Mismatched parentheses.\n");
+    printf("Invalid expression. Mismatched parentheses. %d more '(' than ')'.\n",
+      parentheses_cnt);
     return false;
   }
 
@@ -271,7 +272,10 @@ bool eval(int p, int q, int64_t *ret) {
           tokens[i - 1].type == '/') {
         // Only negative symbol is allowed
         if (tokens[i].type != '-') {
-          printf("Invalid expression. Unknown operator %s.\n", tokens[i].str);
+          printf(
+            "Invalid expression. Unknown operator type %d ('%s') at location %d. It should be '-' for negative numbers.\n",
+            tokens[i].type, (char *)(&tokens[i].type), i
+          );
           return false;
         }
         continue;
@@ -295,7 +299,10 @@ bool eval(int p, int q, int64_t *ret) {
           tokens[i - 1].type == '/') {
         // Only negative symbol is allowed
         if (tokens[i].type != '*') {
-          printf("Invalid expression. Unknown operator %s.\n", tokens[i].str);
+          printf(
+            "Invalid expression. Unknown operator type %d ('%s') at location %d. It should be '*' for negative numbers.\n",
+            tokens[i].type, (char *)(&tokens[i].type), i
+          );
           return false;
         }
         continue;
@@ -306,7 +313,9 @@ bool eval(int p, int q, int64_t *ret) {
       if (major_op < i && (tokens[i].type == '*' || tokens[i].type == '/'))
         major_op = i;
     } else {
-      printf("Invalid expression. Unknown operator %s.\n", tokens[i].str);
+      printf("Invalid expression. Unknown operator type %d ('%s') at location %d.\n",
+        tokens[i].type, (char *)(&tokens[i].type), i
+      );
       return false;
     }
   }
