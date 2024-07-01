@@ -39,6 +39,10 @@ extern word_t expr(char *e, bool *success);
 int main(int argc, char *argv[]) {
   init_monitor(argc, argv);
   bool success = false;
-  printf("%u\n", expr("1+2", &success));
+  word_t result = expr("1+2", &success);
+  if (success)
+    printf("%u\n", result);
+  else
+    printf("Invalid expression\n");
   return 0;
 }
