@@ -261,7 +261,7 @@ bool eval(int p, int q, int64_t *ret) {
     // Skip all expressions in parentheses
     if (tokens[i].type == '(') in_parentheses++;
     if (tokens[i].type == ')') in_parentheses--;
-    if (in_parentheses > 0)
+    if (in_parentheses > 0 || (tokens[i].type == ')' && in_parentheses == 0))
       continue;
 
     // Skip all numbers
@@ -275,7 +275,8 @@ bool eval(int p, int q, int64_t *ret) {
       // A negative number should be the first token
       // or the token after a left parenthesis
       // or the token after an operator
-      printf("Checking symbol %d ('%s') at location %d\n", tokens[i].type, (char *)(&tokens[i].type), i);
+      printf("Checking symbol %d ('%s') at location %d\n",
+        tokens[i].type, (char *)(&tokens[i].type), i);
       if (i == p ||
           tokens[i - 1].type == '(' ||
           tokens[i - 1].type == '+' ||
