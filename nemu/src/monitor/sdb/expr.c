@@ -223,9 +223,9 @@ bool eval(int p, int q, int64_t *ret) {
       if (!eval(q, q, &addr)) return false;
       if (addr < 0) {
 #ifdef CONFIG_ISA64
-        printf("Invalid expression. Accessing negative address %016lx.\n", addr);
+        printf("Invalid expression. Accessing negative address 0x%016llx.\n", addr);
 #else
-        printf("Invalid expression. Accessing negative address %08lx.\n", addr);
+        printf("Invalid expression. Accessing negative address 0x%08lx.\n", addr);
 #endif
         return false;
       }
