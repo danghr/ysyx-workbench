@@ -345,7 +345,7 @@ bool eval(int p, int q, int64_t *ret) {
     return false;
   }
 
-  Log("Major operator found at %d, type '%s", major_op, (char *)(&tokens[major_op].type));
+  Log("Major operator found at %d, type '%s'", major_op, (char *)(&tokens[major_op].type));
 
   // Evaluate the left and right expressions
   int64_t left, right;
