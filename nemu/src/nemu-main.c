@@ -27,7 +27,8 @@ int check_expr(int argc, char *argv[]) {
   bool success = false;
   word_t result = expr("-3+2-10/5", &success);
   if (success)
-    printf("0x%08x\n", result);
+    printf("%d\n", result);
+    // printf("0x%08x\n", result);
   else
     printf("Invalid expression.\n");
   exit(0);
