@@ -15,6 +15,7 @@
 
 #include <isa.h>
 #include <common.h>
+#include <memory/paddr.h>
 
 /* We use the POSIX regex functions to process regular expressions.
  * Type 'man regex' for more information about POSIX regex functions.
@@ -170,16 +171,17 @@ bool eval(int p, int q, int64_t *ret) {
   if (p == q) {
     // Single token, should only be a number
     // Convert the string to number
-    char str[32] = tokens[p].str;
     if (tokens[p].type != TK_NUMBER && tokens[p].type != TK_HEX) {
-      printf("Invalid expression. Token %s is not a number.\n", &str);
+      printf("Invalid expression. Token %s is not a number.\n", tokens[p].str);
       return false;
     }
+    char str[32];
+    strcpy(str, tokens[p].str);
     char *endptr;
 #ifdef CONFIG_ISA64
-    *ret = (int64_t)strtoll(str, endptr, 0);
+    *ret = (int64_t)strtoll(str, &endptr, 0);
 #else
-    *ret = (int64_t)strtol(str, endptr, 0);
+    *ret = (int64_t)strtol(str, &endptr, 0);
 #endif
     assert(*endptr == '\0');
     return true;
@@ -217,9 +219,17 @@ bool eval(int p, int q, int64_t *ret) {
     }
     else if (tokens[p].type == '*') {
       // Dereference
-      word_t addr;
+      int64_t addr;
       if (!eval(q, q, &addr)) return false;
-      *ret = vaddr_read(addr, 4);
+      if (addr < 0) {
+#ifdef CONFIG_ISA64
+        printf("Invalid expression. Accessing negative address %016lx.\n", addr);
+#else
+        printf("Invalid expression. Accessing negative address %08lx.\n", addr);
+#endif
+        return false;
+      }
+      *ret = paddr_read((word_t)addr, 4);
       return true;
     }
   }
@@ -328,7 +338,17 @@ word_t expr(char *e, bool *success) {
   }
 
   /* TODO: Insert codes to evaluate the expression. */
-  TODO();
+  // Now we have nr_tokens tokens
+  assert(nr_token > 0);
+  assert(nr_token < 32);
 
-  return 0;
+  word_t result;
+  // Use signed integer to support negative numbers
+  if (!eval(0, nr_token - 1, (int64_t *)&result)) {
+    *success = false;
+    return 0;
+  }
+
+  *success = true;
+  return result;
 }
