@@ -314,7 +314,7 @@ bool eval(int p, int q, int64_t *ret) {
     printf("Invalid expression. No major operator found.\n");
     return false;
   }
-  printf("Major op: %d, %s\n", major_op, tokens[major_op].str);
+  printf("Major op: %d, %c\n", major_op, (char)tokens[major_op].type);
 
   // Evaluate the left and right expressions
   int64_t left, right;
