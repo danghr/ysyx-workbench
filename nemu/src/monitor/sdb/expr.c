@@ -75,6 +75,11 @@ static bool make_token(char *e) {
   int i;
   regmatch_t pmatch;
 
+  for (int i = 0; i < 32; i++) {
+    tokens[i].type = -1;
+    tokens[i].str[0] = '\0';
+  }
+
   nr_token = 0;
 
   while (e[position] != '\0') {
@@ -94,8 +99,42 @@ static bool make_token(char *e) {
          * of tokens, some extra actions should be performed.
          */
 
+        if(nr_token >= 32) {  // The `tokens' array only supports 32 elements
+          printf("Too many tokens\n");
+          nr_token = 0;
+          return false;
+        }
+
         switch (rules[i].token_type) {
-          default: TODO();
+          case TK_NOTYPE: break;  // Do nothing, drop spaces
+
+          case '+':
+          case '-':
+          case '*':
+          case '/':
+          case '(':
+          case ')':
+            assert(substr_len == 1);  // Should only matche one character
+            tokens[nr_token].type = rules[i].token_type;
+            nr_token++;
+            break;
+          
+          case TK_HEX:
+          case TK_NUMBER:
+            // The length of the number should be less than the buffer
+            assert(substr_len < 32);
+            tokens[nr_token].type = rules[i].token_type;
+
+            // Copy the number string to the token and record the string
+            // for further conversion
+            strncpy(tokens[nr_token].str, substr_start, substr_len);
+            // Note that strncpy does not automatically add null character
+            // at the end of the string, so we need to manually do that
+            tokens[nr_token].str[substr_len] = '\0';
+            
+            nr_token++;
+            break;
+          default: assert(0);   // Should not be reached
         }
 
         break;
