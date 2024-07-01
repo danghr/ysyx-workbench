@@ -20,29 +20,29 @@ void am_init_monitor();
 void engine_start();
 int is_exit_status_bad();
 
-// int main(int argc, char *argv[]) {
-//   /* Initialize the monitor. */
-// #ifdef CONFIG_TARGET_AM
-//   am_init_monitor();
-// #else
-//   init_monitor(argc, argv);
-// #endif
-
-//   /* Start engine. */
-//   engine_start();
-
-//   return is_exit_status_bad();
-// }
-
 extern word_t expr(char *e, bool *success);
 
-int main(int argc, char *argv[]) {
+int check_expr(int argc, char *argv[]) {
   init_monitor(argc, argv);
   bool success = false;
-  word_t result = expr("2+*0x80000000", &success);
+  word_t result = expr("20x80000000", &success);
   if (success)
     printf("%u\n", result);
   else
     printf("Invalid expression\n");
-  return 0;
+  exit(0);
+}
+
+int main(int argc, char *argv[]) {
+  /* Initialize the monitor. */
+#ifdef CONFIG_TARGET_AM
+  am_init_monitor();
+#else
+  init_monitor(argc, argv);
+#endif
+
+  /* Start engine. */
+  engine_start();
+
+  return is_exit_status_bad();
 }
