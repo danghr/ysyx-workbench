@@ -34,10 +34,10 @@ int is_exit_status_bad();
 //   return is_exit_status_bad();
 // }
 
-extern word_t eval(char *e, bool *success);
+extern word_t expr(char *e, bool *success);
 
 int main(int argc, char *argv[]) {
   bool success = false;
-  printf("%ul\n", eval("1+2", &success));
+  printf("%ul\n", expr("1+2", &success));
   return 0;
 }
