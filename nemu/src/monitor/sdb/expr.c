@@ -162,6 +162,7 @@ static bool make_token(char *e) {
 }
 
 bool eval(int p, int q, int64_t *ret) {
+  Log("Evaluating tokens from %d to %d", p, q);
   // Function called by program.
   // Assertion is fine as these conditions should never be reached.
   // nr_token has already been checked by function `expr'. 
@@ -175,15 +176,14 @@ bool eval(int p, int q, int64_t *ret) {
       printf("Invalid expression. Token %s is not a number.\n", tokens[p].str);
       return false;
     }
-    char str[32];
-    strcpy(str, tokens[p].str);
     char *endptr;
 #ifdef CONFIG_ISA64
-    *ret = (int64_t)strtoll(str, &endptr, 0);
+    *ret = (int64_t)strtoll(tokens[p].str, &endptr, 0);
 #else
-    *ret = (int64_t)strtol(str, &endptr, 0);
+    *ret = (int64_t)strtol(tokens[p].str, &endptr, 0);
 #endif
     assert(*endptr == '\0');
+    Log("Returning value of tokens from %d to %d is %ld", p, q, *ret);
     return true;
   }
 
@@ -215,6 +215,7 @@ bool eval(int p, int q, int64_t *ret) {
       if (!eval(q, q, &num))
         return false;
       *ret = -num;
+      Log("Returning value of tokens from %d to %d is %ld", p, q, *ret);
       return true;
     }
     else if (tokens[p].type == '*') {
@@ -230,6 +231,7 @@ bool eval(int p, int q, int64_t *ret) {
         return false;
       }
       *ret = paddr_read((word_t)addr, 4);
+      Log("Returning value of tokens from %d to %d is %ld", p, q, *ret);
       return true;
     }
   }
@@ -328,6 +330,7 @@ bool eval(int p, int q, int64_t *ret) {
     case '/': *ret = left / right; break;
     default: assert(0);  // Should not be reached
   }
+  Log("Value of tokens from %d to %d is %ld", p, q, *ret);
   return true;
 }
 
@@ -350,5 +353,5 @@ word_t expr(char *e, bool *success) {
   }
 
   *success = true;
-  return result;
+  return (word_t)result;
 }
