@@ -38,6 +38,13 @@ static struct rule {
 
   {" +", TK_NOTYPE},    // spaces
   {"\\+", '+'},         // plus
+  {"\\-", '-'},         // minus / negative number
+  {"\\*", '*'},         // multiply / pointer dereference
+  {"\\/", '/'},         // divide
+  {"\\(", '('},         // left parenthesis
+  {"\\)", ')'},         // right parenthesis
+  {"0x[0-9a-fA-F]+", TK_HEX}, // hexadecimal numbers
+  {"[0-9]+", TK_NUMBER}, // numbers
   {"==", TK_EQ},        // equal
 };
 
