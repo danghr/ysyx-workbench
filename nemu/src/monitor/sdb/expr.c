@@ -192,7 +192,7 @@ bool eval(int p, int q, int64_t *ret) {
    *********************************/
   // Check if the expression is surrounded by parentheses
   int parentheses_cnt = 0;
-  for (int i = p + 1; i <= q; i++) {
+  for (int i = p; i <= q; i++) {
     if (tokens[i].type == '(') parentheses_cnt++;
     if (tokens[i].type == ')') parentheses_cnt--;
     if (parentheses_cnt < 0) {
