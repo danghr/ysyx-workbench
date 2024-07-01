@@ -26,11 +26,9 @@ int check_expr(int argc, char *argv[]) {
   init_monitor(argc, argv);
   bool success = false;
   word_t result = expr("5+-(2+3)", &success);
-  if (success)
-    printf("%d\n", result);
-    // printf("0x%08x\n", result);
-  else
-    printf("Invalid expression.\n");
+  printf("%d\n", result);
+  assert(result == 5+(-(2+3)));
+  assert(success);
   exit(0);
 }
 
