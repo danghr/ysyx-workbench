@@ -296,7 +296,7 @@ bool eval(int p, int q, int64_t *ret) {
           );
           return false;
         }
-        Log("Negative symbol found at location %d\n", i);
+        Log("Negative symbol found at location %d", i);
         // Skip negative symbols
         continue;
       }
@@ -326,7 +326,7 @@ bool eval(int p, int q, int64_t *ret) {
           );
           return false;
         }
-        Log("Dereference symbol found at location %d\n", i);
+        Log("Dereference symbol found at location %d", i);
         // Skip dereference symbols
         continue;
       }
