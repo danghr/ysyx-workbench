@@ -187,9 +187,12 @@ bool eval(int p, int q, int64_t *ret) {
     return true;
   }
 
+  /*********************************
+   *** Step 1: Check parentheses ***
+   *********************************/
   // Check if the expression is surrounded by parentheses
   int parentheses_cnt = 0;
-  for (int i = p + 1; i <= q; i++) {
+  for (int i = p; i <= q; i++) {
     if (tokens[i].type == '(') parentheses_cnt++;
     if (tokens[i].type == ')') parentheses_cnt--;
     if (parentheses_cnt < 0) {
@@ -208,12 +211,21 @@ bool eval(int p, int q, int64_t *ret) {
     return eval(p + 1, q - 1, ret);
   }
 
-  // Handle unary operators
-  if (q - p == 1) {
-    if (tokens[p].type == '-' && (tokens[q].type == TK_NUMBER || tokens[q].type == TK_HEX)) {
+  /*************************************
+   *** Step 2: Check unary operators ***
+   *************************************/
+  // Two allowed types here: -x and -(xxx)
+  if (
+    (tokens[p].type == '-' || tokens[p].type == '*') && 
+    (
+      (p + 1 == q && (tokens[q].type == TK_NUMBER || tokens[q].type == TK_HEX)) ||
+      (tokens[p + 1].type == '(' && tokens[q].type == ')')
+    )
+  ) {
+    if (tokens[p].type == '-') {
       // Negative number
       int64_t num;
-      if (!eval(q, q, &num))
+      if (!eval(p + 1, q, &num))
         return false;
       *ret = -num;
       Log("Returning value of tokens from %d to %d is %ld", p, q, *ret);
@@ -222,7 +234,7 @@ bool eval(int p, int q, int64_t *ret) {
     else if (tokens[p].type == '*') {
       // Dereference
       int64_t addr;
-      if (!eval(q, q, &addr)) return false;
+      if (!eval(p + 1, q, &addr)) return false;
       if (addr < 0) {
 #ifdef CONFIG_ISA64
         printf("Invalid expression. Accessing negative address 0x%016llx.\n", addr);
@@ -237,6 +249,9 @@ bool eval(int p, int q, int64_t *ret) {
     }
   }
 
+  /************************************
+   *** Step 3: Find major operators ***
+   ************************************/
   // Find the major operator
   // i.e., the operator with the least prirority
   // as it needs to be computed last
@@ -246,16 +261,12 @@ bool eval(int p, int q, int64_t *ret) {
     // Skip all expressions in parentheses
     if (tokens[i].type == '(') in_parentheses++;
     if (tokens[i].type == ')') in_parentheses--;
-    if (in_parentheses > 0)
+    if (in_parentheses > 0 || (tokens[i].type == ')' && in_parentheses == 0))
       continue;
 
     // Skip all numbers
     if (tokens[i].type == TK_NUMBER || tokens[i].type == TK_HEX)
       continue;
-
-    /***************************
-     * Find the major operator *
-     ***************************/
 
     // + and - are the lowest priority operators
     // We need to record the last one among them
@@ -264,12 +275,15 @@ bool eval(int p, int q, int64_t *ret) {
       // A negative number should be the first token
       // or the token after a left parenthesis
       // or the token after an operator
+      printf("Checking symbol %d ('%s') at location %d\n",
+        tokens[i].type, (char *)(&tokens[i].type), i);
       if (i == p ||
           tokens[i - 1].type == '(' ||
           tokens[i - 1].type == '+' ||
           tokens[i - 1].type == '-' ||
           tokens[i - 1].type == '*' ||
-          tokens[i - 1].type == '/') {
+          tokens[i - 1].type == '/'
+      ) {
         // Only negative symbol is allowed
         if (tokens[i].type != '-') {
           printf(
@@ -278,6 +292,8 @@ bool eval(int p, int q, int64_t *ret) {
           );
           return false;
         }
+        printf("Negative symbol found at location %d\n", i);
+        // Skip negative symbols
         continue;
       }
       // Now we have a valid + or - (as minus) operator
@@ -296,22 +312,26 @@ bool eval(int p, int q, int64_t *ret) {
           tokens[i - 1].type == '+' ||
           tokens[i - 1].type == '-' ||
           tokens[i - 1].type == '*' ||
-          tokens[i - 1].type == '/') {
-        // Only negative symbol is allowed
+          tokens[i - 1].type == '/'
+      ) {
+        // Only dereference symbol is allowed
         if (tokens[i].type != '*') {
           printf(
-            "Invalid expression. Unknown operator type %d ('%s') at location %d. It should be '*' for negative numbers.\n",
+            "Invalid expression. Unknown operator type %d ('%s') at location %d. It should be '*' for dereference symbols.\n",
             tokens[i].type, (char *)(&tokens[i].type), i
           );
           return false;
         }
+        // Skip dereference symbols
         continue;
       }
       // Now we have a valid * (as multiplication) or / operator
       // It automatically overrides the previous operator
       // if it is * or /;
-      if (major_op < i && (tokens[i].type == '*' || tokens[i].type == '/'))
-        major_op = i;
+      if (
+        major_op == -1 || 
+        (major_op < i && (tokens[major_op].type == '*' || tokens[major_op].type == '/'))
+      ) major_op = i;
     } else {
       printf("Invalid expression. Unknown operator type %d ('%s') at location %d.\n",
         tokens[i].type, (char *)(&tokens[i].type), i
@@ -324,6 +344,8 @@ bool eval(int p, int q, int64_t *ret) {
     printf("Invalid expression. No major operator found.\n");
     return false;
   }
+
+  Log("Major operator found at %d, type '%s", major_op, (char *)(&tokens[major_op].type));
 
   // Evaluate the left and right expressions
   int64_t left, right;
