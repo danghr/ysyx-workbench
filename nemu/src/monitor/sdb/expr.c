@@ -353,5 +353,5 @@ word_t expr(char *e, bool *success) {
   }
 
   *success = true;
-  return result;
+  return (word_t)result;
 }
