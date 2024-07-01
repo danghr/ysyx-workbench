@@ -332,7 +332,9 @@ bool eval(int p, int q, int64_t *ret) {
         (major_op < i && (tokens[major_op].type == '*' || tokens[major_op].type == '/'))
       ) major_op = i;
     } else {
-      printf("Invalid expression. Cannot find major operator.\n");
+      printf("Invalid expression. Unknown operator type %d ('%s') at location %d.\n",
+        tokens[i].type, (char *)(&tokens[i].type), i
+      );
       return false;
     }
   }
