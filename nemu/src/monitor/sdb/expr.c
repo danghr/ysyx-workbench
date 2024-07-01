@@ -193,7 +193,7 @@ bool eval(int p, int q, int64_t *ret) {
     if (tokens[i].type == '(') parentheses_cnt++;
     if (tokens[i].type == ')') parentheses_cnt--;
     if (parentheses_cnt < 0) {
-      printf("Invalid expression. Mismatched parentheses.\n");
+      printf("Invalid expression. Mismatched parentheses,more ')' than '(' .\n");
       return false;
     }
   }
