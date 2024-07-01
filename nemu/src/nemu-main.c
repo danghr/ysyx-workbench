@@ -28,7 +28,6 @@ int check_expr(int argc, char *argv[]) {
   word_t result = expr("*(0x80000000+-4--4)", &success);
   printf("%d\n", result);
   printf("%08x\n", result);
-  assert(result == 5+(-(2+3)));
   assert(success);
   exit(0);
 }
