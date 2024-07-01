@@ -198,7 +198,8 @@ bool eval(int p, int q, int64_t *ret) {
     }
   }
   if (parentheses_cnt != 0) {
-    printf("Invalid expression. Mismatched parentheses. %d more '(' than ')'.\n", parentheses_cnt);
+    printf("Invalid expression. Mismatched parentheses. %d more '(' than ')'.\n",
+      parentheses_cnt);
     return false;
   }
 
@@ -208,32 +209,30 @@ bool eval(int p, int q, int64_t *ret) {
   }
 
   // Handle unary operators
-  if (q - p == 1) {
-    if (tokens[p].type == '-' && (tokens[q].type == TK_NUMBER || tokens[q].type == TK_HEX)) {
-      // Negative number
-      int64_t num;
-      if (!eval(q, q, &num))
-        return false;
-      *ret = -num;
-      Log("Returning value of tokens from %d to %d is %ld", p, q, *ret);
-      return true;
-    }
-    else if (tokens[p].type == '*') {
-      // Dereference
-      int64_t addr;
-      if (!eval(q, q, &addr)) return false;
-      if (addr < 0) {
+  if (tokens[p].type == '-') {
+    // Negative number
+    int64_t num;
+    if (!eval(p + 1, q, &num))
+      return false;
+    *ret = -num;
+    Log("Returning value of tokens from %d to %d is %ld", p, q, *ret);
+    return true;
+  }
+  else if (tokens[p].type == '*') {
+    // Dereference
+    int64_t addr;
+    if (!eval(p + 1, q, &addr)) return false;
+    if (addr < 0) {
 #ifdef CONFIG_ISA64
-        printf("Invalid expression. Accessing negative address 0x%016llx.\n", addr);
+      printf("Invalid expression. Accessing negative address 0x%016llx.\n", addr);
 #else
-        printf("Invalid expression. Accessing negative address 0x%08lx.\n", addr);
+      printf("Invalid expression. Accessing negative address 0x%08lx.\n", addr);
 #endif
-        return false;
-      }
-      *ret = paddr_read((word_t)addr, 4);
-      Log("Returning value of tokens from %d to %d is %ld", p, q, *ret);
-      return true;
+      return false;
     }
+    *ret = paddr_read((word_t)addr, 4);
+    Log("Returning value of tokens from %d to %d is %ld", p, q, *ret);
+    return true;
   }
 
   // Find the major operator
