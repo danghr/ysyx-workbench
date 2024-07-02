@@ -32,13 +32,63 @@ static char *code_format =
 "}";
 static pos = 0;
 
+static void put_in_buf(char *string) {
+  strcpy(buf + pos, string);
+  pos += strlen(string);
+}
+
+static void gen_rand_op() {
+  int choose = rand() % 4;
+  switch (choose) {
+  case 0:
+    put_in_buf("+");
+    break;
+  case 1:
+    put_in_buf("-");
+    break;
+  case 2:
+    put_in_buf("*");
+    break;
+  case 3:
+    put_in_buf("/");
+    break;
+  default:
+    break;
+  }
+}
+static void gen_rand_value() {
+  int choose = rand() % 2;
+  char buffer[64];
+  switch (choose) {
+    case 0:
+      sprintf(buffer, "%d", rand());
+      put_in_buf(buffer);
+      break;
+    case 1:
+      sprintf(buffer, "0x%x", rand());
+      put_in_buf(buffer);
+      break;
+    default:
+      break;
+  }
+}
+
 static void gen_rand_expr() {
   int choose = rand() % 3;
   switch (choose) {
   case 0:
-    
+    gen_rand_value();
     break;
-  
+  case 1:
+    put_in_buf("(");
+    gen_rand_expr();
+    put_in_buf(")");
+    break;
+  case 2:
+    gen_rand_expr();
+    gen_rand_op();
+    gen_rand_expr();
+    break;
   default:
     break;
   }
