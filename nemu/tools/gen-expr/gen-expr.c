@@ -30,9 +30,18 @@ static char *code_format =
 "  printf(\"%%u\", result); "
 "  return 0; "
 "}";
+static pos = 0;
 
 static void gen_rand_expr() {
-  buf[0] = '\0';
+  int choose = rand() % 3;
+  switch (choose) {
+  case 0:
+    
+    break;
+  
+  default:
+    break;
+  }
 }
 
 int main(int argc, char *argv[]) {
