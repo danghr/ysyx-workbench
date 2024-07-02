@@ -50,7 +50,7 @@ void check_expr(int argc, char *argv[]) {
 #endif
     char *op = strtok(NULL, "\n");
     bool success = false;
-    printf("Expression: %s\n", op);
+    printf("Expression: \"%s\"\n", op);
 #ifdef CONFIG_ISA64
     printf("Reference value: %lu\n", ref_val);
 #else
