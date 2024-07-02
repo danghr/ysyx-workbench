@@ -25,7 +25,7 @@ extern word_t expr(char *e, bool *success);
 int check_expr(int argc, char *argv[]) {
   init_monitor(argc, argv);
   bool success = false;
-  word_t result = expr("-(\t 1\n+ 2)*(2 + 3)", &success);
+  word_t result = expr("-(\t 1\n+ 2)*(2 + 3)\n", &success);
   printf("%d\n", result);
   printf("0x%08x\n", result);
   assert(success);
