@@ -366,7 +366,7 @@ bool eval(int p, int q, word_t *ret) {
 #endif
         return false;
       }
-      *ret = paddr_read(unary_value, 4);
+      *ret = paddr_read(unary_value, sizeof(word_t));
       return true;
     }
     assert(0);  // Should not be reached
