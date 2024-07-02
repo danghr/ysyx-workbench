@@ -46,5 +46,44 @@ void isa_reg_display() {
 }
 
 word_t isa_reg_str2val(const char *s, bool *success) {
+  // We can accept both `$name` and `name` as register names.
+  // We can accept both `$ra` and `$x1` as register names.
+  // Also, we can accept `$x0`, `$0` and `$zero` for the zero register.
+  char *reg_name = (char *)s;
+  if (s[0] == '$')
+    reg_name++;
+  if (strcmp(reg_name, "pc") == 0) {
+    *success = true;
+    return cpu.pc;
+  }
+  if (reg_name[0] == 'x') {
+    // Directly extract number of the register
+    char *endptr;
+    long long idx = strtol(reg_name + 1, &endptr, 10);
+    if (!(*reg_name != '\0' && *endptr == '\0')) {
+      *success = false;
+      printf("Invalid register name: %s. Register names starting with 'x' can only be a number.\n", s);
+      return 0;
+    }
+    if (idx < 0 || idx >= MUXDEF(CONFIG_RVE, 16, 32)) {
+      *success = false;
+      printf("Invalid register name: %s. Register index out of range.\n", s);
+      return 0;
+    }
+    *success = true;
+    return cpu.gpr[idx];
+  }
+  if (strcmp(reg_name, "zero") == 0 || strcmp(reg_name, "0") == 0) {
+    *success = true;
+    return 0;
+  }
+  for (int i = 0; i < MUXDEF(CONFIG_RVE, 16, 32); i++) {
+    if (strcmp(reg_name, regs[i]) == 0) {
+      *success = true;
+      return cpu.gpr[i];
+    }
+  }
+  *success = false;
+  printf("Invalid register name: %s.\n", s);
   return 0;
 }

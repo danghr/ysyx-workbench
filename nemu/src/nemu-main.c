@@ -17,6 +17,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+// #define CHECK_EXPR
+#define CHECK_EXPR_DEREF_REG
+
 void init_monitor(int, char *[]);
 void am_init_monitor();
 void engine_start();
@@ -24,6 +27,7 @@ int is_exit_status_bad();
 
 extern word_t expr(char *e, bool *success);
 
+#ifdef CHECK_EXPR
 void check_expr(int argc, char *argv[]) {
   char *nemu_home = getenv("NEMU_HOME");
   char expr_file[1024];
@@ -76,8 +80,59 @@ void check_expr(int argc, char *argv[]) {
   printf("All tests for expr passed!\n");
   return;
 }
-
-#define CHECK_EXPR
+#elif defined(CHECK_EXPR_DEREF_REG)
+void check_expr(int argc, char *argv[]) {
+  // Manually write some test cases for expr
+  // to check implementation of memory and 
+  // register dereference
+  bool success = false;
+  word_t result = 0;
+  // Test case 1: Dereference a register
+  printf("Testcase 1\n");
+  result = expr("$0", &success);
+  assert(success);
+  assert(result == 0);
+  printf("Result: %u\n", result);
+  // Test case 2: Dereference a register with offset
+  printf("Testcase 2\n");
+  result = expr("$0+4", &success);
+  assert(success);
+  assert(result == 4);
+  printf("Result: %u\n", result);
+  // Test case 3: Dereference a register with different names
+  printf("Testcase 3\n");
+  result = expr("$zero", &success);
+  assert(success);
+  assert(result == 0);
+  printf("Result: %u\n", result);
+  result = expr("$x0", &success);
+  assert(success);
+  printf("Result: %u\n", result);
+  result = expr("$sp", &success);
+  assert(success);
+  printf("Result: %u\n", result);
+  result = expr("$x2", &success);
+  assert(success);
+  printf("Result: %u\n", result); 
+  // Test case 4: Dereference a memory address
+  printf("Testcase 4\n");
+  result = expr("*0x80000000", &success);
+  assert(success);
+  assert(result == 0x00000297);
+  printf("Result: %u\n", result); 
+  result = expr("*(0x80000000--4*4)", &success);
+  assert(success);
+  assert(result == 0xdeadbeef);
+  printf("Result: %u\n", result); 
+  // Test case 5: Mixed dereference
+  printf("Testcase 5\n");
+  result = expr("*($pc)", &success);
+  assert(success);
+  assert(result == 0x00000297);
+  printf("Result: %u\n", result); 
+  printf("All tests for expr passed!\n");
+}
+#endif
 
 int main(int argc, char *argv[]) {
   /* Initialize the monitor. */
@@ -87,13 +142,13 @@ int main(int argc, char *argv[]) {
   init_monitor(argc, argv);
 #endif
 
-#ifdef CHECK_EXPR
+#if defined(CHECK_EXPR) || defined(CHECK_EXPR_DEREF_REG)
   check_expr(argc, argv);
   return 0;
-#else
+#endif
+
   /* Start engine. */
   engine_start();
 
   return is_exit_status_bad();
-#endif
 }
