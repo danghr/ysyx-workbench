@@ -25,7 +25,7 @@ extern word_t expr(char *e, bool *success);
 int check_expr(int argc, char *argv[]) {
   init_monitor(argc, argv);
   bool success = false;
-  word_t result = expr("-(-3+2)+(-(-2-1))", &success);
+  word_t result = expr("((((((((((-(-3+2)+(-(-2-1))))))))))))", &success);
   printf("%d\n", result);
   printf("0x%08x\n", result);
   assert(success);
