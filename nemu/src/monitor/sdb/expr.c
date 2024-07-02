@@ -80,7 +80,7 @@ typedef struct token {
   char str[32];
 } Token;
 
-#define EXPR_C_MAX_TOKENS 64
+#define EXPR_C_MAX_TOKENS 256
 static Token tokens[EXPR_C_MAX_TOKENS] __attribute__((used)) = {};
 static int nr_token __attribute__((used))  = 0;
 
@@ -167,7 +167,7 @@ static bool make_token(char *e) {
   return true;
 }
 
-bool eval(int p, int q, uint64_t *ret) {
+bool eval(int p, int q, word_t *ret) {
 #ifdef EXPR_DEBUG
   Log("Evaluating tokens from %d to %d", p, q);
 #endif
@@ -186,13 +186,17 @@ bool eval(int p, int q, uint64_t *ret) {
     }
     char *endptr;
 #ifdef CONFIG_ISA64
-    *ret = (uint64_t)strtoll(tokens[p].str, &endptr, 0);
+    *ret = (word_t)strtoll(tokens[p].str, &endptr, 0);
 #else
-    *ret = (uint64_t)strtol(tokens[p].str, &endptr, 0);
+    *ret = (word_t)strtol(tokens[p].str, &endptr, 0);
 #endif
     assert(*endptr == '\0');
 #ifdef EXPR_DEBUG
+  #ifdef CONFIG_ISA64
     Log("Returning value of tokens from %d to %d is %lu", p, q, *ret);
+  #else
+    Log("Returning value of tokens from %d to %d is %u", p, q, *ret);
+  #endif
 #endif
     return true;
   }
@@ -343,7 +347,7 @@ bool eval(int p, int q, uint64_t *ret) {
   // Detect unary operators
   // According to previous code, it should be the first token
   if (major_op == p) {
-    uint64_t unary_value;
+    word_t unary_value;
     if (tokens[major_op].type == '-') {
       // Negative number
       if (!eval(p + 1, q, &unary_value)) return false;
@@ -355,7 +359,11 @@ bool eval(int p, int q, uint64_t *ret) {
       // Dereference the value
       // Check if the address is in the physical memory
       if (!in_pmem(unary_value)) {
-        printf("Invalid expression. Dereferencing address 0x%lx is out of physical memory.\n", unary_value);
+#ifdef CONFIG_ISA64
+        printf("Invalid expression. Dereferencing address 0x%016lx is out of physical memory.\n", unary_value);
+#else
+        printf("Invalid expression. Dereferencing address 0x%08x is out of physical memory.\n", unary_value);
+#endif
         return false;
       }
       *ret = paddr_read(unary_value, 4);
@@ -365,7 +373,7 @@ bool eval(int p, int q, uint64_t *ret) {
   }
 
   // Evaluate the left and right expressions
-  uint64_t left, right;
+  word_t left, right;
   if (!eval(p, major_op - 1, &left) ||
       !eval(major_op + 1, q, &right))
     return false;
@@ -379,7 +387,11 @@ bool eval(int p, int q, uint64_t *ret) {
     default: assert(0);  // Should not be reached
   }
 #ifdef EXPR_DEBUG
-  Log("Value of tokens from %d to %d is %lu", p, q, *ret);
+  #ifdef CONFIG_ISA64
+    Log("Value of tokens from %d to %d is %lu", p, q, *ret);
+  #else
+    Log("Value of tokens from %d to %d is %u", p, q, *ret);
+  #endif
 #endif
   return true;
 }
@@ -395,7 +407,7 @@ word_t expr(char *e, bool *success) {
   assert(nr_token > 0);
   assert(nr_token < EXPR_C_MAX_TOKENS);
 
-  uint64_t result;
+  word_t result;
   // Use signed integer to support negative numbers
   if (!eval(0, nr_token - 1, &result)) {
     *success = false;
