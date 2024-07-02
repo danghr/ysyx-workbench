@@ -52,6 +52,10 @@ word_t isa_reg_str2val(const char *s, bool *success) {
   char *reg_name = (char *)s;
   if (s[0] == '$')
     reg_name++;
+  if (strcmp(reg_name, "pc") == 0) {
+    *success = true;
+    return cpu.pc;
+  }
   if (reg_name[0] == 'x') {
     // Directly extract number of the register
     char **endptr = NULL;
@@ -68,6 +72,10 @@ word_t isa_reg_str2val(const char *s, bool *success) {
     }
     *success = true;
     return cpu.gpr[idx];
+  }
+  if (strcmp(reg_name, "zero") == 0 || strcmp(reg_name, "0") == 0) {
+    *success = true;
+    return 0;
   }
   for (int i = 0; i < MUXDEF(CONFIG_RVE, 16, 32); i++) {
     if (strcmp(reg_name, regs[i]) == 0) {

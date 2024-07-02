@@ -53,7 +53,7 @@ static struct rule {
   {"0x[0-9a-fA-F]+", TK_HEX}, // hexadecimal numbers
   {"[0-9]+", TK_NUMBER}, // numbers
   {"==", TK_EQ},        // equal
-  {"\\$[a-zA-Z]+", TK_REGISTER}, // register
+  {"\\$[a-z0-9]+", TK_REGISTER}, // register
 };
 
 #define NR_REGEX ARRLEN(rules)
