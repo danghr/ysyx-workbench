@@ -50,7 +50,7 @@ void check_expr(int argc, char *argv[]) {
     word_t ref_val = strtoul(ref_val_str, NULL, 0);
     printf("Reference value: %u\n", ref_val);
 #endif
-    char *op = strtok(NULL, "\0");
+    char *op = strtok(NULL, "\n");
     bool success = false;
     printf("Expression: %s\n", op);
     word_t result = expr(op, &success);
