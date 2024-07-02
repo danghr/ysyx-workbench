@@ -78,7 +78,8 @@ typedef struct token {
   char str[32];
 } Token;
 
-static Token tokens[32] __attribute__((used)) = {};
+#define EXPR_C_MAX_TOKENS 64
+static Token tokens[EXPR_C_MAX_TOKENS] __attribute__((used)) = {};
 static int nr_token __attribute__((used))  = 0;
 
 static bool make_token(char *e) {
@@ -86,7 +87,7 @@ static bool make_token(char *e) {
   int i;
   regmatch_t pmatch;
 
-  for (int i = 0; i < 32; i++) {
+  for (int i = 0; i < EXPR_C_MAX_TOKENS; i++) {
     tokens[i].type = -1;
     tokens[i].str[0] = '\0';
   }
@@ -110,7 +111,8 @@ static bool make_token(char *e) {
          * of tokens, some extra actions should be performed.
          */
 
-        if(nr_token >= 32) {  // The `tokens' array only supports 32 elements
+        // The `tokens' array only supports EXPR_C_MAX_TOKENS elements
+        if(nr_token >= EXPR_C_MAX_TOKENS) {
           printf("Too many tokens\n");
           nr_token = 0;
           return false;
@@ -375,7 +377,7 @@ word_t expr(char *e, bool *success) {
   /* TODO: Insert codes to evaluate the expression. */
   // Now we have nr_tokens tokens
   assert(nr_token > 0);
-  assert(nr_token < 32);
+  assert(nr_token < EXPR_C_MAX_TOKENS);
 
   int64_t result;
   // Use signed integer to support negative numbers
