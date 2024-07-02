@@ -266,7 +266,9 @@ bool eval(int p, int q, word_t *ret) {
       continue;
 
     // Skip all numbers
-    if (tokens[i].type == TK_NUMBER || tokens[i].type == TK_HEX)
+    if (tokens[i].type == TK_NUMBER ||
+        tokens[i].type == TK_HEX ||
+        tokens[i].type == TK_REGISTER)
       continue;
 
     // + and - are the lowest priority operators
