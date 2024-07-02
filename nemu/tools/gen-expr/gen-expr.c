@@ -19,9 +19,11 @@
 #include <time.h>
 #include <assert.h>
 #include <string.h>
+#include <unistd.h>
+#include <stdbool.h>
 
 // this should be enough
-static char buf[65536] = {};
+static char buf[65536];
 static char code_buf[65536 + 128] = {}; // a little larger than `buf`
 static char *code_format =
 "#include <stdio.h>\n"
@@ -75,7 +77,7 @@ static void gen_rand_value() {
 }
 
 static void gen_rand_expr() {
-  if (pos > 65536-1024) return ;
+  if (pos > 65536 / 2) return ;
   if (rand() % 2)
     put_in_buf(" ");
   int choose = rand() % 3;
@@ -107,6 +109,7 @@ int main(int argc, char *argv[]) {
   }
   int i;
   for (i = 0; i < loop; i ++) {
+    pos = 0;
     gen_rand_expr();
 
     sprintf(code_buf, code_format, buf);
@@ -116,8 +119,22 @@ int main(int argc, char *argv[]) {
     fputs(code_buf, fp);
     fclose(fp);
 
-    int ret = system("gcc /tmp/.code.c -o /tmp/.expr");
+    int ret = system("gcc /tmp/.code.c -o /tmp/.expr > /tmp/.expr.compile 2>&1");
     if (ret != 0) continue;
+    // Skip this result if compiler output include '-Wdiv-by-zero'
+    FILE *fp_compile = fopen("/tmp/.expr.compile", "r");
+    assert(fp_compile != NULL);
+    char compile_buf[4096];
+    bool skip = false;
+    while (fgets(compile_buf, 4096, fp_compile) != NULL) {
+      if (strstr(compile_buf, "-Wdiv-by-zero") != NULL) {
+        // printf("Skipping due to -Wdiv-by-zero\n");
+        skip = true;
+        break;
+      }
+    }
+    fclose(fp_compile);
+    if (skip) { i--; continue; }
 
     fp = popen("/tmp/.expr", "r");
     assert(fp != NULL);

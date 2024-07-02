@@ -14,6 +14,8 @@
 ***************************************************************************************/
 
 #include <common.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 void init_monitor(int, char *[]);
 void am_init_monitor();
@@ -23,11 +25,25 @@ int is_exit_status_bad();
 extern word_t expr(char *e, bool *success);
 
 void check_expr(int argc, char *argv[]) {
-  bool success = false;
-  word_t result = expr("*(0x80000000 + (-(\t -1\n+ -3)*(1 - -1)))\n", &success);
-  printf("%u\n", result);
-  printf("0x%08x\n", result);
-  assert(success);
+  FILE *fp = fopen("$(NEMU_HOME)/tools/gen-expr/expr.txt", "r");
+  assert(fp != NULL);
+
+  // While loop, read a line from the file, 
+  // extract the first number as the reference number,
+  // then call expr() to evaluate the expression,
+  // and finally compare the value returned by expr() with the reference number.
+  char * line = NULL;
+  size_t len = 0;
+  ssize_t read;
+  while ((read = getline(&line, &len, fp)) != -1) {
+    printf("Retrieved line of length %zu:\n", read);
+    printf("%s", line);
+  }
+  if (line)
+    free(line);
+  
+
+  fclose(fp);
   return;
 }
 
