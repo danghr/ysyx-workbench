@@ -217,46 +217,8 @@ bool eval(int p, int q, int64_t *ret) {
     return eval(p + 1, q - 1, ret);
   }
 
-  /*************************************
-   *** Step 2: Check unary operators ***
-   *************************************/
-  // Two allowed types here: -x and -(xxx)
-  if (
-    (tokens[p].type == '-' || tokens[p].type == '*') && 
-    (
-      (p + 1 == q && (tokens[q].type == TK_NUMBER || tokens[q].type == TK_HEX)) ||
-      (tokens[p + 1].type == '(' && tokens[q].type == ')')
-    )
-  ) {
-    if (tokens[p].type == '-') {
-      // Negative number
-      int64_t num;
-      if (!eval(p + 1, q, &num))
-        return false;
-      *ret = -num;
-      Log("Returning value of tokens from %d to %d is %ld", p, q, *ret);
-      return true;
-    }
-    else if (tokens[p].type == '*') {
-      // Dereference
-      int64_t addr;
-      if (!eval(p + 1, q, &addr)) return false;
-      if (addr < 0) {
-#ifdef CONFIG_ISA64
-        printf("Invalid expression. Accessing negative address 0x%016llx.\n", addr);
-#else
-        printf("Invalid expression. Accessing negative address 0x%08lx.\n", addr);
-#endif
-        return false;
-      }
-      *ret = paddr_read((word_t)addr, 4);
-      Log("Returning value of tokens from %d to %d is %ld", p, q, *ret);
-      return true;
-    }
-  }
-
   /************************************
-   *** Step 3: Find major operators ***
+   *** Step 2: Find major operators ***
    ************************************/
   // Find the major operator
   // i.e., the operator with the least prirority
@@ -280,9 +242,7 @@ bool eval(int p, int q, int64_t *ret) {
       // Check whether it is a negative number
       // A negative number should be the first token
       // or the token after a left parenthesis
-      // or the token after an operator
-      printf("Checking symbol %d ('%s') at location %d\n",
-        tokens[i].type, (char *)(&tokens[i].type), i);
+      // or the token after an operato
       if (i == p ||
           tokens[i - 1].type == '(' ||
           tokens[i - 1].type == '+' ||
@@ -298,8 +258,13 @@ bool eval(int p, int q, int64_t *ret) {
           );
           return false;
         }
-        printf("Negative symbol found at location %d\n", i);
-        // Skip negative symbols
+        Log("Negative symbol found at location %d", i);
+        // Record only when there is no major operator
+        if (major_op == -1) {
+          // Negative numbers should be the first token in this situation
+          assert(i == p);
+          major_op = i;
+        }
         continue;
       }
       // Now we have a valid + or - (as minus) operator
@@ -328,7 +293,13 @@ bool eval(int p, int q, int64_t *ret) {
           );
           return false;
         }
-        // Skip dereference symbols
+        Log("Dereference symbol found at location %d", i);
+        // Record only when there is no major operator
+        if (major_op == -1) {
+          // Dereference symbols should be the first token in this situation
+          assert(i == p);
+          major_op = i;
+        }
         continue;
       }
       // Now we have a valid * (as multiplication) or / operator
@@ -352,6 +323,30 @@ bool eval(int p, int q, int64_t *ret) {
   }
 
   Log("Major operator found at %d, type '%s'", major_op, (char *)(&tokens[major_op].type));
+  
+  // Detect unary operators
+  // According to previous code, it should be the first token
+  if (major_op == p) {
+    int64_t unary_value;
+    if (tokens[major_op].type == '-') {
+      // Negative number
+      if (!eval(p + 1, q, &unary_value)) return false;
+      *ret = -unary_value;
+      return true;
+    } else if (tokens[major_op].type == '*') {
+      // Derefence
+      if (!eval(p + 1, q, &unary_value)) return false;
+      // Dereference the value
+      // Check if the address is in the physical memory
+      if (!in_pmem(unary_value)) {
+        printf("Invalid expression. Dereferencing address 0x%lx is out of physical memory.\n", unary_value);
+        return false;
+      }
+      *ret = paddr_read(unary_value, 4);
+      return true;
+    }
+    assert(0);  // Should not be reached
+  }
 
   // Evaluate the left and right expressions
   int64_t left, right;
