@@ -88,27 +88,27 @@ void check_expr(int argc, char *argv[]) {
   bool success = false;
   word_t result = 0;
   // Test case 1: Dereference a register
-  result = expr("*$0", &success);
+  result = expr("$0", &success);
   assert(success);
   assert(result == 0);
   printf("Result: %u\n", result);
   // Test case 2: Dereference a register with offset
-  result = expr("*$0+4", &success);
+  result = expr("$0+4", &success);
   assert(success);
   assert(result == 4);
   printf("Result: %u\n", result);
   // Test case 3: Dereference a register with different names
-  result = expr("*$zero", &success);
+  result = expr("$zero", &success);
   assert(success);
   assert(result == 0);
   printf("Result: %u\n", result);
-  result = expr("*$x0", &success);
+  result = expr("$x0", &success);
   assert(success);
   printf("Result: %u\n", result);
-  result = expr("*$sp", &success);
+  result = expr("$sp", &success);
   assert(success);
   printf("Result: %u\n", result);
-  result = expr("*$x2", &success);
+  result = expr("$x2", &success);
   assert(success);
   printf("Result: %u\n", result); 
   // Test case 4: Dereference a memory address
