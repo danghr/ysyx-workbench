@@ -73,6 +73,7 @@ void check_expr(int argc, char *argv[]) {
     free(line);
 
   fclose(fp);
+  printf("All tests for expr passed!\n");
   return;
 }
 
