@@ -365,6 +365,10 @@ bool eval(int p, int q, word_t *ret) {
   Log("Major operator found at %d, type '%s'", major_op, (char *)(&tokens[major_op].type));
 #endif
   
+  /************************************
+   *** Step 3: Evaluate expressions ***
+   ************************************/
+
   // Detect unary operators
   // According to previous code, it should be the first token
   if (major_op == p) {
