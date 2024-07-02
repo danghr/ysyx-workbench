@@ -23,7 +23,6 @@ int is_exit_status_bad();
 extern word_t expr(char *e, bool *success);
 
 void check_expr(int argc, char *argv[]) {
-  init_monitor(argc, argv);
   bool success = false;
   word_t result = expr("*(0x80000000 + (-(\t -1\n+ -3)*(1 - -1)))\n", &success);
   printf("%u\n", result);
