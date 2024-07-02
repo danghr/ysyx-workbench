@@ -58,9 +58,9 @@ word_t isa_reg_str2val(const char *s, bool *success) {
   }
   if (reg_name[0] == 'x') {
     // Directly extract number of the register
-    char **endptr = NULL;
-    long long idx = strtol(reg_name + 1, endptr, 10);
-    if (!(*reg_name != '\0' && **endptr == '\0')) {
+    char *endptr;
+    long long idx = strtol(reg_name + 1, &endptr, 10);
+    if (!(*reg_name != '\0' && *endptr == '\0')) {
       *success = false;
       printf("Invalid register name: %s. Register names starting with 'x' can only be a number.\n", s);
       return 0;
