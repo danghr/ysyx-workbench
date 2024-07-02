@@ -32,14 +32,12 @@ void check_expr(int argc, char *argv[]) {
   FILE *fp = fopen(expr_file, "r");
   assert(fp != NULL);
 
-  // While loop, read a line from the file, 
-  // extract the first number as the reference number,
-  // then call expr() to evaluate the expression,
-  // and finally compare the value returned by expr() with the reference number.
   char * line = NULL;
   size_t len = 0;
   ssize_t read;
+  int cnt = 0;
   while ((read = getline(&line, &len, fp)) != -1) {
+    printf("Testing line %d\n", ++cnt);
     printf("Retrieved line of length %zu:\n", read);
     printf("%s", line);
     char *ref_val_str = strtok(line, " ");
