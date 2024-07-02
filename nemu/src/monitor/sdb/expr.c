@@ -80,7 +80,7 @@ typedef struct token {
   char str[32];
 } Token;
 
-#define EXPR_C_MAX_TOKENS 64
+#define EXPR_C_MAX_TOKENS 1024
 static Token tokens[EXPR_C_MAX_TOKENS] __attribute__((used)) = {};
 static int nr_token __attribute__((used))  = 0;
 
@@ -192,7 +192,7 @@ bool eval(int p, int q, uint64_t *ret) {
 #endif
     assert(*endptr == '\0');
 #ifdef EXPR_DEBUG
-    Log("Returning value of tokens from %d to %d is %lu", p, q, *ret);
+    Log("Returning value of tokens from %d to %d is %" PRId64 "", p, q, *ret);
 #endif
     return true;
   }
@@ -379,7 +379,7 @@ bool eval(int p, int q, uint64_t *ret) {
     default: assert(0);  // Should not be reached
   }
 #ifdef EXPR_DEBUG
-  Log("Value of tokens from %d to %d is %lu", p, q, *ret);
+  Log("Value of tokens from %d to %d is %" PRId64 "", p, q, *ret);
 #endif
   return true;
 }

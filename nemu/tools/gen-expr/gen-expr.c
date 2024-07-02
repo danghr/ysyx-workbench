@@ -30,7 +30,8 @@ static char *code_format =
 "  printf(\"%%u\", result); "
 "  return 0; "
 "}";
-static pos = 0;
+
+static int pos = 0;
 
 static void put_in_buf(char *string) {
   strcpy(buf + pos, string);
@@ -41,16 +42,16 @@ static void gen_rand_op() {
   int choose = rand() % 4;
   switch (choose) {
   case 0:
-    put_in_buf("+");
+    put_in_buf(" + ");
     break;
   case 1:
-    put_in_buf("-");
+    put_in_buf(" - ");
     break;
   case 2:
-    put_in_buf("*");
+    put_in_buf(" * ");
     break;
   case 3:
-    put_in_buf("/");
+    put_in_buf(" / ");
     break;
   default:
     break;
@@ -61,11 +62,11 @@ static void gen_rand_value() {
   char buffer[64];
   switch (choose) {
     case 0:
-      sprintf(buffer, "%d", rand());
+      sprintf(buffer, "%d", rand() % (2 << 10));
       put_in_buf(buffer);
       break;
     case 1:
-      sprintf(buffer, "0x%x", rand());
+      sprintf(buffer, "0x%x", rand() % (2 << 10));
       put_in_buf(buffer);
       break;
     default:
@@ -74,6 +75,9 @@ static void gen_rand_value() {
 }
 
 static void gen_rand_expr() {
+  if (pos > 65536-1024) return ;
+  if (rand() % 2)
+    put_in_buf(" ");
   int choose = rand() % 3;
   switch (choose) {
   case 0:
