@@ -163,7 +163,7 @@ static bool make_token(char *e) {
   return true;
 }
 
-bool eval(int p, int q, int64_t *ret) {
+bool eval(int p, int q, uint64_t *ret) {
   Log("Evaluating tokens from %d to %d", p, q);
   // Function called by program.
   // Assertion is fine as these conditions should never be reached.
@@ -180,12 +180,12 @@ bool eval(int p, int q, int64_t *ret) {
     }
     char *endptr;
 #ifdef CONFIG_ISA64
-    *ret = (int64_t)strtoll(tokens[p].str, &endptr, 0);
+    *ret = (uint64_t)strtoll(tokens[p].str, &endptr, 0);
 #else
-    *ret = (int64_t)strtol(tokens[p].str, &endptr, 0);
+    *ret = (uint64_t)strtol(tokens[p].str, &endptr, 0);
 #endif
     assert(*endptr == '\0');
-    Log("Returning value of tokens from %d to %d is %ld", p, q, *ret);
+    Log("Returning value of tokens from %d to %d is %lu", p, q, *ret);
     return true;
   }
 
@@ -329,7 +329,7 @@ bool eval(int p, int q, int64_t *ret) {
   // Detect unary operators
   // According to previous code, it should be the first token
   if (major_op == p) {
-    int64_t unary_value;
+    uint64_t unary_value;
     if (tokens[major_op].type == '-') {
       // Negative number
       if (!eval(p + 1, q, &unary_value)) return false;
@@ -351,7 +351,7 @@ bool eval(int p, int q, int64_t *ret) {
   }
 
   // Evaluate the left and right expressions
-  int64_t left, right;
+  uint64_t left, right;
   if (!eval(p, major_op - 1, &left) ||
       !eval(major_op + 1, q, &right))
     return false;
@@ -364,7 +364,7 @@ bool eval(int p, int q, int64_t *ret) {
     case '/': *ret = left / right; break;
     default: assert(0);  // Should not be reached
   }
-  Log("Value of tokens from %d to %d is %ld", p, q, *ret);
+  Log("Value of tokens from %d to %d is %lu", p, q, *ret);
   return true;
 }
 
@@ -379,7 +379,7 @@ word_t expr(char *e, bool *success) {
   assert(nr_token > 0);
   assert(nr_token < EXPR_C_MAX_TOKENS);
 
-  int64_t result;
+  uint64_t result;
   // Use signed integer to support negative numbers
   if (!eval(0, nr_token - 1, &result)) {
     *success = false;
