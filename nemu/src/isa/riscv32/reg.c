@@ -29,7 +29,7 @@ void isa_reg_display() {
   for (int i = 0;
        i < MUXDEF(CONFIG_RVE, 16, 32) /* See src/riscv32/include/isa_def.h */;
        i++
-      ) {
+  ) {
     /* 64-bit registers for RV64. See include/common.h and RISC-V ISA I Sec. 4.1 */
 #ifdef CONFIG_RV64  
     printf("%-4s  0x%016x  %lld\n", regs[i], cpu.gpr[i], cpu.gpr[i]);
