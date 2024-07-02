@@ -80,7 +80,7 @@ typedef struct token {
   char str[32];
 } Token;
 
-#define EXPR_C_MAX_TOKENS 1024
+#define EXPR_C_MAX_TOKENS 128
 static Token tokens[EXPR_C_MAX_TOKENS] __attribute__((used)) = {};
 static int nr_token __attribute__((used))  = 0;
 

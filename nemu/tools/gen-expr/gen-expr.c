@@ -77,7 +77,8 @@ static void gen_rand_value() {
 }
 
 static void gen_rand_expr() {
-  if (pos > 65536 / 2) return ;
+  // Avoid being too long
+  if (pos > 65536 / 512) return ;
   if (rand() % 2)
     put_in_buf(" ");
   int choose = rand() % 3;
