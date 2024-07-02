@@ -66,10 +66,10 @@ void check_expr(int argc, char *argv[]) {
       printf("Expression invalid!\n");
       assert(0);
     }
+    printf("\n");
   }
   if (line)
     free(line);
-  
 
   fclose(fp);
   return;
