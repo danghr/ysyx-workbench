@@ -25,7 +25,11 @@ int is_exit_status_bad();
 extern word_t expr(char *e, bool *success);
 
 void check_expr(int argc, char *argv[]) {
-  FILE *fp = fopen("$(NEMU_HOME)/tools/gen-expr/expr.txt", "r");
+  char *nemu_home = getenv("NEMU_HOME");
+  char expr_file[1024];
+  strcpy(expr_file, nemu_home);
+  strcat(expr_file, "/tools/gen-expr/expr.txt");
+  FILE *fp = fopen(expr_file, "r");
   assert(fp != NULL);
 
   // While loop, read a line from the file, 
