@@ -17,6 +17,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+// #define CHECK_EXPR
+#define CHECK_EXPR_DEREF_REG
+
 void init_monitor(int, char *[]);
 void am_init_monitor();
 void engine_start();
@@ -24,6 +27,7 @@ int is_exit_status_bad();
 
 extern word_t expr(char *e, bool *success);
 
+#ifdef CHECK_EXPR
 void check_expr(int argc, char *argv[]) {
   char *nemu_home = getenv("NEMU_HOME");
   char expr_file[1024];
@@ -76,8 +80,13 @@ void check_expr(int argc, char *argv[]) {
   printf("All tests for expr passed!\n");
   return;
 }
-
-#define CHECK_EXPR
+#elif defined(CHECK_EXPR_DEREF_REG)
+void check_expr(int argc, char *argv[]) {
+  // Manually write some test cases for expr
+  // to check implementation of memory and 
+  // register dereference
+}
+#endif
 
 int main(int argc, char *argv[]) {
   /* Initialize the monitor. */
@@ -87,13 +96,13 @@ int main(int argc, char *argv[]) {
   init_monitor(argc, argv);
 #endif
 
-#ifdef CHECK_EXPR
+#if defined(CHECK_EXPR) || defined(CHECK_EXPR_DEREF_REG)
   check_expr(argc, argv);
   return 0;
-#else
+#endif
+
   /* Start engine. */
   engine_start();
 
   return is_exit_status_bad();
-#endif
 }

@@ -31,6 +31,7 @@ enum {
   /* TODO: Add more token types */
   TK_NUMBER, // Numbers
   TK_HEX, // Hexadecimal numbers
+  TK_REGISTER, // Registers
 };
 
 static struct rule {
@@ -52,6 +53,7 @@ static struct rule {
   {"0x[0-9a-fA-F]+", TK_HEX}, // hexadecimal numbers
   {"[0-9]+", TK_NUMBER}, // numbers
   {"==", TK_EQ},        // equal
+  {"\\$[a-zA-Z]+", TK_REGISTER}, // register
 };
 
 #define NR_REGEX ARRLEN(rules)
@@ -138,6 +140,7 @@ static bool make_token(char *e) {
           
           case TK_HEX:
           case TK_NUMBER:
+          case TK_REGISTER:
             // The length of the number should be less than the buffer
             assert(substr_len < 32);
             tokens[nr_token].type = rules[i].token_type;
@@ -178,7 +181,23 @@ bool eval(int p, int q, word_t *ret) {
   assert(p <= q);
 
   if (p == q) {
-    // Single token, should only be a number
+    // Single token, should only be a number or a register
+    if (tokens[p].type == TK_REGISTER) {
+      bool success = false;
+      *ret = isa_reg_str2val(tokens[p].str, &success);
+      if (!success) {
+        printf("Invalid expression. Unknown register name %s.\n", tokens[p].str);
+        return false;
+      }
+#ifdef EXPR_DEBUG
+  #ifdef CONFIG_ISA64
+      Log("Derefere register %s whose value is %lu", tokens[p].str, *ret);
+  #else
+      Log("Derefere register %s whose value is %u", tokens[p].str, *ret);
+  #endif
+#endif
+      return true;
+    }
     // Convert the string to number
     if (tokens[p].type != TK_NUMBER && tokens[p].type != TK_HEX) {
       printf("Invalid expression. Token %s is not a number.\n", tokens[p].str);
@@ -366,7 +385,7 @@ bool eval(int p, int q, word_t *ret) {
 #endif
         return false;
       }
-      *ret = paddr_read(unary_value, 4);
+      *ret = paddr_read(unary_value, sizeof(word_t));
       return true;
     }
     assert(0);  // Should not be reached
