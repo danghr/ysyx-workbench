@@ -360,9 +360,9 @@ bool eval(int p, int q, word_t *ret) {
       // Check if the address is in the physical memory
       if (!in_pmem(unary_value)) {
 #ifdef CONFIG_ISA64
-        printf("Invalid expression. Dereferencing address 0x%lx is out of physical memory.\n", unary_value);
+        printf("Invalid expression. Dereferencing address 0x%016lx is out of physical memory.\n", unary_value);
 #else
-        printf("Invalid expression. Dereferencing address 0x%x is out of physical memory.\n", unary_value);
+        printf("Invalid expression. Dereferencing address 0x%08x is out of physical memory.\n", unary_value);
 #endif
         return false;
       }
