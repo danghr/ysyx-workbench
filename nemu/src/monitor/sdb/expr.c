@@ -101,8 +101,10 @@ static bool make_token(char *e) {
         char *substr_start = e + position;
         int substr_len = pmatch.rm_eo;
 
+#ifdef EXPR_DEBUG
         Log("match rules[%d] = \"%s\" at position %d with len %d: %.*s",
             i, rules[i].regex, position, substr_len, substr_len, substr_start);
+#endif
 
         position += substr_len;
 
@@ -164,7 +166,9 @@ static bool make_token(char *e) {
 }
 
 bool eval(int p, int q, uint64_t *ret) {
+#ifdef EXPR_DEBUG
   Log("Evaluating tokens from %d to %d", p, q);
+#endif
   // Function called by program.
   // Assertion is fine as these conditions should never be reached.
   // nr_token has already been checked by function `expr'. 
@@ -185,7 +189,9 @@ bool eval(int p, int q, uint64_t *ret) {
     *ret = (uint64_t)strtol(tokens[p].str, &endptr, 0);
 #endif
     assert(*endptr == '\0');
+#ifdef EXPR_DEBUG
     Log("Returning value of tokens from %d to %d is %lu", p, q, *ret);
+#endif
     return true;
   }
 
@@ -260,7 +266,9 @@ bool eval(int p, int q, uint64_t *ret) {
           );
           return false;
         }
+#ifdef EXPR_DEBUG
         Log("Negative symbol found at location %d", i);
+#endif
         // Record only when there is no major operator
         if (major_op == -1) {
           // Negative numbers should be the first token in this situation
@@ -295,7 +303,9 @@ bool eval(int p, int q, uint64_t *ret) {
           );
           return false;
         }
+#ifdef EXPR_DEBUG
         Log("Dereference symbol found at location %d", i);
+#endif
         // Record only when there is no major operator
         if (major_op == -1) {
           // Dereference symbols should be the first token in this situation
@@ -324,7 +334,9 @@ bool eval(int p, int q, uint64_t *ret) {
     return false;
   }
 
+#ifdef EXPR_DEBUG
   Log("Major operator found at %d, type '%s'", major_op, (char *)(&tokens[major_op].type));
+#endif
   
   // Detect unary operators
   // According to previous code, it should be the first token
@@ -364,7 +376,9 @@ bool eval(int p, int q, uint64_t *ret) {
     case '/': *ret = left / right; break;
     default: assert(0);  // Should not be reached
   }
+#ifdef EXPR_DEBUG
   Log("Value of tokens from %d to %d is %lu", p, q, *ret);
+#endif
   return true;
 }
 
