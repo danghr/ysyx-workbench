@@ -130,6 +130,7 @@ void check_expr(int argc, char *argv[]) {
   assert(success);
   assert(result == 0x00000297);
   printf("Result: %u\n", result); 
+  printf("All tests for expr passed!\n");
 }
 #endif
 
