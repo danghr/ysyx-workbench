@@ -42,6 +42,30 @@ void check_expr(int argc, char *argv[]) {
   while ((read = getline(&line, &len, fp)) != -1) {
     printf("Retrieved line of length %zu:\n", read);
     printf("%s", line);
+    char *ref_val_str = strtok(line, " ");
+#ifdef CONFIG_ISA64
+    word_t ref_val = strtoull(ref_val_str, NULL, 0);
+    printf("Reference value: %lu\n", ref_val);
+#else
+    word_t ref_val = strtoul(ref_val_str, NULL, 0);
+    printf("Reference value: %u\n", ref_val);
+#endif
+    char *op = strtok(NULL, "\0");
+    bool success = false;
+    printf("Expression: %s\n", op);
+    word_t result = expr(op, &success);
+    if (success) {
+      printf("Result: %u\n", result);
+      if (result == ref_val) {
+        printf("Result correct!\n");
+      } else {
+        printf("Result incorrect!\n");
+        assert(0);
+      }
+    } else {
+      printf("Expression invalid!\n");
+      assert(0);
+    }
   }
   if (line)
     free(line);
