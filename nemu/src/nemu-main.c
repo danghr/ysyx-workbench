@@ -45,14 +45,17 @@ void check_expr(int argc, char *argv[]) {
     char *ref_val_str = strtok(line, " ");
 #ifdef CONFIG_ISA64
     word_t ref_val = strtoull(ref_val_str, NULL, 0);
-    printf("Reference value: %lu\n", ref_val);
 #else
     word_t ref_val = strtoul(ref_val_str, NULL, 0);
-    printf("Reference value: %u\n", ref_val);
 #endif
     char *op = strtok(NULL, "\n");
     bool success = false;
     printf("Expression: %s\n", op);
+#ifdef CONFIG_ISA64
+    printf("Reference value: %lu\n", ref_val);
+#else
+    printf("Reference value: %u\n", ref_val);
+#endif
     word_t result = expr(op, &success);
     if (success) {
       printf("Result: %u\n", result);
