@@ -16,8 +16,9 @@
 #include <isa.h>
 #include <common.h>
 #include <memory/paddr.h>
+#include "sdb.h"
 
-#define EXPR_DEBUG
+// #define EXPR_DEBUG
 
 /* We use the POSIX regex functions to process regular expressions.
  * Type 'man regex' for more information about POSIX regex functions.
