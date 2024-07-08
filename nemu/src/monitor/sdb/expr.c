@@ -26,12 +26,24 @@
 
 enum {
   // Starting from 256 avoids conflict with ASCII code
-  TK_NOTYPE = 256, TK_EQ,
+  TK_NOTYPE = 256, TK_EQ, TK_UNEQ,
+  TK_ARITH_AND, TK_ARITH_OR,
 
   /* TODO: Add more token types */
   TK_NUMBER, // Numbers
   TK_HEX, // Hexadecimal numbers
   TK_REGISTER, // Registers
+};
+
+// Defines the priority of operators
+enum {
+  // Smallest priority
+  PRIV_ARITH_OR,
+  PRIV_ARITH_AND,
+  PRIV_EQUNEQ,
+  PRIV_ADDSUB,
+  PRIV_MULDIV,
+  // Largest priority
 };
 
 static struct rule {
@@ -53,6 +65,9 @@ static struct rule {
   {"0x[0-9a-fA-F]+", TK_HEX}, // hexadecimal numbers
   {"[0-9]+", TK_NUMBER}, // numbers
   {"==", TK_EQ},        // equal
+  {"!=", TK_UNEQ},     // unequal
+  {"&&", TK_ARITH_AND}, // arithmetic and
+  {"\\|\\|", TK_ARITH_OR},  // arithmetic or
   {"\\$[a-z0-9]+", TK_REGISTER}, // register
 };
 
@@ -133,7 +148,16 @@ static bool make_token(char *e) {
           case '/':
           case '(':
           case ')':
-            assert(substr_len == 1);  // Should only matche one character
+            assert(substr_len == 1);  // Should only match one character
+            tokens[nr_token].type = rules[i].token_type;
+            nr_token++;
+            break;
+          
+          case TK_EQ:
+          case TK_UNEQ:
+          case TK_ARITH_AND:
+          case TK_ARITH_OR:
+            assert(substr_len == 2);  // Should only match two characters
             tokens[nr_token].type = rules[i].token_type;
             nr_token++;
             break;
@@ -177,8 +201,10 @@ bool eval(int p, int q, word_t *ret) {
   // Function called by program.
   // Assertion is fine as these conditions should never be reached.
   // nr_token has already been checked by function `expr'. 
-  assert(q < nr_token);
-  assert(p <= q);
+  if (q >= nr_token || p > q) {
+    printf("Invalid expression. Token range from %d to %d is illegal (boundary: %d).\n", p, q, nr_token);
+    return false;
+  }
 
   if (p == q) {
     // Single token, should only be a number or a register
@@ -257,6 +283,7 @@ bool eval(int p, int q, word_t *ret) {
   // i.e., the operator with the least prirority
   // as it needs to be computed last
   int major_op = -1;
+  int major_op_priority = INT32_MAX;
   int in_parentheses = 0;
   for (int i = p; i <= q; i++) {
     // Skip all expressions in parentheses
@@ -271,88 +298,66 @@ bool eval(int p, int q, word_t *ret) {
         tokens[i].type == TK_REGISTER)
       continue;
 
-    // + and - are the lowest priority operators
-    // We need to record the last one among them
-    if (tokens[i].type == '+' || tokens[i].type == '-') {
-      // Check whether it is a negative number
-      // A negative number should be the first token
-      // or the token after a left parenthesis
-      // or the token after an operato
-      if (i == p ||
-          tokens[i - 1].type == '(' ||
-          tokens[i - 1].type == '+' ||
-          tokens[i - 1].type == '-' ||
-          tokens[i - 1].type == '*' ||
-          tokens[i - 1].type == '/'
-      ) {
-        // Only negative symbol is allowed
-        if (tokens[i].type != '-') {
-          printf(
-            "Invalid expression. Unknown operator type %d ('%s') at location %d. It should be '-' for negative numbers.\n",
-            tokens[i].type, (char *)(&tokens[i].type), i
-          );
-          return false;
-        }
-#ifdef EXPR_DEBUG
-        Log("Negative symbol found at location %d", i);
-#endif
-        // Record only when there is no major operator
-        if (major_op == -1) {
-          // Negative numbers should be the first token in this situation
-          assert(i == p);
-          major_op = i;
-        }
-        continue;
+    // Check unary operators
+    if (i == p ||
+        tokens[i - 1].type == '(' ||
+        tokens[i - 1].type == '+' ||
+        tokens[i - 1].type == '-' ||
+        tokens[i - 1].type == '*' ||
+        tokens[i - 1].type == '/'
+    ) {
+      // Only negative and dereference symbol is allowed
+      if (tokens[i].type != '-' && tokens[i].type != '*') {
+        printf(
+          "Invalid expression. Unknown unary operator type %d ('%s') at location %d. It should be '-' for negative numbers or '*' for dereference symbols.\n",
+          tokens[i].type, (char *)(&tokens[i].type), i
+        );
+        return false;
       }
-      // Now we have a valid + or - (as minus) operator
-      // It automatically overrides the previous operator
-      // no matter it is +, -, * or /;
-      if (major_op < i)
+#ifdef EXPR_DEBUG
+      Log("Unary operator %c found at location %d", (char)tokens[i].type, i);
+#endif
+      // Record only when there is no major operator
+      if (major_op == -1) {
+        // Unary operators should be the first token in this situation
+        assert(i == p);
         major_op = i;
-    } else if (tokens[i].type == '*' || tokens[i].type == '/') {
-      // Check whether it is a dereference
-      // Similar to negative numbers,
-      // a dereference operator should be the first token
-      // or the token after a left parenthesis
-      // or the token after an operator
-      if (i == p ||
-          tokens[i - 1].type == '(' ||
-          tokens[i - 1].type == '+' ||
-          tokens[i - 1].type == '-' ||
-          tokens[i - 1].type == '*' ||
-          tokens[i - 1].type == '/'
-      ) {
-        // Only dereference symbol is allowed
-        if (tokens[i].type != '*') {
-          printf(
-            "Invalid expression. Unknown operator type %d ('%s') at location %d. It should be '*' for dereference symbols.\n",
-            tokens[i].type, (char *)(&tokens[i].type), i
-          );
-          return false;
-        }
-#ifdef EXPR_DEBUG
-        Log("Dereference symbol found at location %d", i);
-#endif
-        // Record only when there is no major operator
-        if (major_op == -1) {
-          // Dereference symbols should be the first token in this situation
-          assert(i == p);
-          major_op = i;
-        }
-        continue;
+        // We do not modify the priority here for unary operators
+        // If another operator is found, it will override the unary operator
       }
-      // Now we have a valid * (as multiplication) or / operator
-      // It automatically overrides the previous operator
-      // if it is * or /;
-      if (
-        major_op == -1 || 
-        (major_op < i && (tokens[major_op].type == '*' || tokens[major_op].type == '/'))
-      ) major_op = i;
-    } else {
-      printf("Invalid expression. Unknown operator type %d ('%s') at location %d.\n",
-        tokens[i].type, (char *)(&tokens[i].type), i
-      );
-      return false;
+      // Skip the unary operator
+      continue;
+    }
+
+    // Select the major operator as the operator with the least priority
+    int cur_priority;
+    switch (tokens[i].type) {
+      case '+':
+      case '-':
+        cur_priority = PRIV_ADDSUB;
+        break;
+      case '*':
+      case '/':
+        cur_priority = PRIV_MULDIV;
+        break;
+      case TK_EQ:
+      case TK_UNEQ:
+        cur_priority = PRIV_EQUNEQ;
+        break;
+      case TK_ARITH_AND:
+        cur_priority = PRIV_ARITH_AND;
+        break;
+      case TK_ARITH_OR:
+        cur_priority = PRIV_ARITH_OR;
+        break;
+      default: assert(0);  // Should not be reached
+    }
+
+    // Note that the major operator should be the one with the least priority
+    // For operators with the same priority, we select the last one
+    if (cur_priority <= major_op_priority) {
+      major_op = i;
+      major_op_priority = cur_priority;
     }
   }
 
@@ -393,8 +398,10 @@ bool eval(int p, int q, word_t *ret) {
       }
       *ret = paddr_read(unary_value, sizeof(word_t));
       return true;
+    } else {
+      // All other operators cannot be unary
+      assert(0);
     }
-    assert(0);  // Should not be reached
   }
 
   // Evaluate the left and right expressions
@@ -409,6 +416,10 @@ bool eval(int p, int q, word_t *ret) {
     case '-': *ret = left - right; break;
     case '*': *ret = left * right; break;
     case '/': *ret = left / right; break;
+    case TK_EQ: *ret = left == right; break;
+    case TK_UNEQ: *ret = left != right; break;
+    case TK_ARITH_AND: *ret = left && right; break;
+    case TK_ARITH_OR: *ret = left || right; break;
     default: assert(0);  // Should not be reached
   }
 #ifdef EXPR_DEBUG
