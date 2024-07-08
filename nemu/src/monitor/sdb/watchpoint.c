@@ -102,7 +102,7 @@ bool watchpoint_check() {
       assert(0);  // Should not reach as we have checked the expression when adding watchpoint
     }
     if (val != wp->value) {
-      printf("Value of '%s' in watchpoint %d changed from " FMT_WORD " to " FMT_WORD "\n", wp->str, wp->NO, wp->value, val);
+      printf("Watchpoint %d: Value of '%s' changed from " FMT_WORD " to " FMT_WORD "\n", wp->NO, wp->str, wp->value, val);
       wp->value = val;
       ret = true;
     }
