@@ -148,7 +148,16 @@ static bool make_token(char *e) {
           case '/':
           case '(':
           case ')':
-            assert(substr_len == 1);  // Should only matche one character
+            assert(substr_len == 1);  // Should only match one character
+            tokens[nr_token].type = rules[i].token_type;
+            nr_token++;
+            break;
+          
+          case TK_EQ:
+          case TK_UNEQ:
+          case TK_ARITH_AND:
+          case TK_ARITH_OR:
+            assert(substr_len == 2);  // Should only match two characters
             tokens[nr_token].type = rules[i].token_type;
             nr_token++;
             break;
