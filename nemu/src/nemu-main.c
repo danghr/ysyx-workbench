@@ -17,8 +17,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-// #define CHECK_EXPR
-#define CHECK_EXPR_DEREF_REG
+#define CHECK_EXPR
+// #define CHECK_EXPR_DEREF_REG
 
 void init_monitor(int, char *[]);
 void am_init_monitor();
@@ -85,11 +85,7 @@ void check_expr(int argc, char *argv[]) {
 #endif
     char *op = strtok(NULL, "\n");
     printf("Expression: \"%s\"\n", op);
-#ifdef CONFIG_ISA64
-    printf("Reference value: %lu\n", ref_val);
-#else
-    printf("Reference value: %u\n", ref_val);
-#endif
+    printf("Reference value: " FMT_WORD, ref_val);
     result = expr(op, &success);
     if (success) {
       printf("Result: %u\n", result);
