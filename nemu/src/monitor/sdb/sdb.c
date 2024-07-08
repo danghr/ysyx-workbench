@@ -183,6 +183,10 @@ static int cmd_x(char *args) {
   // Parse the address
   // TODO: Change to value of expressions
   paddr_t addr = strtoull(arg_expr, NULL, 16 /* Base, force hexadecimal */);
+  if (!in_pmem(addr)) {
+    printf("x: Invalid address " FMT_WORD ". It is out of physical memory. \n", addr);
+    return 1;
+  }
   printf("Scanning memory from address " FMT_WORD " for %d bytes\n", addr, len);
 
   // Allocate a buffer for the scanned value
