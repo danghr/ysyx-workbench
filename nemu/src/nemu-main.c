@@ -29,6 +29,39 @@ extern word_t expr(char *e, bool *success);
 
 #ifdef CHECK_EXPR
 void check_expr(int argc, char *argv[]) {
+  bool success = false;
+  word_t result = 0;
+
+  // Manual test cases
+  result = expr("1+2", &success);
+  assert(success);
+  assert(result == 3);
+
+  result = expr("1+2*3", &success);
+  assert(success);
+  assert(result == 7);
+
+  result = expr("1*2+-1", &success);
+  assert(success);
+  assert(result == 1);
+
+  result = expr("1 && 0", &success);
+  assert(success);
+  assert(result == 0);
+
+  result = expr("0 || 1 - 1", &success);
+  assert(success);
+  assert(result == 0);
+
+  result = expr("0 || 1 && 1", &success);
+  assert(success);
+  assert(result == 1);
+
+  result = expr("0 || 1 && 1 || 0", &success);
+  assert(success);
+  assert(result == 1);
+
+  // Random test cases
   char *nemu_home = getenv("NEMU_HOME");
   char expr_file[1024];
   strcpy(expr_file, nemu_home);
@@ -51,14 +84,13 @@ void check_expr(int argc, char *argv[]) {
     word_t ref_val = strtoul(ref_val_str, NULL, 0);
 #endif
     char *op = strtok(NULL, "\n");
-    bool success = false;
     printf("Expression: \"%s\"\n", op);
 #ifdef CONFIG_ISA64
     printf("Reference value: %lu\n", ref_val);
 #else
     printf("Reference value: %u\n", ref_val);
 #endif
-    word_t result = expr(op, &success);
+    result = expr(op, &success);
     if (success) {
       printf("Result: %u\n", result);
       if (result == ref_val) {
