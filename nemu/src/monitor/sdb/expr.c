@@ -233,11 +233,7 @@ bool eval(int p, int q, word_t *ret) {
 #endif
     assert(*endptr == '\0');
 #ifdef EXPR_DEBUG
-  #ifdef CONFIG_ISA64
-    Log("Returning value of tokens from %d to %d is %lu", p, q, *ret);
-  #else
-    Log("Returning value of tokens from %d to %d is %u", p, q, *ret);
-  #endif
+    Log("Returning value of tokens from %d to %d is " FMT_WORD, p, q, *ret);
 #endif
     return true;
   }
