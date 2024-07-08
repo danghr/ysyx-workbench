@@ -183,11 +183,7 @@ static int cmd_x(char *args) {
   // Parse the address
   // TODO: Change to value of expressions
   paddr_t addr = strtoull(arg_expr, NULL, 16 /* Base, force hexadecimal */);
-#ifdef CONFIG_ISA64
-  printf("0x%016x    ", addr);
-#else
-  printf("0x%08x    ", addr);
-#endif
+  printf("Scanning memory from address " FMT_WORD " for %d bytes\n", addr, len);
 
   // Allocate a buffer for the scanned value
   uint8_t *buffer = malloc(sizeof(char) * len);

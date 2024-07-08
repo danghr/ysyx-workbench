@@ -18,7 +18,7 @@
 #include <stdlib.h>
 
 // #define CHECK_EXPR
-#define CHECK_EXPR_DEREF_REG
+// #define CHECK_EXPR_DEREF_REG
 
 void init_monitor(int, char *[]);
 void am_init_monitor();
