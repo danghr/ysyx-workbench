@@ -47,7 +47,7 @@ static void put_in_buf_for_output(char *string) {
 }
 
 static void gen_rand_op() {
-  int choose = rand() % 4;
+  int choose = rand() % 8;
   switch (choose) {
   case 0:
     put_in_buf(" + ");
@@ -65,6 +65,22 @@ static void gen_rand_op() {
     put_in_buf(" / ");
     put_in_buf_for_output(" / ");
     break;
+  case 4:
+    put_in_buf(" && ");
+    put_in_buf_for_output(" && ");
+    break;
+  case 5:
+    put_in_buf(" || ");
+    put_in_buf_for_output(" || ");
+    break;
+  case 6:
+    put_in_buf(" == ");
+    put_in_buf_for_output(" == ");
+    break;
+  case 7:
+    put_in_buf(" != ");
+    put_in_buf_for_output(" != ");
+    break;
   default:
     break;
   }
@@ -74,6 +90,11 @@ static void gen_rand_value() {
   int choose = rand() % 2;
   char buffer[64];
   uint32_t value = rand() % (2 << 10);
+  if (rand() % 2) {
+    // Negative
+    put_in_buf("-");
+    put_in_buf_for_output("-");
+  }
   switch (choose) {
     case 0:
       sprintf(buffer, "%du", value);
