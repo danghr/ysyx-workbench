@@ -283,7 +283,7 @@ bool eval(int p, int q, word_t *ret) {
   // i.e., the operator with the least prirority
   // as it needs to be computed last
   int major_op = -1;
-  int major_op_priority = -1;
+  int major_op_priority = INT32_MAX;
   int in_parentheses = 0;
   for (int i = p; i <= q; i++) {
     // Skip all expressions in parentheses
