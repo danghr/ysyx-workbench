@@ -26,9 +26,11 @@ typedef struct watchpoint {
 
   /* TODO: Add more members if necessary */
   char str[32];
+  word_t value;
 } WP;
 
 WP* new_wp(const char *expression);
-void free_wp(WP *wp);
+void free_wp(int number);
+void print_wp();
 
 #endif

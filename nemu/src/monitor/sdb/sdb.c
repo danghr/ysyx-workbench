@@ -58,6 +58,7 @@ static int cmd_help(char *args);
 static int cmd_si(char *args);
 static int cmd_info(char *args);
 static int cmd_x(char *args);
+static int cmd_w(char *args);
 
 static struct {
   const char *name;
@@ -72,7 +73,7 @@ static struct {
   { "si", "Continue the execution for N instructions. Format: `si [N]'. N=1 if not specified", cmd_si },
   { "info", "Print the program status. `info r' prints register status, and `info w' prints watchpoint status", cmd_info },
   { "x", "Scan memory. Format: `x N EXPR'. Print 4*N bytes of memory starting from the value of EXPR", cmd_x },
-
+  { "w", "Add a watchpoint. Format: `w EXPR'. The program will stop when the value of EXPR changes", cmd_w },
 };
 
 #define NR_CMD ARRLEN(cmd_table)
@@ -151,8 +152,7 @@ static int cmd_info(char *args) {
   } else if (strcmp(arg, "w") == 0) {
     // Print the watchpoint status
     printf("Watchpoint status\n");
-    printf("Not implemented\n");
-    assert(0);
+    print_wp();
   } else {
     printf("info: Invalid argument '%s'\n", arg);
     return 1;
@@ -208,6 +208,30 @@ static int cmd_x(char *args) {
   printf("\n");
   
   free(buffer);
+  return 0;
+}
+
+static int cmd_w(char *args) {
+  // Extract the first argument
+  char *arg = strtok(NULL, "\0");
+
+  // Check whether the parameter is leagal
+  if (arg == NULL) {
+    printf("w: Missing argument\n");
+    return 1;
+  }
+  if (strtok(NULL, "\0") != NULL) {
+    printf("w: Too many arguments\n");
+    return 1;
+  }
+
+  // Add the watchpoint
+  WP *wp = new_wp(arg);
+  if (wp == NULL) {
+    printf("w: Failed to add watchpoint\n");
+    return 1;
+  }
+  printf("w: Added watchpoint %d: '%s'\n", wp->NO, wp->str);
   return 0;
 }
 
