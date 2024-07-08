@@ -233,7 +233,11 @@ bool eval(int p, int q, word_t *ret) {
 #endif
     assert(*endptr == '\0');
 #ifdef EXPR_DEBUG
-    Log("Returning value of tokens from %d to %d is " FMT_WORD, p, q, *ret);
+  #ifdef CONFIG_ISA64
+    Log("Returning value of tokens from %d to %d is %lu", p, q, *ret);
+  #else
+    Log("Returning value of tokens from %d to %d is %u", p, q, *ret);
+  #endif
 #endif
     return true;
   }
@@ -381,11 +385,7 @@ bool eval(int p, int q, word_t *ret) {
       // Dereference the value
       // Check if the address is in the physical memory
       if (!in_pmem(unary_value)) {
-#ifdef CONFIG_ISA64
-        printf("Invalid expression. Dereferencing address 0x%016lx is out of physical memory.\n", unary_value);
-#else
-        printf("Invalid expression. Dereferencing address 0x%08x is out of physical memory.\n", unary_value);
-#endif
+        printf("Invalid expression. Dereferencing address " FMT_WORD " is out of physical memory.\n", unary_value);
         return false;
       }
       *ret = paddr_read(unary_value, sizeof(word_t));
