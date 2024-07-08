@@ -64,10 +64,10 @@ static struct rule {
   {"\\)", ')'},         // right parenthesis
   {"0x[0-9a-fA-F]+", TK_HEX}, // hexadecimal numbers
   {"[0-9]+", TK_NUMBER}, // numbers
-  {"\\==", TK_EQ},        // equal
-  {"\\!=", TK_UNEQ},     // unequal
-  {"\\&&", TK_ARITH_AND}, // arithmetic and
-  {"\\||", TK_ARITH_OR},  // arithmetic or
+  {"==", TK_EQ},        // equal
+  {"!=", TK_UNEQ},     // unequal
+  {"&&", TK_ARITH_AND}, // arithmetic and
+  {"\\|\\|", TK_ARITH_OR},  // arithmetic or
   {"\\$[a-z0-9]+", TK_REGISTER}, // register
 };
 
