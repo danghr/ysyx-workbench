@@ -216,11 +216,7 @@ bool eval(int p, int q, word_t *ret) {
         return false;
       }
 #ifdef EXPR_DEBUG
-  #ifdef CONFIG_ISA64
-      Log("Derefere register %s whose value is %lu", tokens[p].str, *ret);
-  #else
-      Log("Derefere register %s whose value is %u", tokens[p].str, *ret);
-  #endif
+      Log("Derefere register %s whose value is " FMT_WORD, tokens[p].str, *ret);
 #endif
       return true;
     }
