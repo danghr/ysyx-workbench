@@ -36,14 +36,10 @@ void init_wp_pool() {
 /* TODO: Implement the functionality of watchpoint */
 
 WP* new_wp(const char *expression) {
-  WP *wp = free_;
-  if (wp == NULL) {
+  if (free_ == NULL) {
     printf("No enough watchpoints.\n");
     return NULL;
   }
-  free_ = free_->next;
-  wp->next = head;
-  wp->NO = ++total_wp_count;
   if (strlen(expression) >= 32) {
     printf("Expression '%s' too long.\n", expression);
     return NULL;
@@ -54,6 +50,10 @@ WP* new_wp(const char *expression) {
     printf("Invalid expression '%s'.\n", expression);
     return NULL;
   }
+  WP *wp = free_;
+  free_ = free_->next;
+  wp->next = head;
+  wp->NO = ++total_wp_count;
   strcpy(wp->str, expression);
   wp->value = value;
   printf("Watchpoint %d set. Initial value of '%s' is " FMT_WORD "\n", wp->NO, wp->str, wp->value);
