@@ -14,16 +14,9 @@
 ***************************************************************************************/
 
 #include "sdb.h"
+#include <cpu/watchpoint_check.h>
 
 #define NR_WP 32
-
-typedef struct watchpoint {
-  int NO;
-  struct watchpoint *next;
-
-  /* TODO: Add more members if necessary */
-
-} WP;
 
 static WP wp_pool[NR_WP] = {};
 static WP *head = NULL, *free_ = NULL;
@@ -41,3 +34,57 @@ void init_wp_pool() {
 
 /* TODO: Implement the functionality of watchpoint */
 
+WP* new_wp(const char *expression) {
+  WP *wp = free_;
+  if (wp == NULL) {
+    printf("No enough watchpoints.\n");
+    return NULL;
+  }
+  free_ = free_->next;
+  wp->next = head;
+  if (strlen(expression) >= 32) {
+    printf("Expression '%s' too long.\n", expression);
+    return NULL;
+  }
+  bool success = false;
+  expr((char *)expression, &success);
+  if (!success) {
+    printf("Invalid expression '%s'.\n", expression);
+    return NULL;
+  }
+  strcpy(wp->str, expression);
+  head = wp;
+  return wp;
+}
+
+void free_wp(WP *wp) {
+  WP *p;
+  if (head == wp) {
+    head = wp->next;
+  } else {
+    for (p = head; p != NULL; p = p->next) {
+      if (p->next == wp) {
+        p->next = wp->next;
+        break;
+      }
+    }
+  }
+  wp->next = free_;
+  free_ = wp;
+}
+
+bool watchpoint_check() {
+  for (WP *wp = head; wp != NULL; wp = wp->next) {
+    bool success = true;
+    word_t val = expr(wp->str, &success);
+    if (!success) {
+      printf("Invalid expression '%s'.\n", wp->str);
+      assert(0);  // Should not reach as we have checked the expression when adding watchpoint
+    }
+    if (val) {
+      printf("Hit watchpoint %d: '%s' = " FMT_WORD "\n", wp->NO, wp->str, val);
+      return true;
+    }
+  }
+  return false;
+}

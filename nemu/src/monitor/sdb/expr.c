@@ -16,6 +16,7 @@
 #include <isa.h>
 #include <common.h>
 #include <memory/paddr.h>
+#include "sdb.h"
 
 #define EXPR_DEBUG
 
