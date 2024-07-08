@@ -162,6 +162,10 @@ void check_expr(int argc, char *argv[]) {
   assert(success);
   assert(result == 0x00000297);
   printf("Result: %u\n", result); 
+  // Test case 6: Invalid dereference
+  printf("Testcase 6\n");
+  result = expr("*($0)", &success);
+  assert(!success);
   printf("All tests for expr passed!\n");
 }
 #endif
