@@ -157,12 +157,20 @@ static int cmd_info(char *args) {
     // Print the register status
     printf("Register status\n");
     isa_reg_display();
-  } else if (strcmp(arg, "w") == 0) {
+  } 
+#ifdef CONFIG_WATCHPOINT
+  else if (strcmp(arg, "w") == 0) {
     // Print the watchpoint status
     printf("Watchpoint status\n");
     print_wp();
-  } else {
+  }
+#endif
+  else {
     printf("info: Invalid argument '%s'\n", arg);
+#ifndef CONFIG_WATCHPOINT
+    if (strcmp(arg, "w") == 0)
+      printf("Watchpoint not enabled. Recompile NEMU with config `watchpoint' enabled in menuconfig if you need.\n");
+#endif
     return 1;
   }
   return 0;
