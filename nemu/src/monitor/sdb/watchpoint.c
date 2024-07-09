@@ -66,6 +66,7 @@ WP* new_wp(const char *expression) {
   return wp;
 #else
   printf("Watchpoint not enabled. Recompile NEMU with config `watchpoint' enabled in menuconfig.\n");
+  assert(0);  // This function should not be called by design
   return NULL;
 #endif
 }
@@ -102,6 +103,7 @@ void free_wp(int number) {
   free_ = wp;
 #else
   printf("Watchpoint not enabled. Recompile NEMU with config `watchpoint' enabled in menuconfig.\n");
+  assert(0);  // This function should not be called by design
 #endif
 }
 
@@ -124,6 +126,7 @@ bool watchpoint_check() {
   return ret;
 #else
   printf("Watchpoint not enabled. Recompile NEMU with config `watchpoint' enabled in menuconfig.\n");
+  assert(0);  // This function should not be called by design
   return false;
 #endif
 }
@@ -136,5 +139,6 @@ void print_wp() {
   }
 #else
   printf("Watchpoint not enabled. Recompile NEMU with config `watchpoint' enabled in menuconfig.\n");
+  assert(0);  // This function should not be called by design
 #endif
 }
