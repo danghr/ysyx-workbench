@@ -313,7 +313,7 @@ void sdb_mainloop() {
     if (i == NR_CMD) {
       printf("Unknown command '%s'\n", cmd);
 #ifndef CONFIG_WATCHPOINT
-      printf("Watchpoint not enabled. Recompile NEMU with config `watchpoint' enabled in menuconfig.\n");
+      printf("Watchpoint not enabled. Recompile NEMU with config `watchpoint' enabled in menuconfig if you need.\n");
 #endif
     }
   }
