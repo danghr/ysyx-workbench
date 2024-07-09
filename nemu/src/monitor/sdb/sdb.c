@@ -58,8 +58,10 @@ static int cmd_help(char *args);
 static int cmd_si(char *args);
 static int cmd_info(char *args);
 static int cmd_x(char *args);
+#ifdef CONFIG_WATCHPOINT
 static int cmd_w(char *args);
 static int cmd_d(char *args);
+#endif
 
 static struct {
   const char *name;
@@ -74,8 +76,10 @@ static struct {
   { "si", "Continue the execution for N instructions. Format: `si [N]'. N=1 if not specified", cmd_si },
   { "info", "Print the program status. `info r' prints register status, and `info w' prints watchpoint status", cmd_info },
   { "x", "Scan memory. Format: `x N EXPR'. Print 4*N bytes of memory starting from the value of EXPR", cmd_x },
+#ifdef CONFIG_WATCHPOINT
   { "w", "Add a watchpoint. Format: `w EXPR'. The program will stop when the value of EXPR changes", cmd_w },
   { "d", "Delete a watchpoint. Format: `d N'. N is the number of the watchpoint to be deleted", cmd_d },
+#endif
 };
 
 #define NR_CMD ARRLEN(cmd_table)
@@ -213,6 +217,7 @@ static int cmd_x(char *args) {
   return 0;
 }
 
+#ifdef CONFIG_WATCHPOINT
 static int cmd_w(char *args) {
   // Extract the first argument
   char *arg = strtok(NULL, "\0");
@@ -263,6 +268,7 @@ static int cmd_d(char *args) {
   free_wp(number);
   return 0;
 }
+#endif
 
 void sdb_set_batch_mode() {
   is_batch_mode = true;

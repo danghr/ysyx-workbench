@@ -41,6 +41,7 @@ static void trace_and_difftest(Decode *_this, vaddr_t dnpc) {
   IFDEF(CONFIG_DIFFTEST, difftest_step(_this->pc, dnpc));
 
   // Check the watchpoints
+#ifdef CONFIG_WATCHPOINT
   if (watchpoint_check()) {
     // We only manually stop NEMU when the state is RUNNING
     // This is to avoid the problem that the state is STOP when the watchpoint is hit
@@ -51,6 +52,7 @@ static void trace_and_difftest(Decode *_this, vaddr_t dnpc) {
       printf("NEMU stopped due to watchpoint hit.\n");
     }
   }
+#endif
 }
 
 static void exec_once(Decode *s, vaddr_t pc) {
