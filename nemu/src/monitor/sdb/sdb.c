@@ -23,7 +23,9 @@
 static int is_batch_mode = false;
 
 void init_regex();
+#ifdef CONFIG_WATCHPOINT
 void init_wp_pool();
+#endif
 
 /* We use the `readline' library to provide more flexibility to read from stdin. */
 static char* rl_gets() {
@@ -317,5 +319,7 @@ void init_sdb() {
   init_regex();
 
   /* Initialize the watchpoint pool. */
+#ifdef CONFIG_WATCHPOINT
   init_wp_pool();
+#endif
 }
