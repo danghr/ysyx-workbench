@@ -122,6 +122,11 @@ config CC_ASAN
   depends on MODE_SYSTEM
   bool "Enable address sanitizer"
   default n
+
+config CC_UNDEF
+  depends on MODE_SYSTEM
+  bool "Enable undefined behavior sanitizer"
+  default n
 endmenu
 
 menu "Testing and Debugging"
