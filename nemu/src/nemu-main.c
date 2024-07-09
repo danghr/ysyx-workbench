@@ -167,6 +167,7 @@ void check_expr(int argc, char *argv[]) {
 #endif
 
 int main(int argc, char *argv[]) {
+  int a = 5 / 0;
   /* Initialize the monitor. */
 #ifdef CONFIG_TARGET_AM
   am_init_monitor();
