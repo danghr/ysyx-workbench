@@ -23,7 +23,9 @@
 static int is_batch_mode = false;
 
 void init_regex();
+#ifdef CONFIG_WATCHPOINT
 void init_wp_pool();
+#endif
 
 /* We use the `readline' library to provide more flexibility to read from stdin. */
 static char* rl_gets() {
@@ -58,8 +60,10 @@ static int cmd_help(char *args);
 static int cmd_si(char *args);
 static int cmd_info(char *args);
 static int cmd_x(char *args);
+#ifdef CONFIG_WATCHPOINT
 static int cmd_w(char *args);
 static int cmd_d(char *args);
+#endif
 
 static struct {
   const char *name;
@@ -74,8 +78,10 @@ static struct {
   { "si", "Continue the execution for N instructions. Format: `si [N]'. N=1 if not specified", cmd_si },
   { "info", "Print the program status. `info r' prints register status, and `info w' prints watchpoint status", cmd_info },
   { "x", "Scan memory. Format: `x N EXPR'. Print 4*N bytes of memory starting from the value of EXPR", cmd_x },
+#ifdef CONFIG_WATCHPOINT
   { "w", "Add a watchpoint. Format: `w EXPR'. The program will stop when the value of EXPR changes", cmd_w },
   { "d", "Delete a watchpoint. Format: `d N'. N is the number of the watchpoint to be deleted", cmd_d },
+#endif
 };
 
 #define NR_CMD ARRLEN(cmd_table)
@@ -151,12 +157,20 @@ static int cmd_info(char *args) {
     // Print the register status
     printf("Register status\n");
     isa_reg_display();
-  } else if (strcmp(arg, "w") == 0) {
+  } 
+#ifdef CONFIG_WATCHPOINT
+  else if (strcmp(arg, "w") == 0) {
     // Print the watchpoint status
     printf("Watchpoint status\n");
     print_wp();
-  } else {
+  }
+#endif
+  else {
     printf("info: Invalid argument '%s'\n", arg);
+#ifndef CONFIG_WATCHPOINT
+    if (strcmp(arg, "w") == 0)
+      printf("Watchpoint not enabled. Recompile NEMU with config `watchpoint' enabled in menuconfig if you need.\n");
+#endif
     return 1;
   }
   return 0;
@@ -213,6 +227,7 @@ static int cmd_x(char *args) {
   return 0;
 }
 
+#ifdef CONFIG_WATCHPOINT
 static int cmd_w(char *args) {
   // Extract the first argument
   char *arg = strtok(NULL, "\0");
@@ -263,6 +278,7 @@ static int cmd_d(char *args) {
   free_wp(number);
   return 0;
 }
+#endif
 
 void sdb_set_batch_mode() {
   is_batch_mode = true;
@@ -302,7 +318,13 @@ void sdb_mainloop() {
       }
     }
 
-    if (i == NR_CMD) { printf("Unknown command '%s'\n", cmd); }
+    if (i == NR_CMD) {
+      printf("Unknown command '%s'\n", cmd);
+#ifndef CONFIG_WATCHPOINT
+      if (strcmp(cmd, "w") == 0 || strcmp(cmd, "d") == 0)
+        printf("Watchpoint not enabled. Recompile NEMU with config `watchpoint' enabled in menuconfig if you need.\n");
+#endif
+    }
   }
 }
 
@@ -311,5 +333,7 @@ void init_sdb() {
   init_regex();
 
   /* Initialize the watchpoint pool. */
+#ifdef CONFIG_WATCHPOINT
   init_wp_pool();
+#endif
 }

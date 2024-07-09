@@ -18,10 +18,13 @@
 
 #define NR_WP 32
 
+#ifdef CONFIG_WATCHPOINT
 static WP wp_pool[NR_WP] = {};
 static WP *head = NULL, *free_ = NULL;
 static int total_wp_count = 0;
+#endif
 
+#ifdef CONFIG_WATCHPOINT
 void init_wp_pool() {
   int i;
   for (i = 0; i < NR_WP; i ++) {
@@ -32,10 +35,12 @@ void init_wp_pool() {
   head = NULL;
   free_ = wp_pool;
 }
+#endif
 
 /* TODO: Implement the functionality of watchpoint */
 
 WP* new_wp(const char *expression) {
+#ifdef CONFIG_WATCHPOINT
   if (free_ == NULL) {
     printf("No enough watchpoints.\n");
     return NULL;
@@ -59,9 +64,15 @@ WP* new_wp(const char *expression) {
   printf("Watchpoint %d set. Initial value of '%s' is " FMT_WORD "\n", wp->NO, wp->str, wp->value);
   head = wp;
   return wp;
+#else
+  printf("Watchpoint not enabled. Recompile NEMU with config `watchpoint' enabled in menuconfig if you need.\n");
+  assert(0);  // This function should not be called by design
+  return NULL;
+#endif
 }
 
 void free_wp(int number) {
+#ifdef CONFIG_WATCHPOINT
   if (number > total_wp_count) {
     printf("Watchpoint %d does not exist.\n", number);
     return;
@@ -87,12 +98,18 @@ void free_wp(int number) {
       }
     }
   }
+  printf("Watchpoint %d ('%s') deleted.\n", number, wp->str);
   wp->NO = 0;
   wp->next = free_;
   free_ = wp;
+#else
+  printf("Watchpoint not enabled. Recompile NEMU with config `watchpoint' enabled in menuconfig if you need.\n");
+  assert(0);  // This function should not be called by design
+#endif
 }
 
 bool watchpoint_check() {
+#ifdef CONFIG_WATCHPOINT
   bool ret = false;
   for (WP *wp = head; wp != NULL; wp = wp->next) {
     bool success = false;
@@ -108,11 +125,21 @@ bool watchpoint_check() {
     }
   }
   return ret;
+#else
+  printf("Watchpoint not enabled. Recompile NEMU with config `watchpoint' enabled in menuconfig if you need.\n");
+  assert(0);  // This function should not be called by design
+  return false;
+#endif
 }
 
 void print_wp() {
+#ifdef CONFIG_WATCHPOINT
   printf("Num   Expression\n");
   for (WP *wp = head; wp != NULL; wp = wp->next) {
     printf("%-5d %s\n", wp->NO, wp->str);
   }
+#else
+  printf("Watchpoint not enabled. Recompile NEMU with config `watchpoint' enabled in menuconfig if you need.\n");
+  assert(0);  // This function should not be called by design
+#endif
 }
