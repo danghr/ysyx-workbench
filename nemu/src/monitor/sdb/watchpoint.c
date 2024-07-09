@@ -98,7 +98,7 @@ void free_wp(int number) {
       }
     }
   }
-  printf("Watchpoint %d (`%s') deleted.\n", number, wp->str);
+  printf("Watchpoint %d ('%s') deleted.\n", number, wp->str);
   wp->NO = 0;
   wp->next = free_;
   free_ = wp;
