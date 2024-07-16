@@ -81,3 +81,5 @@ find . -name "*.[ch]" | xargs sed '/^[\s]*$/d' | wc -l | awk '{ print $1 }'
 ### 5. RTFM
 
 `-Wall`表示使编译器检查一些可能存在潜在问题，但又不属于error的情形，并输出warning。`-Werrors`是使编译器将所有的warning当作error来处理，使编译不通过。个人的体会是开启这两个选项有助于避免许多未定义的行为，强迫程序编写者为这些行为提供明确的定义，从而有助于写出高质量、安全的代码。
+
+Ref: https://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html
