@@ -82,4 +82,8 @@ sta: $(BIN)
 clean:
 	rm -rf $(BUILD_DIR)
 
+count:
+	@echo "Total lines of code:"
+	@find . \( -path './csrc/*' -o -path './vsrc/*' -o -path './constr/*' \) | xargs wc -l | grep total | awk '{print $$1}'
+
 include ../Makefile

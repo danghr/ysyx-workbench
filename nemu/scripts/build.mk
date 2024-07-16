@@ -45,7 +45,7 @@ $(OBJ_DIR)/%.o: %.cc
 
 # Some convenient rules
 
-.PHONY: app clean
+.PHONY: app clean count
 
 app: $(BINARY)
 
@@ -55,3 +55,7 @@ $(BINARY):: $(OBJS) $(ARCHIVES)
 
 clean:
 	-rm -rf $(BUILD_DIR)
+
+count:
+	@echo "Total lines of code:"
+	@find . -name "*.[ch]" | xargs wc -l | grep total | awk -F' ' '{print $1}'
