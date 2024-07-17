@@ -16,7 +16,6 @@
 #include <cpu/cpu.h>
 #include <cpu/decode.h>
 #include <cpu/difftest.h>
-#include <cpu/watchpoint_check.h>
 #include <locale.h>
 
 /* The assembly code of instructions executed is only output to the screen
@@ -39,20 +38,6 @@ static void trace_and_difftest(Decode *_this, vaddr_t dnpc) {
 #endif
   if (g_print_step) { IFDEF(CONFIG_ITRACE, puts(_this->logbuf)); }
   IFDEF(CONFIG_DIFFTEST, difftest_step(_this->pc, dnpc));
-
-  // Check the watchpoints
-#ifdef CONFIG_WATCHPOINT
-  if (watchpoint_check()) {
-    // We only manually stop NEMU when the state is RUNNING
-    // This is to avoid the problem that the state is STOP when the watchpoint is hit
-    if (nemu_state.state == NEMU_RUNNING) {
-      nemu_state.state = NEMU_STOP;
-      nemu_state.halt_pc = _this->pc;
-      nemu_state.halt_ret = 0;
-      printf("NEMU stopped due to watchpoint hit.\n");
-    }
-  }
-#endif
 }
 
 static void exec_once(Decode *s, vaddr_t pc) {

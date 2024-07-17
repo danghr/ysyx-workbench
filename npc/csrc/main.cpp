@@ -6,21 +6,11 @@
 
 // Configuration of whether use tracing, sequential logic, or NVBoard
 #define _DO_TRACE
-#define _SEQUENTIAL_LOGIC
+// #define _SEQUENTIAL_LOGIC
 #define _NVBOARD
 
 
-// Assertion macro
-// Use GOTO to save the waveform when an assertion fails
-bool ASSERTION_FAILED = false;
-#define ASSERT(cond) \
-    if (!(cond)) { \
-        printf("Assertion failed at %s:%d\n", __FILE__, __LINE__); \
-        ASSERTION_FAILED = true; \
-        goto EXIT; \
-    }
-
-#define MAX_CYCLES 1e7
+#define MAX_CYCLES 1000000
 #ifdef _SEQUENTIAL_LOGIC
 const int MAX_SIM_TIME = (MAX_CYCLES) * 2;
 #else
@@ -58,13 +48,6 @@ void reset(int n) {
     top->reset = 0;
 }
 #endif
-
-// A condition to detect whether the simulation is finished
-#define SIMULATE_FINISHED (contextp->time() >= MAX_SIM_TIME || Verilated::gotFinish())
-// A macro to simulate until the condition `cond` is met
-#define SIMULATE_UNTIL(cond) while (!(cond) && !SIMULATE_FINISHED)
-// A macro to simulate until the end of the simulation
-#define SIMULATE_LOOP SIMULATE_UNTIL(0)
 
 
 /***
@@ -136,19 +119,117 @@ int main(int argc, char **argv)
     // === Begin simulation body ===
     // =============================
 
-    reset(1);
+    srand(time(NULL));
 
-    while (true) {
-        single_cycle();
+    // Values to be tested
+    const int VALUES_SIZE = 9;
+    int values[VALUES_SIZE] = {7, 6, 2, 1, 0, -1, -2, -7, -8};
+
+    // Test add
+    top->sel=0;
+    for (int i = 0; i < VALUES_SIZE; i++) { 
+        top->a = values[i];
+        for (int j = 0; j < VALUES_SIZE; j++) {
+            top->b = values[j];
+            status_change();
+            printf("a = %d, b = %d, output = %d\n", values[i], values[j], top->y);
+            assert(check_2s_complement_bits<int>(top->y, values[i] + values[j], 4));
+            assert(top->zero == (top->y == 0));
+        }
+    }
+
+    // Test sub
+    top->sel=1;
+    for (int i = 0; i < VALUES_SIZE; i++) { 
+        top->a = values[i];
+        for (int j = 0; j < VALUES_SIZE; j++) {
+            top->b = values[j];
+            status_change();
+            printf("a = %d, b = %d, a - b = %d\n", values[i], values[j], top->y);
+            assert(check_2s_complement_bits<int>(top->y, values[i] - values[j], 4));
+            assert(top->zero == (top->y == 0));
+        }
+    }
+
+    // Test not
+    top->sel=2;
+    for (int i = 0; i < VALUES_SIZE; i++) { 
+        top->a = values[i];
+        status_change();
+        printf("a = %d, ~a = %d\n", values[i], top->y);
+        assert(check_2s_complement_bits<int>(top->y, ~(values[i]), 4));
+        assert(top->zero == (top->y == 0));
+    }
+
+    // Test and
+    top->sel=3;
+    for (int i = 0; i < VALUES_SIZE; i++) { 
+        top->a = values[i];
+        for (int j = 0; j < VALUES_SIZE; j++) {
+            top->b = values[j];
+            status_change();
+            printf("a = %d, b = %d, a & b = %d\n", values[i], values[j], top->y);
+            assert(check_2s_complement_bits<int>(top->y, values[i] & values[j], 4));
+            assert(top->zero == (top->y == 0));
+        }
+    }
+
+    // Test or
+    top->sel=4;
+    for (int i = 0; i < VALUES_SIZE; i++) { 
+        top->a = values[i];
+        for (int j = 0; j < VALUES_SIZE; j++) {
+            top->b = values[j];
+            status_change();
+            printf("a = %d, b = %d, a | b = %d\n", values[i], values[j], top->y);
+            assert(check_2s_complement_bits<int>(top->y, values[i] | values[j], 4));
+            assert(top->zero == (top->y == 0));
+        }
+    }
+
+    // Test xor
+    top->sel=5;
+    for (int i = 0; i < VALUES_SIZE; i++) { 
+        top->a = values[i];
+        for (int j = 0; j < VALUES_SIZE; j++) {
+            top->b = values[j];
+            status_change();
+            printf("a = %d, b = %d, a ^ b = %d\n", values[i], values[j], top->y);
+            assert(check_2s_complement_bits<int>(top->y, values[i] ^ values[j], 4));
+            assert(top->zero == (top->y == 0));
+        }
+    }
+
+    // Test compare
+    top->sel=6;
+    for (int i = 0; i < VALUES_SIZE; i++) { 
+        top->a = values[i];
+        for (int j = 0; j < VALUES_SIZE; j++) {
+            top->b = values[j];
+            status_change();
+            printf("a = %d, b = %d, a < b = %d\n", values[i], values[j], top->y);
+            assert(top->y == (values[i] < values[j]));
+            assert(top->zero == (top->y == 0));
+        }
+    }
+    
+    // Test equal
+    top->sel=7;
+    for (int i = 0; i < VALUES_SIZE; i++) { 
+        top->a = values[i];
+        for (int j = 0; j < VALUES_SIZE; j++) {
+            top->b = values[j];
+            status_change();
+            printf("a = %d, b = %d, a == b = %d\n", values[i], values[j], top->y);
+            assert(top->y == (values[i] == values[j]));
+            assert(top->zero == (top->y == 0));
+        }
     }
 
     // =============================
     // ==== End simulation body ====
     // =============================
 
-EXIT:
-    // An extra cycle to dump the trace of the last signal
-    status_change();
 #ifdef _DO_TRACE
     tfp->close();
     delete tfp;
@@ -159,5 +240,5 @@ EXIT:
     nvboard_quit();
 #endif
     printf("Simulation done.\n");
-    return ASSERTION_FAILED ? 1 : 0;
+    return 0;
 }

@@ -1,133 +1,75 @@
 module top_module (
-    input clk,
-    input reset,
-    input ps2_clk,
-    input ps2_data,
-    output ready,
-    output overflow,
-    output [7:0] data,
-    output [7:0] dots,
-    output reg [27:0] show_count,
-    output reg [13:0] show_ascii,
-    output reg [13:0] show_data,
-    output released,
-    output pressing,
-    output releasing
+    input [3:0] a,
+    input [3:0] b,
+    input [2:0] sel,
+    output [3:0] y,
+    output zero
 );
 
-    assign dots = 8'b11101010;
+    // Add
+    wire [3:0] add_out;
+    wire add_overflow, add_zero;
+    Adder adder (a, b, 1'b0, add_out, add_overflow, add_zero);
 
-    wire [15:0] int_count;
-    reg [7:0] int_ascii, int_data;
-    reg en_data, nextdata_n;
+    // Subtract
+    wire [3:0] sub_out;
+    wire sub_overflow, sub_zero;
+    Adder subber (a, b, 1'b1, sub_out, sub_overflow, sub_zero);
 
-    wire [15:0] unused;
+    // Reverse
+    wire [3:0] rev_out;
+    assign rev_out = ~a;
 
-    wire count_en = (state == RELEASED && next_state == PRESSING); 
-    DecimalCounter decimal_counter_inst (
-        .clk(clk),
-        .reset(reset),
-        .en(count_en),
-        .count({unused, int_count})
-    );
+    // And
+    wire [3:0] and_out;
+    assign and_out = a & b;
 
-    ScancodeToASCII scancode_to_ascii_inst (
-        .clk(clk),
-        .scan_code(int_data),
-        .ascii_code(int_ascii)
-    );
+    // Or
+    wire [3:0] or_out;
+    assign or_out = a | b;
 
+    // Xor
+    wire [3:0] xor_out;
+    assign xor_out = a ^ b;
 
-    Decode47digit decode47digit_inst_11 (
-        .x(int_count[15:12]),
-        .en(1'b1),
-        .out(show_count[27:21])
-    );
-    Decode47digit decode47digit_inst_12 (
-        .x(int_count[11:8]),
-        .en(1'b1),
-        .out(show_count[20:14])
-    );
-    Decode47digit decode47digit_inst_1 (
-        .x(int_count[7:4]),
-        .en(1'b1),
-        .out(show_count[13:7])
-    );
-    Decode47digit decode47digit_inst_2 (
-        .x(int_count[3:0]),
-        .en(1'b1),
-        .out(show_count[6:0])
-    );
-    Decode47digit decode47digit_inst_3 (
-        .x(int_ascii[7:4]),
-        .en(en_data),
-        .out(show_ascii[13:7])
-    );
-    Decode47digit decode47digit_inst_4 (
-        .x(int_ascii[3:0]),
-        .en(en_data),
-        .out(show_ascii[6:0])
-    );
-    Decode47digit decode47digit_inst_5 (
-        .x(int_data[7:4]),
-        .en(en_data),
-        .out(show_data[13:7])
-    );
-    Decode47digit decode47digit_inst_6 (
-        .x(int_data[3:0]),
-        .en(en_data),
-        .out(show_data[6:0])
-    );
+    // Compare
+    wire [3:0] cmp_out;
+    assign cmp_out = {3'b000, sub_out[3] ^ sub_overflow}; 
 
-    parameter RELEASED = 2'b00, PRESSING = 2'b01, RELEASING = 2'b10;
-    reg [1:0] state, next_state;
+    // Equal
+    wire [3:0] eq_out;
+    assign eq_out = {3'b000, sub_zero};
 
-    always @(*) begin
-        case (state)
-            RELEASED : next_state = (ready & nextdata_n) ? PRESSING : RELEASED;
-            PRESSING : next_state = ((ready & nextdata_n) & (data == 8'hF0)) ? RELEASING : PRESSING;
-            RELEASING : next_state = ((ready & nextdata_n) & (data != 8'hF0)) ? RELEASED : RELEASING;
-            default : next_state = state;
-        endcase
-    end
+    MuxKey #(8, 3, 4) mux (y, sel, {
+        {3'b000, add_out}, 
+        {3'b001, sub_out}, 
+        {3'b010, rev_out}, 
+        {3'b011, and_out}, 
+        {3'b100, or_out}, 
+        {3'b101, xor_out}, 
+        {3'b110, cmp_out}, 
+        {3'b111, eq_out}
+    });
+    assign zero = ~(|y);
 
-    ps2_keyboard ps2_keyboard_inst (
-        .clk(clk),
-        .resetn(~reset),
-        .ps2_clk(ps2_clk),
-        .ps2_data(ps2_data),
-        .data(data),
-        .ready(ready),
-        .nextdata_n(nextdata_n),
-        .overflow(overflow)
-    );
+endmodule
 
-    always @(posedge clk ) begin
-        if (reset) begin
-            nextdata_n <= 1'b1;
-            int_ascii <= 8'b0;
-            int_data <= 8'b0;
-            en_data <= 1'b0;
-            state <= RELEASED;
-        end else begin
-            if (ready & nextdata_n) begin
-                nextdata_n <= 1'b0;
-                int_data <= (state == RELEASED && next_state == PRESSING) ? data : int_data;
-                $display("[PS/2 Keyboard Controller] Receive %x", data);
-            end else begin
-                nextdata_n <= 1'b1;
-                int_data <= int_data;
-                en_data <= en_data;
-            end
-            state <= next_state;
-            en_data <= (next_state == PRESSING);
-            if (state != next_state)
-                $display("[Top Module] State: %b => %b", state, next_state);
-        end
-    end
+module Adder (
+    input [3:0] a,
+    input [3:0] b,
+    input rev,
+    output [3:0] y,
+    output overflow,
+    output zero
+);
 
-    assign released = (state == RELEASED);
-    assign pressing = (state == PRESSING);
-    assign releasing = (state == RELEASING);
+    wire [3:0] b_rev;
+    wire carry;
 
+    assign b_rev = (b ^ {4{rev}});
+    assign {carry, y} = a + b_rev + {3'b000, rev};
+    assign overflow = (a[3] == b_rev[3]) && (y[3] != a[3]);
+
+    assign zero = ~(|y);
+    
 endmodule
