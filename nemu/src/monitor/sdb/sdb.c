@@ -14,6 +14,7 @@
 ***************************************************************************************/
 
 #include <isa.h>
+#include <utils.h>
 #include <cpu/cpu.h>
 #include <memory/paddr.h>
 #include <readline/readline.h>
@@ -50,8 +51,9 @@ static int cmd_c(char *args) {
   return 0;
 }
 
-
 static int cmd_q(char *args) {
+  set_nemu_state(NEMU_QUIT, 0, 0);
+  // Still returns a negative number to exit the main loop. See `sdb_mainloop'.
   return -1;
 }
 
