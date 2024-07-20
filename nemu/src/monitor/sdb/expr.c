@@ -282,6 +282,7 @@ bool eval(int p, int q, word_t *ret) {
   int major_op = -1;
   int major_op_priority = INT32_MAX;
   int in_parentheses = 0;
+  // Scan for major operators from left to right
   for (int i = p; i <= q; i++) {
     // Skip all expressions in parentheses
     if (tokens[i].type == '(') in_parentheses++;
@@ -295,7 +296,7 @@ bool eval(int p, int q, word_t *ret) {
         tokens[i].type == TK_REGISTER)
       continue;
 
-    // Check unary operators
+    // Skip unary operators unless they are the first token
     if (i == p ||
         tokens[i - 1].type == '(' ||
         tokens[i - 1].type == '+' ||
