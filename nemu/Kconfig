@@ -122,6 +122,11 @@ config CC_ASAN
   depends on MODE_SYSTEM
   bool "Enable address sanitizer"
   default n
+
+config CC_UNDEF
+  depends on MODE_SYSTEM
+  bool "Enable undefined behavior sanitizer"
+  default n
 endmenu
 
 menu "Testing and Debugging"
@@ -159,6 +164,12 @@ config DIFFTEST
   help
     Enable differential testing with a reference design.
     Note that this will significantly reduce the performance of NEMU.
+
+config WATCHPOINT
+  bool "Enable watchpoints"
+  default n
+  help
+    This will significantly reduce the performance of NEMU.
 
 choice
   prompt "Reference design"

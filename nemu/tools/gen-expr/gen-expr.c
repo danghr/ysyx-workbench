@@ -19,9 +19,12 @@
 #include <time.h>
 #include <assert.h>
 #include <string.h>
+#include <unistd.h>
+#include <stdbool.h>
 
 // this should be enough
-static char buf[65536] = {};
+static char buf[65536];
+static char buf_for_output[65536];
 static char code_buf[65536 + 128] = {}; // a little larger than `buf`
 static char *code_format =
 "#include <stdio.h>\n"
@@ -31,8 +34,113 @@ static char *code_format =
 "  return 0; "
 "}";
 
+static int pos = 0;
+static int pos_output = 0;
+
+static void put_in_buf(char *string) {
+  strcpy(buf + pos, string);
+  pos += strlen(string);
+}
+static void put_in_buf_for_output(char *string) {
+  strcpy(buf_for_output + pos_output, string);
+  pos_output += strlen(string);
+}
+
+static void gen_rand_op() {
+  int choose = rand() % 8;
+  switch (choose) {
+  case 0:
+    put_in_buf(" + ");
+    put_in_buf_for_output(" + ");
+    break;
+  case 1:
+    put_in_buf(" - ");
+    put_in_buf_for_output(" - ");
+    break;
+  case 2:
+    put_in_buf(" * ");
+    put_in_buf_for_output(" * ");
+    break;
+  case 3:
+    put_in_buf(" / ");
+    put_in_buf_for_output(" / ");
+    break;
+  case 4:
+    put_in_buf(" && ");
+    put_in_buf_for_output(" && ");
+    break;
+  case 5:
+    put_in_buf(" || ");
+    put_in_buf_for_output(" || ");
+    break;
+  case 6:
+    put_in_buf(" == ");
+    put_in_buf_for_output(" == ");
+    break;
+  case 7:
+    put_in_buf(" != ");
+    put_in_buf_for_output(" != ");
+    break;
+  default:
+    break;
+  }
+}
+
+static void gen_rand_value() {
+  int choose = rand() % 2;
+  char buffer[64];
+  uint32_t value = rand() % (2 << 10);
+  if (rand() % 2) {
+    // Negative
+    put_in_buf("-");
+    put_in_buf_for_output("-");
+  }
+  switch (choose) {
+    case 0:
+      sprintf(buffer, "%du", value);
+      put_in_buf(buffer);
+      sprintf(buffer, "%d", value);
+      put_in_buf_for_output(buffer);
+      break;
+    case 1:
+      sprintf(buffer, "0x%xu", value);
+      put_in_buf(buffer);
+      sprintf(buffer, "0x%x", value);
+      put_in_buf_for_output(buffer);
+      break;
+    default:
+      break;
+  }
+}
+
 static void gen_rand_expr() {
-  buf[0] = '\0';
+  // Avoid being too long
+  if (pos > 65536 / 512) return ;
+  if (pos_output > 65536 / 512) return ;
+  if (rand() % 2) {
+    put_in_buf(" ");
+    put_in_buf_for_output(" ");
+  }
+  int choose = rand() % 3;
+  switch (choose) {
+  case 0:
+    gen_rand_value();
+    break;
+  case 1:
+    put_in_buf("(");
+    put_in_buf_for_output("(");
+    gen_rand_expr();
+    put_in_buf(")");
+    put_in_buf_for_output(")");
+    break;
+  case 2:
+    gen_rand_expr();
+    gen_rand_op();
+    gen_rand_expr();
+    break;
+  default:
+    break;
+  }
 }
 
 int main(int argc, char *argv[]) {
@@ -44,6 +152,8 @@ int main(int argc, char *argv[]) {
   }
   int i;
   for (i = 0; i < loop; i ++) {
+    pos = 0;
+    pos_output = 0;
     gen_rand_expr();
 
     sprintf(code_buf, code_format, buf);
@@ -53,8 +163,22 @@ int main(int argc, char *argv[]) {
     fputs(code_buf, fp);
     fclose(fp);
 
-    int ret = system("gcc /tmp/.code.c -o /tmp/.expr");
+    int ret = system("gcc /tmp/.code.c -o /tmp/.expr > /tmp/.expr.compile 2>&1");
     if (ret != 0) continue;
+    // Skip this result if compiler output include '-Wdiv-by-zero'
+    FILE *fp_compile = fopen("/tmp/.expr.compile", "r");
+    assert(fp_compile != NULL);
+    char compile_buf[4096];
+    bool skip = false;
+    while (fgets(compile_buf, 4096, fp_compile) != NULL) {
+      if (strstr(compile_buf, "-Wdiv-by-zero") != NULL) {
+        // printf("Skipping due to -Wdiv-by-zero\n");
+        skip = true;
+        break;
+      }
+    }
+    fclose(fp_compile);
+    if (skip) { i--; continue; }
 
     fp = popen("/tmp/.expr", "r");
     assert(fp != NULL);
@@ -63,7 +187,7 @@ int main(int argc, char *argv[]) {
     ret = fscanf(fp, "%d", &result);
     pclose(fp);
 
-    printf("%u %s\n", result, buf);
+    printf("%u %s\n", result, buf_for_output);
   }
   return 0;
 }
