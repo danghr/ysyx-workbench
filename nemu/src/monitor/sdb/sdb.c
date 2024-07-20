@@ -53,7 +53,8 @@ static int cmd_c(char *args) {
 
 static int cmd_q(char *args) {
   set_nemu_state(NEMU_QUIT, 0, 0);
-   // Still returns a negative number to exit the main loop. See `sdb_mainloop'.
+  cpu_exec(-1);
+  // Still returns a negative number to exit the main loop. See `sdb_mainloop'.
   return -1;
 }
 
