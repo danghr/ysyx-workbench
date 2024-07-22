@@ -47,8 +47,6 @@ static void trace_and_difftest(Decode *_this, vaddr_t dnpc) {
     // This is to avoid the problem that the state is STOP when the watchpoint is hit
     if (nemu_state.state == NEMU_RUNNING) {
       nemu_state.state = NEMU_STOP;
-      nemu_state.halt_pc = _this->pc;
-      nemu_state.halt_ret = 0;
       printf("NEMU stopped due to watchpoint hit.\n");
     }
   }
