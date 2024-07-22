@@ -53,7 +53,7 @@ static int cmd_c(char *args) {
 
 static int cmd_q(char *args) {
   // Use NEMU_QUIT to indicate the exit status.
-  // nemu_state.state = NEMU_QUIT;
+  nemu_state.state = NEMU_QUIT;
   // Still returns a negative number to exit the main loop. See `sdb_mainloop'.
   return -1;
 }
