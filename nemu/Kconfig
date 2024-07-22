@@ -156,6 +156,12 @@ config ITRACE_COND
   string "Only trace instructions when the condition is true"
   default "true"
 
+config WATCHPOINT
+  bool "Enable watchpoints"
+  default n
+  help
+    Enable watchpoints for NEMU.
+    This will significantly reduce the performance of NEMU.
 
 config DIFFTEST
   depends on TARGET_NATIVE_ELF
@@ -164,12 +170,6 @@ config DIFFTEST
   help
     Enable differential testing with a reference design.
     Note that this will significantly reduce the performance of NEMU.
-
-config WATCHPOINT
-  bool "Enable watchpoints"
-  default n
-  help
-    This will significantly reduce the performance of NEMU.
 
 choice
   prompt "Reference design"
