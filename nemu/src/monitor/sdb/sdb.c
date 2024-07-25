@@ -201,12 +201,17 @@ static int cmd_x(char *args) {
 
   // Parse the address
   // TODO: Change to value of expressions
-  paddr_t addr = strtoull(arg_expr, NULL, 16 /* Base, force hexadecimal */);
-  if (!in_pmem(addr)) {
-    printf("x: Invalid address " FMT_WORD ". It is out of physical memory. \n", addr);
+  bool success = false;
+  paddr_t addr = (paddr_t)expr(arg_expr, &success);
+  if (!success) {
+    printf("x: Invalid expression '%s'.\n", arg_expr);
     return 1;
   }
-  printf("Scanning memory from address " FMT_WORD " for %d bytes\n", addr, len);
+  if (!in_pmem(addr)) {
+    printf("x: Invalid address " FMT_WORD " ('%s'). It is out of physical memory. \n", addr, arg_expr);
+    return 1;
+  }
+  printf("Scanning memory from address " FMT_WORD " ('%s') for %d bytes\n", addr, arg_expr, len);
 
   // Allocate a buffer for the scanned value
   uint8_t *buffer = malloc(sizeof(char) * len);
