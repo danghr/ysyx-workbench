@@ -228,9 +228,9 @@ bool eval(int p, int q, word_t *ret) {
     }
     char *endptr;
 #ifdef CONFIG_ISA64
-    *ret = (word_t)strtoll(tokens[p].str, &endptr, 0);
+    *ret = (word_t)strtoull(tokens[p].str, &endptr, 0);
 #else
-    *ret = (word_t)strtol(tokens[p].str, &endptr, 0);
+    *ret = (word_t)strtoul(tokens[p].str, &endptr, 0);
 #endif
     assert(*endptr == '\0');
 #ifdef EXPR_DEBUG
