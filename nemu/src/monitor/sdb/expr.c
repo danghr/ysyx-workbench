@@ -200,7 +200,6 @@ bool eval(int p, int q, word_t *ret) {
   Log("Evaluating tokens from %d to %d", p, q);
 #endif
   // Function called by program.
-  // Assertion is fine as these conditions should never be reached.
   // nr_token has already been checked by function `expr'. 
   if (q >= nr_token || p > q) {
     printf("Invalid expression. Token range from %d to %d is illegal (boundary: %d).\n", p, q, nr_token);
@@ -209,6 +208,7 @@ bool eval(int p, int q, word_t *ret) {
 
   if (p == q) {
     // Single token, should only be a number or a register
+    // Check whether it is a register
     if (tokens[p].type == TK_REGISTER) {
       bool success = false;
       *ret = isa_reg_str2val(tokens[p].str, &success);
@@ -221,16 +221,16 @@ bool eval(int p, int q, word_t *ret) {
 #endif
       return true;
     }
-    // Convert the string to number
+    // If not, then the token should be a number
     if (tokens[p].type != TK_NUMBER && tokens[p].type != TK_HEX) {
       printf("Invalid expression. Token %s is not a number.\n", tokens[p].str);
       return false;
     }
     char *endptr;
 #ifdef CONFIG_ISA64
-    *ret = (word_t)strtoll(tokens[p].str, &endptr, 0);
+    *ret = (word_t)strtoull(tokens[p].str, &endptr, 0);
 #else
-    *ret = (word_t)strtol(tokens[p].str, &endptr, 0);
+    *ret = (word_t)strtoul(tokens[p].str, &endptr, 0);
 #endif
     assert(*endptr == '\0');
 #ifdef EXPR_DEBUG
@@ -438,7 +438,6 @@ word_t expr(char *e, bool *success) {
   assert(nr_token < EXPR_C_MAX_TOKENS);
 
   word_t result;
-  // Use signed integer to support negative numbers
   if (!eval(0, nr_token - 1, &result)) {
     *success = false;
     return 0;
