@@ -207,7 +207,7 @@ static int cmd_x(char *args) {
     printf("x: Invalid expression '%s'.\n", arg_expr);
     return 1;
   }
-  if (!in_pmem(addr)) {
+  if (!in_pmem(addr) || !in_pmem(addr + len - 1)) {
     printf("x: Invalid address " FMT_WORD " ('%s'). It is out of physical memory. \n", addr, arg_expr);
     return 1;
   }
