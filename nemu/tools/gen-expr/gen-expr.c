@@ -163,22 +163,9 @@ int main(int argc, char *argv[]) {
     fputs(code_buf, fp);
     fclose(fp);
 
-    int ret = system("gcc /tmp/.code.c -o /tmp/.expr > /tmp/.expr.compile 2>&1");
-    if (ret != 0) continue;
-    // Skip this result if compiler output include '-Wdiv-by-zero'
-    FILE *fp_compile = fopen("/tmp/.expr.compile", "r");
-    assert(fp_compile != NULL);
-    char compile_buf[4096];
-    bool skip = false;
-    while (fgets(compile_buf, 4096, fp_compile) != NULL) {
-      if (strstr(compile_buf, "-Wdiv-by-zero") != NULL) {
-        // printf("Skipping due to -Wdiv-by-zero\n");
-        skip = true;
-        break;
-      }
-    }
-    fclose(fp_compile);
-    if (skip) { i--; continue; }
+    // Use '-Wdiv-by-zero' to avoid division by 0
+    int ret = system("gcc /tmp/.code.c -Wdiv-by-zero -o /tmp/.expr > /tmp/.expr.compile 2>&1");
+    if (ret != 0) { i--; continue; }
 
     fp = popen("/tmp/.expr", "r");
     assert(fp != NULL);
