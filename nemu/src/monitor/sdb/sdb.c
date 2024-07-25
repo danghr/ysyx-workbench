@@ -208,7 +208,7 @@ static int cmd_x(char *args) {
     return 1;
   }
   if (!in_pmem(addr) || !in_pmem(addr + len - 1)) {
-    printf("x: Invalid address " FMT_WORD " ('%s'). It is out of physical memory. \n", addr, arg_expr);
+    printf("x: Invalid address range starting from " FMT_WORD " ('%s') with length %d. It is out of physical memory. \n", addr, arg_expr, len);
     return 1;
   }
   printf("Scanning memory from address " FMT_WORD " ('%s') for %d bytes\n", addr, arg_expr, len);
