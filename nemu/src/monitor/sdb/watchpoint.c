@@ -136,7 +136,7 @@ void print_wp() {
 #ifdef CONFIG_WATCHPOINT
   printf("Num   Expression\n");
   for (WP *wp = head; wp != NULL; wp = wp->next) {
-    printf("%-5d %s\n", wp->NO, wp->str);
+    printf("%5d %s\n", wp->NO, wp->str);
   }
 #else
   printf("Watchpoint not enabled. Recompile NEMU with config `watchpoint' enabled in menuconfig if you need.\n");
