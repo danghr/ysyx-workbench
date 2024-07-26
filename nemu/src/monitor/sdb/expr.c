@@ -200,15 +200,16 @@ bool eval(int p, int q, word_t *ret) {
   Log("Evaluating tokens from %d to %d", p, q);
 #endif
   // Function called by program.
-  // Assertion is fine as these conditions should never be reached.
   // nr_token has already been checked by function `expr'. 
   if (q >= nr_token || p > q) {
     printf("Invalid expression. Token range from %d to %d is illegal (boundary: %d).\n", p, q, nr_token);
     return false;
   }
 
+  /********** SINGLE TOKEN **********/
   if (p == q) {
     // Single token, should only be a number or a register
+    // Check whether it is a register
     if (tokens[p].type == TK_REGISTER) {
       bool success = false;
       *ret = isa_reg_str2val(tokens[p].str, &success);
@@ -221,7 +222,7 @@ bool eval(int p, int q, word_t *ret) {
 #endif
       return true;
     }
-    // Convert the string to number
+    // If not, then the token should be a number
     if (tokens[p].type != TK_NUMBER && tokens[p].type != TK_HEX) {
       printf("Invalid expression. Token %s is not a number.\n", tokens[p].str);
       return false;
@@ -243,6 +244,7 @@ bool eval(int p, int q, word_t *ret) {
     return true;
   }
 
+  /******** MULTIPLE TOKENS **********/
   /*********************************
    *** Step 1: Check parentheses ***
    *********************************/
@@ -273,9 +275,9 @@ bool eval(int p, int q, word_t *ret) {
     return eval(p + 1, q - 1, ret);
   }
 
-  /************************************
-   *** Step 2: Find major operators ***
-   ************************************/
+  /***************************************
+   *** Step 2: Find the major operator ***
+   ***************************************/
   // Find the major operator
   // i.e., the operator with the least prirority
   // as it needs to be computed last
@@ -296,7 +298,8 @@ bool eval(int p, int q, word_t *ret) {
         tokens[i].type == TK_REGISTER)
       continue;
 
-    // Skip unary operators unless they are the first token
+    // Detect unary operators
+    // Unary operators should be the first token or following operators like (, +, -, *, /
     if (i == p ||
         tokens[i - 1].type == '(' ||
         tokens[i - 1].type == '+' ||
@@ -322,6 +325,7 @@ bool eval(int p, int q, word_t *ret) {
         major_op = i;
         // We do not modify the priority here for unary operators
         // If another operator is found, it will override the unary operator
+        // Otherwise, the unary operator will be the major operator
       }
       // Skip the unary operator
       continue;
@@ -372,7 +376,7 @@ bool eval(int p, int q, word_t *ret) {
    *** Step 3: Evaluate expressions ***
    ************************************/
 
-  // Detect unary operators
+  // Handle unary operators
   // According to previous code, it should be the first token
   if (major_op == p) {
     word_t unary_value;
@@ -438,7 +442,6 @@ word_t expr(char *e, bool *success) {
   assert(nr_token < EXPR_C_MAX_TOKENS);
 
   word_t result;
-  // Use signed integer to support negative numbers
   if (!eval(0, nr_token - 1, &result)) {
     *success = false;
     return 0;
