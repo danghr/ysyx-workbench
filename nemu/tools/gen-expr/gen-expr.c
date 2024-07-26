@@ -165,6 +165,7 @@ int main(int argc, char *argv[]) {
 
     // Use '-Wdiv-by-zero' to avoid division by 0
     int ret = system("gcc /tmp/.code.c -Wdiv-by-zero -o /tmp/.expr > /tmp/.expr.compile 2>&1");
+    // Try again if the compilation fails
     if (ret != 0) { i--; continue; }
 
     fp = popen("/tmp/.expr", "r");

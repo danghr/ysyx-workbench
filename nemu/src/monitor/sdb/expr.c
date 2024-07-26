@@ -206,6 +206,7 @@ bool eval(int p, int q, word_t *ret) {
     return false;
   }
 
+  /********** SINGLE TOKEN **********/
   if (p == q) {
     // Single token, should only be a number or a register
     // Check whether it is a register
@@ -243,6 +244,7 @@ bool eval(int p, int q, word_t *ret) {
     return true;
   }
 
+  /******** MULTIPLE TOKENS **********/
   /*********************************
    *** Step 1: Check parentheses ***
    *********************************/
@@ -273,9 +275,9 @@ bool eval(int p, int q, word_t *ret) {
     return eval(p + 1, q - 1, ret);
   }
 
-  /************************************
-   *** Step 2: Find major operators ***
-   ************************************/
+  /***************************************
+   *** Step 2: Find the major operator ***
+   ***************************************/
   // Find the major operator
   // i.e., the operator with the least prirority
   // as it needs to be computed last
@@ -296,7 +298,8 @@ bool eval(int p, int q, word_t *ret) {
         tokens[i].type == TK_REGISTER)
       continue;
 
-    // Skip unary operators unless they are the first token
+    // Detect unary operators
+    // Unary operators should be the first token or following operators like (, +, -, *, /
     if (i == p ||
         tokens[i - 1].type == '(' ||
         tokens[i - 1].type == '+' ||
@@ -322,6 +325,7 @@ bool eval(int p, int q, word_t *ret) {
         major_op = i;
         // We do not modify the priority here for unary operators
         // If another operator is found, it will override the unary operator
+        // Otherwise, the unary operator will be the major operator
       }
       // Skip the unary operator
       continue;
@@ -372,7 +376,7 @@ bool eval(int p, int q, word_t *ret) {
    *** Step 3: Evaluate expressions ***
    ************************************/
 
-  // Detect unary operators
+  // Handle unary operators
   // According to previous code, it should be the first token
   if (major_op == p) {
     word_t unary_value;
