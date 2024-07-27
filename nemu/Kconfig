@@ -122,11 +122,6 @@ config CC_ASAN
   depends on MODE_SYSTEM
   bool "Enable address sanitizer"
   default n
-
-config CC_UNDEF
-  depends on MODE_SYSTEM
-  bool "Enable undefined behavior sanitizer"
-  default n
 endmenu
 
 menu "Testing and Debugging"
@@ -156,12 +151,6 @@ config ITRACE_COND
   string "Only trace instructions when the condition is true"
   default "true"
 
-config WATCHPOINT
-  bool "Enable watchpoints"
-  default n
-  help
-    Enable watchpoints for NEMU.
-    This will significantly reduce the performance of NEMU.
 
 config DIFFTEST
   depends on TARGET_NATIVE_ELF
