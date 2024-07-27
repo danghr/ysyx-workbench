@@ -60,7 +60,9 @@ static void exec_once(Decode *s, vaddr_t pc) {
   cpu.pc = s->dnpc;
 #ifdef CONFIG_ITRACE
   char *p = s->logbuf;
+  // Display "0x80000000:"
   p += snprintf(p, sizeof(s->logbuf), FMT_WORD ":", s->pc);
+  // Display "00 00 02 97"
   int ilen = s->snpc - s->pc;
   int i;
   uint8_t *inst = (uint8_t *)&s->isa.inst.val;
@@ -75,6 +77,7 @@ static void exec_once(Decode *s, vaddr_t pc) {
   p += space_len;
 
 #ifndef CONFIG_ISA_loongarch32r
+  // Display "auipc t0, 0"
   void disassemble(char *str, int size, uint64_t pc, uint8_t *code, int nbyte);
   disassemble(p, s->logbuf + sizeof(s->logbuf) - p,
       MUXDEF(CONFIG_ISA_x86, s->snpc, s->pc), (uint8_t *)&s->isa.inst.val, ilen);
