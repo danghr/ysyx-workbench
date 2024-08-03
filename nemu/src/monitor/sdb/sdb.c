@@ -14,9 +14,7 @@
 ***************************************************************************************/
 
 #include <isa.h>
-#include <utils.h>
 #include <cpu/cpu.h>
-#include <memory/paddr.h>
 #include <readline/readline.h>
 #include <readline/history.h>
 #include "sdb.h"
@@ -24,9 +22,7 @@
 static int is_batch_mode = false;
 
 void init_regex();
-#ifdef CONFIG_WATCHPOINT
 void init_wp_pool();
-#endif
 
 /* We use the `readline' library to provide more flexibility to read from stdin. */
 static char* rl_gets() {
@@ -51,22 +47,12 @@ static int cmd_c(char *args) {
   return 0;
 }
 
+
 static int cmd_q(char *args) {
-  // Use NEMU_QUIT to indicate the exit status.
-  nemu_state.state = NEMU_QUIT;
-  // Still returns a negative number to exit the main loop. See `sdb_mainloop'.
   return -1;
 }
 
 static int cmd_help(char *args);
-
-static int cmd_si(char *args);
-static int cmd_info(char *args);
-static int cmd_x(char *args);
-#ifdef CONFIG_WATCHPOINT
-static int cmd_w(char *args);
-static int cmd_d(char *args);
-#endif
 
 static struct {
   const char *name;
@@ -78,13 +64,7 @@ static struct {
   { "q", "Exit NEMU", cmd_q },
 
   /* TODO: Add more commands */
-  { "si", "Continue the execution for N instructions. Format: `si [N]'. N=1 if not specified", cmd_si },
-  { "info", "Print the program status. `info r' prints register status, and `info w' prints watchpoint status", cmd_info },
-  { "x", "Scan memory. Format: `x N EXPR'. Print 4*N bytes of memory starting from the value of EXPR", cmd_x },
-#ifdef CONFIG_WATCHPOINT
-  { "w", "Add a watchpoint. Format: `w EXPR'. The program will stop when the value of EXPR changes", cmd_w },
-  { "d", "Delete a watchpoint. Format: `d N'. N is the number of the watchpoint to be deleted", cmd_d },
-#endif
+
 };
 
 #define NR_CMD ARRLEN(cmd_table)
@@ -111,182 +91,6 @@ static int cmd_help(char *args) {
   }
   return 0;
 }
-
-static int cmd_si(char *args) {
-  // Extract the first argument
-  // Note that since we are parsing the same argument command,
-  // the strtok function should be called with NULL
-  // See `man 3 strtok'
-  char *arg = strtok(NULL, " ");
-  uint64_t steps = 1;
-  if (arg != NULL) {
-    // Check whether the parameter is a valid number
-    char **endptr = malloc(sizeof(char*));
-    steps = strtoull(arg, /* String to be parsed */ 
-                     endptr, /* Address of the first invalid character */
-                     10 /* Base, force decimal */
-                    );
-    if (!(*arg != '\0' && **endptr == '\0')) {  // Refer to `man 3 stroull'
-      printf("si: Invalid argument '%s' for si\n", arg);
-      free(endptr);
-      return 1;
-    }
-    free(endptr);
-  }
-  // PRId64: macro for printing int64_t
-  printf("Executing %" PRId64 " instruction(s)\n", steps);
-
-  // Call the execution function
-  cpu_exec(steps);
-  return 0;
-}
-
-static int cmd_info(char *args) {
-  // Extract the first argument
-  char *arg = strtok(NULL, " ");
-
-  // Check whether the parameter is leagal
-  if (arg == NULL) {
-    printf("info: Missing argument\n");
-    return 1;
-  }
-  char *more_arg = strtok(NULL, " ");
-  if (more_arg != NULL) {
-    printf("info: Too many arguments\n");
-    return 1;
-  }
-
-  if (strcmp(arg, "r") == 0) {
-    // Print the register status
-    printf("Register status\n");
-    isa_reg_display();
-  } 
-#ifdef CONFIG_WATCHPOINT
-  else if (strcmp(arg, "w") == 0) {
-    // Print the watchpoint status
-    printf("Watchpoint status\n");
-    print_wp();
-  }
-#endif
-  else {
-    printf("info: Invalid argument '%s'\n", arg);
-#ifndef CONFIG_WATCHPOINT
-    if (strcmp(arg, "w") == 0)
-      printf("Watchpoint not enabled. Recompile NEMU with config `watchpoint' enabled in menuconfig if you need.\n");
-#endif
-    return 1;
-  }
-  return 0;
-}
-
-static int cmd_x(char *args) {
-  // Extract the two arguments and check their validity
-  char *arg_len = strtok(NULL, " ");
-  char *arg_expr = strtok(NULL, "\0");  // Parse until the end of the string
-  if (arg_expr == NULL) {
-    printf("x: Missing argument\n");
-    return 1;
-  }
-  if (strtok(NULL, "\0") != NULL) {
-    printf("x: Too many arguments\n");
-    return 1;
-  }
-
-  // Parse the length
-  int len = atoi(arg_len);
-  if (len <= 0) {
-    printf("x: Invalid argument '%s'\n", arg_len);
-    return 1;
-  }
-
-  // Parse the address
-  // TODO: Change to value of expressions
-  bool success = false;
-  paddr_t addr = (paddr_t)expr(arg_expr, &success);
-  if (!success) {
-    printf("x: Invalid expression '%s'.\n", arg_expr);
-    return 1;
-  }
-  if (!in_pmem(addr) || !in_pmem(addr + len - 1)) {
-    printf("x: Invalid address range starting from " FMT_WORD " ('%s') with length %d bytes. It is out of physical memory. \n", addr, arg_expr, len);
-    return 1;
-  }
-  printf("Scanning memory from address " FMT_WORD " ('%s') for %d bytes\n", addr, arg_expr, len);
-
-  // Allocate a buffer for the scanned value
-  uint8_t *buffer = malloc(sizeof(char) * len);
-
-  // Read the value from the memory byte by byte
-  // Note that the memory is little-endian
-  // so we place the bytes reversely
-  // to print the result in human-readable order
-  for(int i = 0; i < len; i++)
-    buffer[len - i - 1] = paddr_read(addr + i, 1);
-
-  // Print the scanned value byte by byte
-  for (int i = 0; i < len; i++)
-    printf("%02x ", buffer[i]);
-  printf("    ");
-  for (int i = 0; i < len; i++)
-    printf("%c", (char)buffer[i]);
-  printf("\n");
-  
-  free(buffer);
-  return 0;
-}
-
-#ifdef CONFIG_WATCHPOINT
-static int cmd_w(char *args) {
-  // Extract the first argument
-  char *arg = strtok(NULL, "\0");
-
-  // Check whether the parameter is leagal
-  if (arg == NULL) {
-    printf("w: Missing argument\n");
-    return 1;
-  }
-  if (strtok(NULL, "\0") != NULL) {
-    printf("w: Too many arguments\n");
-    return 1;
-  }
-
-  // Add the watchpoint
-  WP *wp = new_wp(arg);
-  if (wp == NULL) {
-    printf("w: Failed to add watchpoint\n");
-    return 1;
-  }
-  printf("w: Added watchpoint %d: '%s'\n", wp->NO, wp->str);
-  return 0;
-}
-
-static int cmd_d(char *args) {
-  // Extract the first argument
-  char *arg = strtok(NULL, " ");
-
-  // Check whether the parameter is leagal
-  if (arg == NULL) {
-    printf("d: Missing argument\n");
-    return 1;
-  }
-  char *more_arg = strtok(NULL, " ");
-  if (more_arg != NULL) {
-    printf("d: Too many arguments\n");
-    return 1;
-  }
-
-  // Parse the number
-  int number = atoi(arg);
-  if (number <= 0) {
-    printf("d: Invalid argument '%s'\n", arg);
-    return 1;
-  }
-
-  // Delete the watchpoint
-  free_wp(number);
-  return 0;
-}
-#endif
 
 void sdb_set_batch_mode() {
   is_batch_mode = true;
@@ -326,13 +130,7 @@ void sdb_mainloop() {
       }
     }
 
-    if (i == NR_CMD) {
-      printf("Unknown command '%s'\n", cmd);
-#ifndef CONFIG_WATCHPOINT
-      if (strcmp(cmd, "w") == 0 || strcmp(cmd, "d") == 0)
-        printf("Watchpoint not enabled. Recompile NEMU with config `watchpoint' enabled in menuconfig if you need.\n");
-#endif
-    }
+    if (i == NR_CMD) { printf("Unknown command '%s'\n", cmd); }
   }
 }
 
@@ -341,7 +139,5 @@ void init_sdb() {
   init_regex();
 
   /* Initialize the watchpoint pool. */
-#ifdef CONFIG_WATCHPOINT
   init_wp_pool();
-#endif
 }

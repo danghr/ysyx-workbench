@@ -31,7 +31,6 @@ OBJS = $(SRCS:%.c=$(OBJ_DIR)/%.o) $(CXXSRC:%.cc=$(OBJ_DIR)/%.o)
 $(OBJ_DIR)/%.o: %.c
 	@echo + CC $<
 	@mkdir -p $(dir $@)
-	@$(CC) $(CFLAGS) -E -c -o $(OBJ_DIR)/$<.i $<
 	@$(CC) $(CFLAGS) -c -o $@ $<
 	$(call call_fixdep, $(@:.o=.d), $@)
 
@@ -46,7 +45,7 @@ $(OBJ_DIR)/%.o: %.cc
 
 # Some convenient rules
 
-.PHONY: app clean count
+.PHONY: app clean
 
 app: $(BINARY)
 
@@ -56,7 +55,3 @@ $(BINARY):: $(OBJS) $(ARCHIVES)
 
 clean:
 	-rm -rf $(BUILD_DIR)
-
-count:
-	@echo "Total lines of code:"
-	@find . -name "*.[ch]" | xargs wc -l | grep total | awk -F' ' '{print $1}'
