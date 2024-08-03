@@ -8,10 +8,11 @@ module ScancodeToASCII (
     
     initial begin
         $readmemh("/home/danghr/Desktop/YSYX/ysyx-workbench/npc/vsrc/scancode_to_ascii.txt", scan_to_ascii);
-        $display("Scancode test, should be 0x71: 0x%h", scan_to_ascii[21]);
+        // $display("Scancode test, should be 0x71: 0x%h", scan_to_ascii[21]);
     end
 
     always @(posedge clk ) begin
+        $display("Scancode: 0x%h, ASCII: 0x%h", scan_code, scan_to_ascii[scan_code]);
         ascii_code <= scan_to_ascii[scan_code];
     end
 
