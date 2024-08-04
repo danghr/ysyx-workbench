@@ -35,9 +35,12 @@ enum {
 
 static void decode_operand(Decode *s, int *rd, word_t *src1, word_t *src2, word_t *imm, int type) {
   uint32_t i = s->isa.inst.val;
+  /* Select `rd`, `rs1` and `rs2` from fixed location*/
   int rs1 = BITS(i, 19, 15);
   int rs2 = BITS(i, 24, 20);
   *rd     = BITS(i, 11, 7);
+  /* Put the value of `rd`, `src1`, `src2` and `imm` in corresponding variables 
+     according to the type of the instruction */
   switch (type) {
     case TYPE_I: src1R();          immI(); break;
     case TYPE_U:                   immU(); break;
