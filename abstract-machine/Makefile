@@ -86,10 +86,10 @@ CFLAGS   += -O2 -MMD -Wall -Werror $(INCFLAGS) \
             -D__PLATFORM__=$(PLATFORM) -D__PLATFORM_$(shell echo $(PLATFORM) | tr a-z A-Z | tr - _) \
             -DARCH_H=\"$(ARCH_H)\" \
             -fno-asynchronous-unwind-tables -fno-builtin -fno-stack-protector \
-            -Wno-main -U_FORTIFY_SOURCE -fvisibility=hidden $(shell sdl2-config --cflags)
+            -Wno-main -U_FORTIFY_SOURCE -fvisibility=hidden
 CXXFLAGS +=  $(CFLAGS) -ffreestanding -fno-rtti -fno-exceptions
 ASFLAGS  += -MMD $(INCFLAGS)
-LDFLAGS  += -z noexecstack $(shell sdl2-config --libs)
+LDFLAGS  += -z noexecstack
 
 ## 4. Arch-Specific Configurations
 
