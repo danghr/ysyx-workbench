@@ -43,6 +43,13 @@ static inline void pattern_decode(const char *str, int len,
       __shift = (c == '?' ? __shift + 1 : 0); \
     } \
   }
+  /* __key: 1 if this bit is 1, 0 otherwise
+   * __mask: 1 if this bit is a not a wildcard (i.e., should be matched), 0 otherwise
+   * __shift: The number of '?'s before this bit
+   *          Note that as the instructions are treated as a bit string, processing starts
+   *          from the leftmost bit. As a result, __shift indicates the number of '?'s
+   *          after the last non-wildcard bit.
+   */
 
 #define macro2(i)  macro(i);   macro((i) + 1)
 #define macro4(i)  macro2(i);  macro2((i) + 2)
@@ -50,10 +57,19 @@ static inline void pattern_decode(const char *str, int len,
 #define macro16(i) macro8(i);  macro8((i) + 8)
 #define macro32(i) macro16(i); macro16((i) + 16)
 #define macro64(i) macro32(i); macro32((i) + 32)
+  /* `macro64(0)' uses the above nested macro to run macro(i) on every i
+   * from 0 to 63, which is the maximum length of a pattern.
+   * e.g., macro4(0) expands to macro2(0) and macro2(2), which further
+   * expands to macro(0), macro(1), macro(2), and macro(3).
+   * If the length of the pattern is less than 64, the remaining are skipped
+   * by the `goto finish' in the last effective macro(i), so that the
+   * `panic` won't be called.
+   */
   macro64(0);
   panic("pattern too long");
 #undef macro
 finish:
+  /* Shift right to ignore the wildcard bits located rightmost */
   *key = __key >> __shift;
   *mask = __mask >> __shift;
   *shift = __shift;
