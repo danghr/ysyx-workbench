@@ -89,7 +89,7 @@ CFLAGS   += -O2 -MMD -Wall -Werror $(INCFLAGS) \
             -Wno-main -U_FORTIFY_SOURCE -fvisibility=hidden $(shell sdl2-config --cflags)
 CXXFLAGS +=  $(CFLAGS) -ffreestanding -fno-rtti -fno-exceptions
 ASFLAGS  += -MMD $(INCFLAGS)
-LDFLAGS  += -z noexecstack $(shell sdl2-config --libs)
+LDFLAGS  += -z noexecstack -L/usr/lib/riscv64-linux-gnu $(shell sdl2-config --libs)
 
 ## 4. Arch-Specific Configurations
 
