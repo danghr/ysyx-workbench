@@ -2,6 +2,17 @@
 
 ## 实验进度
 
+### SDL2安装问题
+
+在Ubuntu 22.04（aarch64）上交叉编译RISC-V版本的测试用例时，遇到`riscv64-linux-gnu-ld: cannot find -lSDL2: no error`错误。
+
+重新安装系统并逐步比对每次`apt install`之后的执行情况发现，问题产生的原因在于通过`apt`安装的SDL2库。详细原因如下：
+
+- `abstract-machine`的Makefile会在`CFLAGS`上加上`$(shell sdl2-config --cflags)`的输出，在`LDFLAGS`上加上`$(shell sdl2-config --libs)`的输出
+- 未通过`apt`安装SDL2库时，两者均会提示`sdl2-config: No such file or directory`，但不会在标准输出中产生任何结果
+- 按照NVBoard的说明通过`apt`安装SDL2库后，执行`sdl2-config --cflags`会输出`-I/usr/include/SDL2 -D_REENTRANT`并被追加到`CFLAGS`中，执行`sdl2-config --libs`会输出`-lSDL2`并被追加到`LDFLAGS`中
+- 执行`riscv64-linux-gnu-ld`时，提示`cannot find -lSDL2: no error`
+
 ## 实验必答题
 
 ### 1. YEMU上的程序运行
