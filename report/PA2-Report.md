@@ -4,14 +4,25 @@
 
 ### SDL2安装问题
 
+#### 问题描述
+
 在Ubuntu 22.04（aarch64）上交叉编译RISC-V版本的测试用例时，遇到`riscv64-linux-gnu-ld: cannot find -lSDL2: no error`错误。
 
 重新安装系统并逐步比对每次`apt install`之后的执行情况发现，问题产生的原因在于通过`apt`安装的SDL2库。详细原因如下：
 
 - `abstract-machine`的Makefile会在`CFLAGS`上加上`$(shell sdl2-config --cflags)`的输出，在`LDFLAGS`上加上`$(shell sdl2-config --libs)`的输出
 - 未通过`apt`安装SDL2库时，两者均会提示`sdl2-config: No such file or directory`，但不会在标准输出中产生任何结果
-- 按照NVBoard的说明通过`apt`安装SDL2库后，执行`sdl2-config --cflags`会输出`-I/usr/include/SDL2 -D_REENTRANT`并被追加到`CFLAGS`中，执行`sdl2-config --libs`会输出`-lSDL2`并被追加到`LDFLAGS`中
+- 通过`apt`安装`libsdl2-dev`库后，执行`sdl2-config --cflags`会输出`-I/usr/include/SDL2 -D_REENTRANT`并被追加到`CFLAGS`中，执行`sdl2-config --libs`会输出`-lSDL2`并被追加到`LDFLAGS`中
 - 执行`riscv64-linux-gnu-ld`时，提示`cannot find -lSDL2: no error`
+
+运行`find /usr -name libSDL2.so`，发现该文件位于`/usr/lib/aarch64-linux-gnu/libSDL2.so`目录中；运行`riscv64-linux-gnu-gcc -print-search-dirs`，发现前述目录并不在`riscv64-linux-gnu-gcc`所查找动态链接库的目录中，该动态链接版本也无法被`riscv64-linux-gnu`的工具链所读取。
+
+#### 目前（2024-08-06）的解决方案
+
+- 通过`dpkg add-architecture riscv64`、`apt update`、`apt install libsdl2-dev:riscv64`安装`riscv64`版本的SDL2
+- 在`abstract-machine/Makefile`的`LDFLAGS`中、`$(shell sdl2-config --libs)`之前增加`-L/usr/lib/riscv64-linux-gnu`以指定使用上一步所安装的SDL2
+- 在编译命令中将`$ISA`指定为`riscv64`而非`riscv32`
+  - 这会
 
 ## 实验必答题
 
