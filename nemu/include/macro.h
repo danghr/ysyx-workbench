@@ -83,8 +83,11 @@
 // NOTE2: each element in the container can be a tuple
 #define MAP(c, f) c(f)
 
+// Generate a mask with `bits` 1's starting from the lowest bit
 #define BITMASK(bits) ((1ull << (bits)) - 1)
+// Extract the bits from `hi` to `lo` in `x`
 #define BITS(x, hi, lo) (((x) >> (lo)) & BITMASK((hi) - (lo) + 1)) // similar to x[hi:lo] in verilog
+// Sign extension `x` with length `len` to 64 bits
 #define SEXT(x, len) ({ struct { int64_t n : len; } __x = { .n = x }; (uint64_t)__x.n; })
 
 #define ROUNDUP(a, sz)   ((((uintptr_t)a) + (sz) - 1) & ~((sz) - 1))
