@@ -2,7 +2,7 @@
 
 ## 实验进度
 
-### SDL2安装问题
+### 交叉编译时链接器找不到SDL2库
 
 #### 问题描述
 
@@ -22,7 +22,12 @@
 - 通过`dpkg add-architecture riscv64`、`apt update`、`apt install libsdl2-dev:riscv64`安装`riscv64`版本的SDL2
 - 在`abstract-machine/Makefile`的`LDFLAGS`中、`$(shell sdl2-config --libs)`之前增加`-L/usr/lib/riscv64-linux-gnu`以指定使用上一步所安装的SDL2
 - 在编译命令中将`$ISA`指定为`riscv64`而非`riscv32`
-  - 这会
+  - 这会关闭`COMMON_CFLAGS += -march=rv32im_zicsr -mabi=ilp32`和`LDFLAGS += -melf32lriscv`两个指令，从而使`riscv64-linux-gnu-ld`能够正确连接`riscv64`版本的`libsdl2.so`。
+  
+#### 上述方案引入的风险
+
+- 上述方案实际上将程序编译为`RV64G`而非`RV32I`，存在使用未定义寄存器和超过32为数据的风险。
+  - Workaround：考虑在现阶段删除SDL2库的引用或不安装SDL2库。
 
 ## 实验必答题
 
