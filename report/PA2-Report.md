@@ -17,17 +17,24 @@
 
 运行`find /usr -name libSDL2.so`，发现该文件位于`/usr/lib/aarch64-linux-gnu/libSDL2.so`目录中；运行`riscv64-linux-gnu-gcc -print-search-dirs`，发现前述目录并不在`riscv64-linux-gnu-gcc`所查找动态链接库的目录中，该动态链接版本也无法被`riscv64-linux-gnu`的工具链所读取。
 
-#### 目前（2024-08-06）的解决方案
+#### 解决方案1
 
 - 通过`dpkg add-architecture riscv64`、`apt update`、`apt install libsdl2-dev:riscv64`安装`riscv64`版本的SDL2
 - 在`abstract-machine/Makefile`的`LDFLAGS`中、`$(shell sdl2-config --libs)`之前增加`-L/usr/lib/riscv64-linux-gnu`以指定使用上一步所安装的SDL2
 - 在编译命令中将`$ISA`指定为`riscv64`而非`riscv32`
   - 这会关闭`COMMON_CFLAGS += -march=rv32im_zicsr -mabi=ilp32`和`LDFLAGS += -melf32lriscv`两个指令，从而使`riscv64-linux-gnu-ld`能够正确连接`riscv64`版本的`libsdl2.so`。
   
-#### 上述方案引入的风险
+##### 上述方案引入的风险
 
 - 上述方案实际上将程序编译为`RV64G`而非`RV32I`，存在使用未定义寄存器和超过32为数据的风险。
-  - Workaround：考虑在现阶段删除SDL2库的引用或不安装SDL2库。
+
+#### 解决方案2
+
+- 删除`abstract-machine/Makefile`中`CFLAGS`和`LDFLAGS`里有关`sdl2-config`的语句，使其不再链接SDL2库
+
+##### 上述方案引入的风险
+
+- 上述方案删除了对SDL2库的引用和链接，在后期需要音视频显示的应用里可能会工作不正常。
 
 ## 实验必答题
 
