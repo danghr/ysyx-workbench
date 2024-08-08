@@ -24,7 +24,7 @@
 
 // For instruction `jal`
 void jal_exec(Decode *s, int rd, word_t imm);
-void jalr_exec(Decode *s, int rd, int rs1, word_t imm);
+void jalr_exec(Decode *s, int rd, word_t src1, word_t imm);
 
 enum {
   TYPE_I, TYPE_U, TYPE_S,
@@ -105,9 +105,9 @@ void jal_exec(Decode *s, int rd, word_t imm) {
   // so we do not need to handle the case seperately
 }
 
-void jalr_exec(Decode *s, int rd, int rs1, word_t imm) {
+void jalr_exec(Decode *s, int rd, word_t src1, word_t imm) {
   // According to the document, "setting the least-significant bit of the result to zero"
-  s->dnpc = (R(rs1) + imm) & (~(vaddr_t)1);
+  s->dnpc = (vaddr_t)(src1 + imm) & (~(vaddr_t)1);
   // Put this line after the above line to ensure the correctness when rd == rs1
   R(rd) = s->snpc;
 }
