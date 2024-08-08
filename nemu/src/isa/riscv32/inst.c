@@ -24,6 +24,7 @@
 
 // For instruction `jal`
 void jal_exec(Decode *s, int rd, word_t imm);
+void jalr_exec(Decode *s, int rd, int rs1, word_t imm);
 
 enum {
   TYPE_I, TYPE_U, TYPE_S,
@@ -78,6 +79,7 @@ static int decode_exec(Decode *s) {
   INSTPAT("??????? ????? ????? 010 ????? 01000 11", sw     , S, Mw(src1 + imm, 4, src2));
 
   INSTPAT("??????? ????? ????? ??? ????? 11011 11", jal    , J, jal_exec(s, rd, imm));
+  INSTPAT("??????? ????? ????? 000 ????? 11001 11", jalr   , I, jalr_exec(s, rd, src1, imm));
 
   INSTPAT("0000000 00001 00000 000 00000 11100 11", ebreak , N, NEMUTRAP(s->pc, R(10))); // R(10) is $a0
   INSTPAT("??????? ????? ????? ??? ????? ????? ??", inv    , N, INV(s->pc));
@@ -89,11 +91,23 @@ static int decode_exec(Decode *s) {
 }
 
 int isa_exec_once(Decode *s) {
+  // `snpc` now equals to `pc + 4` as `inst_fetch` increments the first variable by 4
   s->isa.inst.val = inst_fetch(&s->snpc, 4);
   return decode_exec(s);
 }
 
 void jal_exec(Decode *s, int rd, word_t imm) {
-  R(rd) = s->pc + 4;
   s->dnpc = s->pc + imm;
+  // Use s->snpc to reflect the original design goal in ISA document
+  // "JAL stores the address of the instruction following the jump ('pc'+4) into register rd."
+  R(rd) = s->snpc;
+  // Note that "R(0) = 0" ensures the correctness of register $zero
+  // so we do not need to handle the case seperately
+}
+
+void jalr_exec(Decode *s, int rd, int rs1, word_t imm) {
+  // According to the document, "setting the least-significant bit of the result to zero"
+  s->dnpc = (R(rs1) + imm) & (~(vaddr_t)1);
+  // Put this line after the above line to ensure the correctness when rd == rs1
+  R(rd) = s->snpc;
 }
