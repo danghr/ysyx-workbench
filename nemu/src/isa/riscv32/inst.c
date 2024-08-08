@@ -97,6 +97,7 @@ int isa_exec_once(Decode *s) {
 }
 
 void jal_exec(Decode *s, int rd, word_t imm) {
+  printf("jal_exec: s->pc = 0x%x, imm = 0x%x\n", s->pc, imm);
   s->dnpc = s->pc + imm;
   // Use s->snpc to reflect the original design goal in ISA document
   // "JAL stores the address of the instruction following the jump ('pc'+4) into register rd."
