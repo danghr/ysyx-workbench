@@ -22,9 +22,10 @@
 #define Mr vaddr_read
 #define Mw vaddr_write
 
-// For instruction `jal`
-void jal_exec(Decode *s, int rd, word_t imm);
-void jalr_exec(Decode *s, int rd, word_t src1, word_t imm);
+// Instructions with complex design are implemented by functions.
+static void load_exec(Decode *s, int rd, word_t src1, word_t imm, int width);
+static void jal_exec(Decode *s, int rd, word_t imm);
+static void jalr_exec(Decode *s, int rd, word_t src1, word_t imm);
 
 enum {
   TYPE_I, TYPE_U, TYPE_S,
@@ -75,6 +76,8 @@ static int decode_exec(Decode *s) {
   INSTPAT("??????? ????? ????? 000 ????? 00100 11", addi   , I, R(rd) = src1 + imm);
   INSTPAT("??????? ????? ????? 100 ????? 00000 11", lbu    , I, R(rd) = Mr(src1 + imm, 1));
 
+  INSTPAT("??????? ????? ????? 010 ????? 00000 11", lw     , I, load_exec(s, rd, src1, imm, 4));
+
   INSTPAT("??????? ????? ????? 000 ????? 01000 11", sb     , S, Mw(src1 + imm, 1, src2));
   INSTPAT("??????? ????? ????? 010 ????? 01000 11", sw     , S, Mw(src1 + imm, 4, src2));
 
@@ -94,6 +97,15 @@ int isa_exec_once(Decode *s) {
   // `snpc` now equals to `pc + 4` as `inst_fetch` increments the first variable by 4
   s->isa.inst.val = inst_fetch(&s->snpc, 4);
   return decode_exec(s);
+}
+
+void load_exec(Decode *s, int rd, word_t src1, word_t imm, int width) {
+  /* According to RISC-V ISA document, "Loads with a destination of x0 must still raise
+     any exceptions and cause any other side effects even though the load value is
+     discarded." */
+  // TODO: Raise exception when necessary
+
+  R(rd) = Mr(src1 + imm, width);
 }
 
 void jal_exec(Decode *s, int rd, word_t imm) {
