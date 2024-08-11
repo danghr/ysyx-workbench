@@ -28,6 +28,7 @@ static void jal_exec(Decode *s, int rd, word_t imm);
 static void jalr_exec(Decode *s, int rd, word_t src1, word_t imm);
 
 enum {
+  TYPE_R,
   TYPE_I, TYPE_U, TYPE_S,
   TYPE_J,
   TYPE_N, // none
@@ -52,6 +53,7 @@ static void decode_operand(Decode *s, int *rd, word_t *src1, word_t *src2, word_
   /* Put the value of `rd`, `src1`, `src2` and `imm` in corresponding variables 
      according to the type of the instruction */
   switch (type) {
+    case TYPE_R: src1R(); src2R();         break;
     case TYPE_I: src1R();          immI(); break;
     case TYPE_U:                   immU(); break;
     case TYPE_S: src1R(); src2R(); immS(); break;
@@ -72,6 +74,8 @@ static int decode_exec(Decode *s) {
 
   INSTPAT_START();
   INSTPAT("??????? ????? ????? ??? ????? 00101 11", auipc  , U, R(rd) = s->pc + imm);
+
+  INSTPAT("0000000 ????? ????? 000 ????? 01100 11", add    , R, R(rd) = src1 + src2);
 
   INSTPAT("??????? ????? ????? 000 ????? 00100 11", addi   , I, R(rd) = src1 + imm);
   INSTPAT("??????? ????? ????? 100 ????? 00000 11", lbu    , I, R(rd) = Mr(src1 + imm, 1));
