@@ -80,8 +80,8 @@ static int decode_exec(Decode *s) {
 
   INSTPAT("0000000 ????? ????? 000 ????? 01100 11", add    , R, R(rd) = src1 + src2);
   INSTPAT("0100000 ????? ????? 000 ????? 01100 11", sub    , R, R(rd) = src1 - src2);
-#define MULT_DOUBLE_LENGTH_SIGNED MUXDEF(CONFIG_ISA64, __int128_t, __int64_t)
-#define MULT_DOUBLE_LENGTH_UNSIGNED MUXDEF(CONFIG_ISA64, __uint128_t, __uint64_t)
+#define MULT_DOUBLE_LENGTH_SIGNED MUXDEF(CONFIG_ISA64, __int128, int64_t)
+#define MULT_DOUBLE_LENGTH_UNSIGNED MUXDEF(CONFIG_ISA64, unsigned __int128, uint64_t)
   INSTPAT("0000001 ????? ????? 000 ????? 01100 11", mul    , R, R(rd) = (word_t)((MULT_DOUBLE_LENGTH_SIGNED)src1 * (MULT_DOUBLE_LENGTH_SIGNED)src2));
   INSTPAT("0000001 ????? ????? 001 ????? 01100 11", mulh   , R, R(rd) = (word_t)(((MULT_DOUBLE_LENGTH_SIGNED)src1 * (MULT_DOUBLE_LENGTH_SIGNED)src2) >> (MULT_DOUBLE_LENGTH_SIGNED)MUXDEF(CONFIG_ISA64, 64, 32)));
   INSTPAT("0000001 ????? ????? 100 ????? 01100 11", div    , R, R(rd) = (sword_t)src1 / (sword_t)src2); // signed
