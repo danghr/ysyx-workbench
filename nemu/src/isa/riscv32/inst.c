@@ -83,8 +83,9 @@ static int decode_exec(Decode *s) {
 #define MULT_DOUBLE_LENGTH_SIGNED MUXDEF(CONFIG_ISA64, __int128, int64_t)
 #define MULT_DOUBLE_LENGTH_UNSIGNED MUXDEF(CONFIG_ISA64, unsigned __int128, uint64_t)
 // 1,860,719,717,413,810,394
-  INSTPAT("0000001 ????? ????? 000 ????? 01100 11", mul    , R, R(rd) = (word_t)((MULT_DOUBLE_LENGTH_SIGNED)src1 * (MULT_DOUBLE_LENGTH_SIGNED)src2));
-  INSTPAT("0000001 ????? ????? 001 ????? 01100 11", mulh   , R, R(rd) = (word_t)(((MULT_DOUBLE_LENGTH_SIGNED)src1 * (MULT_DOUBLE_LENGTH_SIGNED)src2) >> (MULT_DOUBLE_LENGTH_SIGNED)MUXDEF(CONFIG_ISA64, 64, 32)));
+// 1,860,719,719,092,984,036
+  INSTPAT("0000001 ????? ????? 000 ????? 01100 11", mul    , R, R(rd) = (word_t)(src1 * src2));
+  INSTPAT("0000001 ????? ????? 001 ????? 01100 11", mulh   , R, R(rd) = (word_t)((src1 >> MUXDEF(CONFIG_ISA64, 32, 16)) * (src2 >> MUXDEF(CONFIG_ISA64, 32, 16))));
   INSTPAT("0000001 ????? ????? 100 ????? 01100 11", div    , R, R(rd) = (sword_t)src1 / (sword_t)src2); // signed
   INSTPAT("0000000 ????? ????? 010 ????? 01100 11", slt    , R, R(rd) = ((sword_t)src1 < (sword_t)src2) ? 1 : 0); // signed
   INSTPAT("0000000 ????? ????? 011 ????? 01100 11", sltu   , R, R(rd) = (src1 < src2) ? 1 : 0); // unsigned
