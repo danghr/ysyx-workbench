@@ -26,7 +26,6 @@
 static void branch_exec(Decode *s, bool cond, word_t imm);
 static void jal_exec(Decode *s, int rd, word_t imm);
 static void jalr_exec(Decode *s, int rd, word_t src1, word_t imm);
-static void mulh_exec(Decode *s, int rd, word_t src1, word_t src2);
 
 enum {
   TYPE_R, TYPE_I, TYPE_U, TYPE_S, TYPE_B, TYPE_J,
@@ -89,13 +88,18 @@ static int decode_exec(Decode *s) {
   /* Note that shift operations only shift "by the shift amount held in the lower 5 bits of register rs2".
      Refer to "2.4.2. Integer Register-Register Operations". */
   INSTPAT("0000000 ????? ????? 001 ????? 01100 11", sll    , R, R(rd) = src1 << BITS(src2, 4, 0));
-// RV32M/RV64M extension
-#define MULT_DOUBLE_LENGTH_SIGNED MUXDEF(CONFIG_ISA64, __int128, int64_t)
-#define MULT_DOUBLE_LENGTH_UNSIGNED MUXDEF(CONFIG_ISA64, unsigned __int128, int64_t)
-// 1,860,719,717,413,810,394
-// 1,860,719,719,092,984,036
-  INSTPAT("0000001 ????? ????? 000 ????? 01100 11", mul    , R, R(rd) = (sword_t)(src1 * src2));
-  INSTPAT("0000001 ????? ????? 001 ????? 01100 11", mulh   , R, mulh_exec(s, rd, src1, src2));
+  
+  // RV32M/RV64M extension for integer multiplication and division
+typedef MUXDEF(CONFIG_ISA64, __int128_t, int64_t) double_sword_t;
+// typedef MUXDEF(CONFIG_ISA64, __uint128_t, uint64_t) double_word_t;
+  /* Result of multiplication of 2's complement numbers is the same as treating the number as unsigned ones. 
+     Safely let the result overflows to get the lower 32 bits. */
+  INSTPAT("0000001 ????? ????? 000 ????? 01100 11", mul    , R, R(rd) = (word_t)(src1 * src2));
+  /* For singed operands in `mulh` and `mulhsu`, we need to convert the number first into `sword_t` then `double_sword_t`.
+     This is to ensure that the sign extension is correct when extending the number into higher bits, as directly converting `word_t`
+     into `double_word_t` treats the original number as unsigned numbers so that no sign extension will be done. */
+  INSTPAT("0000001 ????? ????? 001 ????? 01100 11", mulh   , R, R(rd) = (word_t)(((double_sword_t)(sword_t)src1 * (double_sword_t)(sword_t)src2) >> MUXDEF(CONFIG_ISA64, 64, 32)));
+  /* Result of division of 2's complement numbers is NOT the same as treating the number as unsigned ones. */
   INSTPAT("0000001 ????? ????? 100 ????? 01100 11", div    , R, R(rd) = (sword_t)src1 / (sword_t)src2); // signed
 
   INSTPAT("??????? ????? ????? 000 ????? 00100 11", addi   , I, R(rd) = src1 + imm);
@@ -159,13 +163,4 @@ void jalr_exec(Decode *s, int rd, word_t src1, word_t imm) {
   s->dnpc = (vaddr_t)(src1 + imm) & (~(vaddr_t)1);
   // Put this line after the above line to ensure the correctness when rd == rs1
   R(rd) = s->snpc;
-}
-
-void mulh_exec(Decode *s, int rd, word_t src1, word_t src2) {
-  // The result of MULH is the upper 32 bits of the result of the multiplication
-  // The result is signed, so we need to cast the result to a signed integer
-  // and then shift it right by 32 bits to get the upper 32 bits
-  int64_t result = (int64_t)src1 * (int64_t)src2;
-  result = result >> 32;
-  R(rd) = (sword_t)result;
 }
