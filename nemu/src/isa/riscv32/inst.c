@@ -26,6 +26,7 @@
 static void branch_exec(Decode *s, bool cond, word_t imm);
 static void jal_exec(Decode *s, int rd, word_t imm);
 static void jalr_exec(Decode *s, int rd, word_t src1, word_t imm);
+static void mulh_exec(Decode *s, int rd, word_t src1, word_t src2);
 
 enum {
   TYPE_R, TYPE_I, TYPE_U, TYPE_S, TYPE_B, TYPE_J,
@@ -93,8 +94,8 @@ static int decode_exec(Decode *s) {
 #define MULT_DOUBLE_LENGTH_UNSIGNED MUXDEF(CONFIG_ISA64, unsigned __int128, int64_t)
 // 1,860,719,717,413,810,394
 // 1,860,719,719,092,984,036
-  INSTPAT("0000001 ????? ????? 000 ????? 01100 11", mul    , R, R(rd) = (word_t)(src1 * src2));
-  INSTPAT("0000001 ????? ????? 001 ????? 01100 11", mulh   , R, R(rd) = (word_t)(((int64_t)src1 * (int64_t)src2) >> (int64_t)32));
+  INSTPAT("0000001 ????? ????? 000 ????? 01100 11", mul    , R, R(rd) = (sword_t)(src1 * src2));
+  INSTPAT("0000001 ????? ????? 001 ????? 01100 11", mulh   , R, mulh_exec(s, rd, src1, src2));
   INSTPAT("0000001 ????? ????? 100 ????? 01100 11", div    , R, R(rd) = (sword_t)src1 / (sword_t)src2); // signed
 
   INSTPAT("??????? ????? ????? 000 ????? 00100 11", addi   , I, R(rd) = src1 + imm);
@@ -158,4 +159,13 @@ void jalr_exec(Decode *s, int rd, word_t src1, word_t imm) {
   s->dnpc = (vaddr_t)(src1 + imm) & (~(vaddr_t)1);
   // Put this line after the above line to ensure the correctness when rd == rs1
   R(rd) = s->snpc;
+}
+
+void mulh_exec(Decode *s, int rd, word_t src1, word_t src2) {
+  // The result of MULH is the upper 32 bits of the result of the multiplication
+  // The result is signed, so we need to cast the result to a signed integer
+  // and then shift it right by 32 bits to get the upper 32 bits
+  int64_t result = (int64_t)src1 * (int64_t)src2;
+  result = result >> 32;
+  R(rd) = (sword_t)result;
 }
