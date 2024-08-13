@@ -80,10 +80,6 @@ static int decode_exec(Decode *s) {
 
   INSTPAT("0000000 ????? ????? 000 ????? 01100 11", add    , R, R(rd) = src1 + src2);
   INSTPAT("0100000 ????? ????? 000 ????? 01100 11", sub    , R, R(rd) = src1 - src2);
-#define MULT_DOUBLE_LENGTH_SIGNED MUXDEF(CONFIG_ISA64, __int128_t, __int64_t)
-#define MULT_DOUBLE_LENGTH_UNSIGNED MUXDEF(CONFIG_ISA64, __uint128_t, __uint64_t)
-  INSTPAT("0000001 ????? ????? 000 ????? 01100 11", mul    , R, R(rd) = (word_t)((MULT_DOUBLE_LENGTH_SIGNED)src1 * (MULT_DOUBLE_LENGTH_SIGNED)src2));
-  INSTPAT("0000001 ????? ????? 100 ????? 01100 11", div    , R, R(rd) = (sword_t)src1 / (sword_t)src2); // signed
   INSTPAT("0000000 ????? ????? 010 ????? 01100 11", slt    , R, R(rd) = ((sword_t)src1 < (sword_t)src2) ? 1 : 0); // signed
   INSTPAT("0000000 ????? ????? 011 ????? 01100 11", sltu   , R, R(rd) = (src1 < src2) ? 1 : 0); // unsigned
   INSTPAT("0000000 ????? ????? 111 ????? 01100 11", and    , R, R(rd) = src1 & src2);
@@ -92,11 +88,25 @@ static int decode_exec(Decode *s) {
   /* Note that shift operations only shift "by the shift amount held in the lower 5 bits of register rs2".
      Refer to "2.4.2. Integer Register-Register Operations". */
   INSTPAT("0000000 ????? ????? 001 ????? 01100 11", sll    , R, R(rd) = src1 << BITS(src2, 4, 0));
+  
+  // RV32M/RV64M extension for integer multiplication and division
+typedef MUXDEF(CONFIG_ISA64, __int128_t, int64_t) double_sword_t;
+// typedef MUXDEF(CONFIG_ISA64, __uint128_t, uint64_t) double_word_t;
+  /* Result of multiplication of 2's complement numbers is the same as treating the number as unsigned ones. 
+     Safely let the result overflows to get the lower 32 bits. */
+  INSTPAT("0000001 ????? ????? 000 ????? 01100 11", mul    , R, R(rd) = (word_t)(src1 * src2));
+  /* For singed operands in `mulh` and `mulhsu`, we need to convert the number first into `sword_t` then `double_sword_t`.
+     This is to ensure that the sign extension is correct when extending the number into higher bits, as directly converting `word_t`
+     into `double_word_t` treats the original number as unsigned numbers so that no sign extension will be done. */
+  INSTPAT("0000001 ????? ????? 001 ????? 01100 11", mulh   , R, R(rd) = (word_t)(((double_sword_t)(sword_t)src1 * (double_sword_t)(sword_t)src2) >> MUXDEF(CONFIG_ISA64, 64, 32)));
+  /* Result of division of 2's complement numbers is NOT the same as treating the number as unsigned ones. */
+  INSTPAT("0000001 ????? ????? 100 ????? 01100 11", div    , R, R(rd) = (sword_t)src1 / (sword_t)src2); // signed
 
   INSTPAT("??????? ????? ????? 000 ????? 00100 11", addi   , I, R(rd) = src1 + imm);
   INSTPAT("??????? ????? ????? 011 ????? 00100 11", sltiu  , I, R(rd) = (src1 < imm) ? 1 : 0);  // unsigned
   INSTPAT("??????? ????? ????? 111 ????? 00100 11", andi   , I, R(rd) = src1 & imm);
   INSTPAT("??????? ????? ????? 100 ????? 00100 11", xori   , I, R(rd) = src1 ^ imm);
+  INSTPAT("0000000 ????? ????? 001 ????? 00100 11", slli   , I, R(rd) = src1 << BITS(imm, 4, 0));
 
   /* Note that in a shift-by-a-constant instructions, only imm[4:0] is used as the shift amount, and
      inst[30] is used to distinguish between SRLI and SRAI.
