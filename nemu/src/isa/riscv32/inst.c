@@ -254,11 +254,18 @@ void div_exec(int rd, word_t src1, word_t src2, bool is_signed, bool out_remaind
   word_t quotient;
   word_t remainder;
   
-  // Handle division by zero
+  // Handle special cases
   // Refer to "13.2. Division Operations"
   if (unlikely(src2 == 0)) {
+    // Division by zero
     quotient = (word_t)(-1);  // All bits set to 1
     remainder = src1;
+  } else if (unlikely(is_signed && 
+             (src1 == (word_t)(MUXDEF(CONFIG_ISA64, 0x8000000000000000, 0x80000000)) &&
+              src2 == (word_t)-1))) {
+    // Overflow
+    quotient = src1;
+    remainder = 0;
   } else {
     quotient = is_signed ? ((sword_t)src1 / (sword_t)src2) : (src1 / src2);
     remainder = is_signed ? ((sword_t)src1 % (sword_t)src2) : (src1 % src2);
