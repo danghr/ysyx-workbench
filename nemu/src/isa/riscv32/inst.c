@@ -90,6 +90,7 @@ static int decode_exec(Decode *s) {
   /* Note that shift operations only shift "by the shift amount held in the lower 5 bits of register rs2".
      Refer to "2.4.2. Integer Register-Register Operations". */
   INSTPAT("0000000 ????? ????? 001 ????? 01100 11", sll    , R, R(rd) = src1 << BITS(src2, 4, 0));
+  INSTPAT("0000000 ????? ????? 101 ????? 01100 11", srl    , R, R(rd) = src1 >> BITS(src2, 4, 0));
   INSTPAT("0100000 ????? ????? 101 ????? 01100 11", sra    , R, R(rd) = (sword_t)src1 >> BITS(src2, 4, 0));
   
   // RV32M/RV64M extension for integer multiplication and division
