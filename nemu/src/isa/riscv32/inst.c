@@ -216,6 +216,7 @@ int isa_exec_once(Decode *s) {
  */
 void check_inst_alignment(vaddr_t pc) {
   if (unlikely((pc & 0x3) != 0)) {
+    printf("Unaligned instruction address: " FMT_WORD "\n", pc);
     // Raise an exception if the target address is not aligned to 4 bytes
     // TODO: Raise an exception
     assert(0);
