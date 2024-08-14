@@ -26,6 +26,7 @@
 static void branch_exec(Decode *s, bool cond, word_t imm);
 static void jal_exec(Decode *s, int rd, word_t imm);
 static void jalr_exec(Decode *s, int rd, word_t src1, word_t imm);
+static void div_exec(int rd, word_t src1, word_t src2, bool is_signed, bool out_remainder);
 
 enum {
   TYPE_R, TYPE_I, TYPE_U, TYPE_S, TYPE_B, TYPE_J,
@@ -101,7 +102,8 @@ typedef MUXDEF(CONFIG_ISA64, __int128_t, int64_t) double_sword_t;
      into `double_word_t` treats the original number as unsigned numbers so that no sign extension will be done. */
   INSTPAT("0000001 ????? ????? 001 ????? 01100 11", mulh   , R, R(rd) = (word_t)(((double_sword_t)(sword_t)src1 * (double_sword_t)(sword_t)src2) >> MUXDEF(CONFIG_ISA64, 64, 32)));
   /* Result of division of 2's complement numbers is NOT the same as treating the number as unsigned ones. */
-  INSTPAT("0000001 ????? ????? 100 ????? 01100 11", div    , R, R(rd) = (sword_t)src1 / (sword_t)src2); // signed
+  INSTPAT("0000001 ????? ????? 100 ????? 01100 11", div    , R, div_exec(rd, src1, src2, true, false)); // signed
+  INSTPAT("0000001 ????? ????? 110 ????? 01100 11", rem    , R, div_exec(rd, src1, src2, true, true));  // signed
 
   INSTPAT("??????? ????? ????? 000 ????? 00100 11", addi   , I, R(rd) = src1 + imm);
   INSTPAT("??????? ????? ????? 011 ????? 00100 11", sltiu  , I, R(rd) = (src1 < imm) ? 1 : 0);  // unsigned
@@ -166,4 +168,22 @@ void jalr_exec(Decode *s, int rd, word_t src1, word_t imm) {
   s->dnpc = (vaddr_t)(src1 + imm) & (~(vaddr_t)1);
   // Put this line after the above line to ensure the correctness when rd == rs1
   R(rd) = s->snpc;
+}
+
+void div_exec(int rd, word_t src1, word_t src2, bool is_signed, bool out_remainder) {
+  word_t quotient;
+  word_t remainder;
+  
+  // Handle division by zero
+  // Refer to "13.2. Division Operations"
+  if (unlikely(src2 == 0)) {
+    quotient = (word_t)(-1);  // All bits set to 1
+    remainder = src1;
+  } else {
+    quotient = is_signed ? ((sword_t)src1 / (sword_t)src2) : (src1 / src2);
+    remainder = is_signed ? ((sword_t)src1 % (sword_t)src2) : (src1 % src2);
+  }
+  
+  if (out_remainder) R(rd) = remainder;
+  else R(rd) = quotient;
 }
