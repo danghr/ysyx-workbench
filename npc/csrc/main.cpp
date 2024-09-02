@@ -139,7 +139,7 @@ int main(int argc, char **argv)
 #endif
 
 #ifdef _SEQUENTIAL_LOGIC
-    reset(5);
+    reset(3);
 #endif
 
     // =============================
@@ -150,6 +150,7 @@ int main(int argc, char **argv)
     while (sim_cycle++ < MAX_CYCLES) {
         top->inst = 0x00100093;    // addi x1, x0, 1
         single_cycle();
+        printf("Cycle %d\n", sim_cycle);
         print_reg();
     }
 
