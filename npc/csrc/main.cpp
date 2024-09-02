@@ -50,6 +50,7 @@ void status_change() {
 void single_cycle() {
     top->clk = 1; status_change();
     top->clk = 0; status_change();
+    printf("Next cycle!\n");
 }
 
 void reset(int n) {
