@@ -119,6 +119,17 @@ void print_reg() {
     }
 }
 
+uint32_t memory(uint32_t addr) {
+    uint32_t insts[] = {
+        0x00100093,     // addi x1, x0, 1
+        0x00108113,     // addi x2, x1, 1
+        0x00a10a13,     // addi x20, x2, 10
+        0x00108093,     // addi x1, x1, 1
+        0x00108093,     // addi x1, x1, 1
+    };
+    return insts[addr - 0x80000000];
+}
+
 
 int main(int argc, char **argv)
 {
@@ -148,7 +159,7 @@ int main(int argc, char **argv)
 
     int sim_cycle = 0;
     while (sim_cycle++ < MAX_CYCLES) {
-        top->top_signal_inst = 0x00100093;    // addi x1, x0, 1
+        top->top_signal_inst = memory(top->top_signal_pc);    // addi x1, x0, 1
         single_cycle();
         printf("Cycle %d\n", sim_cycle);
         print_reg();
