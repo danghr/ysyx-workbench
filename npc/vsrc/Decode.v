@@ -1,5 +1,7 @@
-module ysyx_24070014_Decode #(WORD_LEN = 32) (
-  input [31:0] inst,
+`include "vsrc/DEFINITION.v"
+
+module ysyx_24070014_Decode (
+  input [`ysyx_24070014_INST_LEN-1:0] inst,
   input branch_equal,
   input branch_lessthan,
   output pc_sel,
@@ -18,9 +20,8 @@ module ysyx_24070014_Decode #(WORD_LEN = 32) (
   assign pc_sel = 0;  // 0 for pc+4
 
   // imm_sel
-  `include "vsrc/imm_def.v"
   assign imm_sel = 3'd1;
-  // ysyx_24070014_MuxKeyWithDefault #(8, 7, WORD_LEN) mux_imm_sel (inst[6:0], imm_sel, 3'b0, {
+  // ysyx_24070014_MuxKeyWithDefault #(8, 7, ysyx_24070014_INST_LEN) mux_imm_sel (inst[6:0], imm_sel, 3'b0, {
   //   7'0110011, 3'b0,  // Register-register arthimetic operations
   //   7'0010011, imm_I, // Register-immediate arthimetic operations
   //   7'0000011, imm_I, // load instructions
@@ -35,7 +36,7 @@ module ysyx_24070014_Decode #(WORD_LEN = 32) (
 
   // reg_write_en
   assign reg_write_en = 1'b1;
-  // ysyx_24070014_MuxKeyWithDefault #(8, 7, WORD_LEN) mux_reg_write_en_sel (inst[6:0], reg_write_en, 1'b0, {
+  // ysyx_24070014_MuxKeyWithDefault #(8, 7, ysyx_24070014_INST_LEN) mux_reg_write_en_sel (inst[6:0], reg_write_en, 1'b0, {
   //   7'0110011, 1'b1,  // Register-register arthimetic operations
   //   7'0010011, 1'b1,  // Register-immediate arthimetic operations
   //   7'0000011, 1'b1,  // load instructions
@@ -63,7 +64,7 @@ module ysyx_24070014_Decode #(WORD_LEN = 32) (
   // operand_a_sel
   // Set to 0 for register `rs1`. Set to 1 for `pc`.
   assign operand_a_sel = 1'b0;
-  // ysyx_24070014_MuxKeyWithDefault #(8, 7, WORD_LEN) mux_reg_operand_a_sel (inst[6:0], operand_a_sel, 1'b0, {
+  // ysyx_24070014_MuxKeyWithDefault #(8, 7, ysyx_24070014_INST_LEN) mux_reg_operand_a_sel (inst[6:0], operand_a_sel, 1'b0, {
   //   7'0110011, 1'b0,  // Register-register arthimetic operations
   //   7'0010011, 1'b0,  // Register-immediate arthimetic operations
   //   7'0000011, 1'b0,  // Load instructions
@@ -79,7 +80,7 @@ module ysyx_24070014_Decode #(WORD_LEN = 32) (
   // operand_b_sel
   // Set to 0 for register `rs2`. Set to 1 for immediate.
   assign operand_b_sel = 1'b1;
-  // ysyx_24070014_MuxKeyWithDefault #(8, 7, WORD_LEN) mux_reg_operand_a_sel (inst[6:0], operand_a_sel, 1'b0, {
+  // ysyx_24070014_MuxKeyWithDefault #(8, 7, ysyx_24070014_INST_LEN) mux_reg_operand_a_sel (inst[6:0], operand_a_sel, 1'b0, {
   //   7'0110011, 1'b0,  // Register-register arthimetic operations
   //   7'0010011, 1'b1,  // Register-immediate arthimetic operations
   //   7'0000011, 1'b1,  // Load instructions
@@ -98,7 +99,7 @@ module ysyx_24070014_Decode #(WORD_LEN = 32) (
   // mem_write_en
   assign mem_write_en = 1'b0;
   // Only enable for store instructions
-  // ysyx_24070014_MuxKeyWithDefault #(8, 7, WORD_LEN) mux_mem_write_en (inst[6:0], mem_write_en, 1'b0, {
+  // ysyx_24070014_MuxKeyWithDefault #(8, 7, ysyx_24070014_INST_LEN) mux_mem_write_en (inst[6:0], mem_write_en, 1'b0, {
   //   7'0110011, 1'b0,  // Register-register arthimetic operations
   //   7'0010011, 1'b0,  // Register-immediate arthimetic operations
   //   7'0000011, 1'b0,  // Load instructions
@@ -114,7 +115,7 @@ module ysyx_24070014_Decode #(WORD_LEN = 32) (
   // writeback_sel
   // Set to 0 for `mem`, 1 for `alu_out`, 2 for `pc + 4`.
   assign writeback_sel = 2'b1;
-  // ysyx_24070014_MuxKeyWithDefault #(8, 7, WORD_LEN) mux_writeback_sel (inst[6:0], writeback_sel, 2'b0, {
+  // ysyx_24070014_MuxKeyWithDefault #(8, 7, ysyx_24070014_INST_LEN) mux_writeback_sel (inst[6:0], writeback_sel, 2'b0, {
   //   7'0110011, 2'b1,  // Register-register arthimetic operations
   //   7'0010011, 2'b1,  // Register-immediate arthimetic operations
   //   7'0000011, 2'b0,  // Load instructions

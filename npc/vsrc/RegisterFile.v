@@ -45,7 +45,7 @@ module ysyx_24070014_RegisterFile #(ADDR_WIDTH = 5, WORD_LEN = 32) (
   // Write on posedge
   always @(posedge clk) begin
     if (wen) rf[waddr] <= wdata;
-    rf[0] = 0; // x0 is always 0
+    rf[0] <= 0; // x0 is always 0
   end
 
   // Read
