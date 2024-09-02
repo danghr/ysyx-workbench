@@ -2,6 +2,7 @@
 #include TOP_NAME_H_FILE    // Defined in npc/Makefile
 #include "verilated.h"
 #include "verilated_vcd_c.h"
+#include "regs.h"
 
 
 // Configuration of whether use tracing, sequential logic, or NVBoard
@@ -109,15 +110,6 @@ bool check_2s_complement_bits(T result, T ref, int bits) {
     return result_conv == ref_conv;
 }
 
-void print_reg() {
-    // Map registers signal to an array
-    uint32_t *regs = top->top_signal_regfile;
-
-    // Print the value of each register
-    for (int i = 0; i < 32; i++) {
-        printf("x%d: %d\n", i, regs[i]);
-    }
-}
 
 uint32_t memory(uint32_t addr) {
     uint32_t insts[] = {
@@ -128,6 +120,14 @@ uint32_t memory(uint32_t addr) {
         0x00108093,     // addi x1, x1, 1
     };
     return insts[(addr - 0x80000000) / 4];
+}
+
+void ysyx_24070014_ecall() {
+    return ;
+}
+
+void ysyx_24070014_ebreak() {
+    return ;
 }
 
 
@@ -162,7 +162,7 @@ int main(int argc, char **argv)
         top->top_signal_inst = memory(top->top_signal_pc);    // addi x1, x0, 1
         single_cycle();
         printf("Cycle %d\n", sim_cycle);
-        print_reg();
+        isa_reg_display(top);
         printf("\n");
     }
 
