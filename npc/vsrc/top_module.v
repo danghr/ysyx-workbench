@@ -15,7 +15,7 @@ module ysyx_24070014_top_module (
   output top_signal_mem_write_en,
 
   // Signal to access regfile
-  output [`ysyx_24070014_DATA_LEN-1:0] top_signal_regfile[31:0]
+  output [`ysyx_24070014_DATA_LEN-1:0] top_signal_regfile[2**`ysyx_24070014_REG_ADDR_WIDTH-1:0]
 );
 
   // PC
@@ -76,7 +76,7 @@ module ysyx_24070014_top_module (
 
   // Register file, with 32 registers each of `DATA_LEN` bits
   wire [`ysyx_24070014_DATA_LEN-1:0] reg_data_rs1, reg_data_rs2, reg_data_write;
-  ysyx_24070014_RegisterFile #(5, `ysyx_24070014_DATA_LEN) regfile (
+  ysyx_24070014_RegisterFile #(`ysyx_24070014_REG_ADDR_WIDTH, `ysyx_24070014_DATA_LEN) regfile (
     .clk(clk),
     .reset(reset),
     .raddr1(inst_rs1),
