@@ -18,8 +18,8 @@
 module ysyx_24070014_RegisterFile #(ADDR_WIDTH = 5, WORD_LEN = 32) (
   input clk,
   input reset,
-  input [ADDR_WIDTH-1:0] raddr1,
-  input [ADDR_WIDTH-1:0] raddr2,
+  input [WORD_LEN-1:0] raddr1,
+  input [WORD_LEN-1:0] raddr2,
   input [WORD_LEN-1:0] wdata,
   input [ADDR_WIDTH-1:0] waddr,
   input wen,
@@ -42,15 +42,15 @@ module ysyx_24070014_RegisterFile #(ADDR_WIDTH = 5, WORD_LEN = 32) (
     end
   end
 
-  // Write on posedge
+  // Write and read on posedge
   always @(posedge clk) begin
     if (wen) rf[waddr] <= wdata;
-    rf[0] = 0; // x0 is always 0
+    /* Note that for instructions like `addi r1, r1, 1`, we do not want to change the value of `r1`
+       until the next cycle. So it should be fine to read the value of `r1` in the same cycle as
+       the write operation. */
+    rdata1 <= rf[raddr1];
+    rdata2 <= rf[raddr2];
   end
-
-  // Read
-  assign rdata1 = rf[raddr1];
-  assign rdata2 = rf[raddr2];
 
   // To inspect registers
   assign signal_rf = rf;

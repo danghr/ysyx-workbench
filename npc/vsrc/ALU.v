@@ -17,7 +17,7 @@ module ysyx_24070014_ALU #(WORD_LEN = 32) (
   input [WORD_LEN-1:0] in1,
   input [4:0] alu_op,
   output [WORD_LEN-1:0] out
-);
+)
   // Add
   wire [WORD_LEN-1:0] add_out;
   assign add_out = in0 + in1;
@@ -47,8 +47,8 @@ module ysyx_24070014_ALU #(WORD_LEN = 32) (
   // Divide & Remainder unsigned
 
   // Output
-  ysyx_24070014_MuxKeyWithDefault #(1, 5, WORD_LEN) mux (out, alu_op, 32'b0, {
-    5'h0, add_out
+  ysyx_24070014_MuxKey #(5, WORD_LEN) mux (out, alu_op, WORD_LEN'b0, {
+    5'h0, add_out,
   });
 
 endmodule

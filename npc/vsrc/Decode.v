@@ -6,11 +6,11 @@ module ysyx_24070014_Decode #(WORD_LEN = 32) (
   output [2:0] imm_sel,
   output reg_write_en,
   output branch_unsigned,
-  output operand_a_sel,
-  output operand_b_sel,
+  output oprand_a_sel,
+  output oprand_b_sel,
   output [4:0] alu_sel,
   output mem_write_en,
-  output [1:0] writeback_sel
+  output writeback_sel
 );
 
   // pc_sel
@@ -18,18 +18,22 @@ module ysyx_24070014_Decode #(WORD_LEN = 32) (
   assign pc_sel = 0;  // 0 for pc+4
 
   // imm_sel
-  `include "vsrc/imm_def.v"
-  assign imm_sel = `ysyx_24070014_imm_I;
+  integer imm-I = 3'b1;
+  integer imm-S = 3'b2;
+  integer imm-B = 3'b3;
+  integer imm-J = 3'b4;
+  integer imm-U = 3'b5;
+  assign imm_sel = imm-I;
   // ysyx_24070014_MuxKeyWithDefault #(8, 7, WORD_LEN) mux_imm_sel (inst[6:0], imm_sel, 3'b0, {
   //   7'0110011, 3'b0,  // Register-register arthimetic operations
-  //   7'0010011, imm_I, // Register-immediate arthimetic operations
-  //   7'0000011, imm_I, // load instructions
-  //   7'0100011, imm_S, // store instructions
-  //   7'1100011, imm_B, // branch instructions
-  //   7'1101111, imm_J, // `jal`
-  //   7'1100111, imm_I, // `jalr`
-  //   7'0010111, imm_U, // `auipc`
-  //   7'0110111, imm_U, // `lui`
+  //   7'0010011, imm-I, // Register-immediate arthimetic operations
+  //   7'0000011, imm-I, // load instructions
+  //   7'0100011, imm-S, // store instructions
+  //   7'1100011, imm-B, // branch instructions
+  //   7'1101111, imm-J, // `jal`
+  //   7'1100111, imm-I, // `jalr`
+  //   7'0010111, imm-U, // `auipc`
+  //   7'0110111, imm-U, // `lui`
   //   7'1110011, 3'b0   // System instructions, e.g., `ecall` and `ebreak`
   // });
 
