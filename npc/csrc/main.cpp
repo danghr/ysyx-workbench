@@ -152,6 +152,7 @@ int main(int argc, char **argv)
         single_cycle();
         printf("Cycle %d\n", sim_cycle);
         print_reg();
+        printf("\n");
     }
 
     // =============================
