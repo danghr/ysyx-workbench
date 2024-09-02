@@ -19,7 +19,7 @@ module ysyx_24070014_Decode #(WORD_LEN = 32) (
 
   // imm_sel
   `include "vsrc/imm_def.v"
-  assign imm_sel = `ysyx_24070014_imm_I;
+  assign imm_sel = 3'd1;
   // ysyx_24070014_MuxKeyWithDefault #(8, 7, WORD_LEN) mux_imm_sel (inst[6:0], imm_sel, 3'b0, {
   //   7'0110011, 3'b0,  // Register-register arthimetic operations
   //   7'0010011, imm_I, // Register-immediate arthimetic operations
