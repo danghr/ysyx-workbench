@@ -123,10 +123,10 @@ endmodule
 module ysyx_24070014_Mux21 #(DATA_LEN = 1) (
   input sel,                 // Select signal
   input [DATA_LEN-1:0] in0,  // Input 0
-  input [DATA_LEN-1:0] in1   // Input 1
-  output [DATA_LEN-1:0] out,  // Output
+  input [DATA_LEN-1:0] in1,  // Input 1
+  output [DATA_LEN-1:0] out  // Output
 );
-  ysyx_24070014_MuxKeyWithDefault #(2, 1, DATA_LEN) i0 (out, sel, DATA_LEN'b0, {
+  ysyx_24070014_MuxKeyWithDefault #(2, 1, DATA_LEN) i0 (out, sel, 32'b0, {
     1'b0, in0,
     1'b1, in1
   });
@@ -151,7 +151,7 @@ module ysyx_24070014_Mux31 #(DATA_LEN = 1) (
   input [DATA_LEN-1:0] in2,   // Input 2
   output [DATA_LEN-1:0] out   // Output
 );
-  ysyx_24070014_MuxKeyWithDefault #(3, 2, DATA_LEN) i0 (out, sel, DATA_LEN'b0, {
+  ysyx_24070014_MuxKeyWithDefault #(3, 2, DATA_LEN) i0 (out, sel, 32'b0, {
     2'b00, in0,
     2'b01, in1,
     2'b10, in2
@@ -179,7 +179,7 @@ module ysyx_24070014_Mux41 #(DATA_LEN = 1) (
   input [DATA_LEN-1:0] in3,   // Input 3
   output [DATA_LEN-1:0] out   // Output
 );
-  ysyx_24070014_MuxKeyWithDefault #(4, 2, DATA_LEN) i0 (out, sel, DATA_LEN'b0, {
+  ysyx_24070014_MuxKeyWithDefault #(4, 2, DATA_LEN) i0 (out, sel, 32'b0, {
     2'b00, in0,
     2'b01, in1,
     2'b10, in2,
