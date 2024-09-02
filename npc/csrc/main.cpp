@@ -20,7 +20,7 @@ bool ASSERTION_FAILED = false;
         goto EXIT; \
     }
 
-#define MAX_CYCLES 1e7
+#define MAX_CYCLES 5
 #ifdef _SEQUENTIAL_LOGIC
 const int MAX_SIM_TIME = (MAX_CYCLES) * 2;
 #else
@@ -50,7 +50,6 @@ void status_change() {
 void single_cycle() {
     top->clk = 1; status_change();
     top->clk = 0; status_change();
-    printf("Next cycle!\n");
 }
 
 void reset(int n) {
@@ -110,6 +109,16 @@ bool check_2s_complement_bits(T result, T ref, int bits) {
     return result_conv == ref_conv;
 }
 
+void print_reg() {
+    // Map registers signal to an array
+    uint32_t *regs = top->top_signal_regfile;
+
+    // Print the value of each register
+    for (int i = 0; i < 32; i++) {
+        printf("x%d: %d\n", i, regs[i]);
+    }
+}
+
 
 int main(int argc, char **argv)
 {
@@ -137,11 +146,10 @@ int main(int argc, char **argv)
     // === Begin simulation body ===
     // =============================
 
-    reset(1);
-
     while (true) {
         top->inst = 0x00100093;    // addi x1, x0, 1
         single_cycle();
+        print_reg();
     }
 
     // =============================
