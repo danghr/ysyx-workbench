@@ -7,7 +7,7 @@
 // Configuration of whether use tracing, sequential logic, or NVBoard
 #define _DO_TRACE
 #define _SEQUENTIAL_LOGIC
-#define _NVBOARD
+// #define _NVBOARD
 
 
 // Assertion macro
@@ -139,6 +139,7 @@ int main(int argc, char **argv)
     reset(1);
 
     while (true) {
+        top->inst = 0x00100093;    // addi x1, x0, 1
         single_cycle();
     }
 
