@@ -148,7 +148,7 @@ int main(int argc, char **argv)
 
     int sim_cycle = 0;
     while (sim_cycle++ < MAX_CYCLES) {
-        top->inst = 0x00100093;    // addi x1, x0, 1
+        top->top_signal_inst = 0x00100093;    // addi x1, x0, 1
         single_cycle();
         printf("Cycle %d\n", sim_cycle);
         print_reg();

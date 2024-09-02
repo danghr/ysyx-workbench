@@ -6,8 +6,8 @@ module ysyx_24070014_top_module (
   input reset,
 
   // Signal to access the memory for instruction fetch
-  output reg [`ysyx_24070014_WORD_LEN-1:0] pc,
-  input [31:0] inst,
+  output reg [`ysyx_24070014_WORD_LEN-1:0] top_signal_pc,
+  input [31:0] top_signal_inst,
 
   // Signal to access main mamory
   output [`ysyx_24070014_WORD_LEN-1:0] top_signal_mem_addr,
@@ -15,33 +15,25 @@ module ysyx_24070014_top_module (
   output [`ysyx_24070014_WORD_LEN-1:0] top_signal_mem_data_write,
   output top_signal_mem_write_en,
 
-  // Signal to read the register file
-  output [`ysyx_24070014_WORD_LEN-1:0] top_signal_regfile [2**5-1:0],
-
-  // Signal for control signals
-  output [15:0] top_signal_control_signal
+  // Signal to access regfile
+  output reg[31:0] top_signal_regfile[31:0]
 );
+
+  // PC
+  reg [31:0] pc;
+  wire [31:0] inst;
+  assign inst = top_signal_inst;
+  assign top_signal_pc = pc;
 
   wire [4:0] inst_rd = inst[11:7];
   wire [4:0] inst_rs1 = inst[19:15];
   wire [4:0] inst_rs2 = inst[24:20];
 
   // Control signal
-  wire [15:0] control_signal;
   wire pc_sel, reg_write_en, branch_unsigned, operand_a_sel, operand_b_sel, mem_write_en;
   wire [1:0] writeback_sel;
   wire [2:0] imm_sel;
   wire [4:0] alu_sel;
-  assign top_signal_control_signal = control_signal;
-  assign pc_sel = control_signal[0];
-  assign imm_sel = control_signal[3:1];
-  assign reg_write_en = control_signal[4];
-  assign branch_unsigned = control_signal[5];
-  assign operand_a_sel = control_signal[6];
-  assign operand_b_sel = control_signal[7];
-  assign alu_sel = control_signal[12:8];
-  assign mem_write_en = control_signal[13];
-  assign writeback_sel = control_signal[15:14];
   ysyx_24070014_Decode #(`ysyx_24070014_WORD_LEN) decode (
     .inst(inst),
     .branch_equal(0),
