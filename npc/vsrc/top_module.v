@@ -1,5 +1,9 @@
 `include "vsrc/DEFINITION.v"
 
+// DPI-C functions
+// import "DPI-C" function void ysyx_24070014_ecall();
+// import "DPI-C" function void ysyx_24070014_ebreak();
+
 module ysyx_24070014_top_module (
   input clk,
   input reset,
@@ -55,6 +59,7 @@ module ysyx_24070014_top_module (
   wire [1:0] writeback_sel;
   wire [2:0] imm_sel;
   wire [4:0] alu_sel;
+  wire ecall, ebreak;
   ysyx_24070014_Decode decoder (
     .inst(inst),
     .branch_equal(0),
@@ -67,7 +72,9 @@ module ysyx_24070014_top_module (
     .operand_b_sel(operand_b_sel),
     .alu_sel(alu_sel),
     .mem_write_en(mem_write_en),
-    .writeback_sel(writeback_sel)
+    .writeback_sel(writeback_sel),
+    .ecall(ecall),
+    .ebreak(ebreak)
   );
 
   // Register operands
@@ -152,5 +159,8 @@ module ysyx_24070014_top_module (
     .in2(pc_plus_4),                        // PC+4
     .out(reg_data_write)
   );
+
+  // Ecall and ebreak
+
 
 endmodule
