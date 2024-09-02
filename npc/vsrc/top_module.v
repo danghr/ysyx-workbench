@@ -1,5 +1,4 @@
-`define ysyx_24070014_WORD_LEN 32
-`define ysyx_24070014_INIT_PC `ysyx_24070014_WORD_LEN'h80000000
+`include "vsrc/DEFINITION.v"
 
 module ysyx_24070014_top_module (
   input clk,
@@ -16,12 +15,12 @@ module ysyx_24070014_top_module (
   output top_signal_mem_write_en,
 
   // Signal to access regfile
-  output reg[31:0] top_signal_regfile[31:0]
+  output [`ysyx_24070014_DATA_LEN-1:0] top_signal_regfile[31:0]
 );
 
   // PC
-  reg [31:0] pc;
-  wire [31:0] inst;
+  reg [`ysyx_24070014_ADDR_LEN-1:0] pc;
+  wire [`ysyx_24070014_INST_LEN-1:0] inst;
   assign inst = top_signal_inst;
   assign top_signal_pc = pc;
 
@@ -34,7 +33,7 @@ module ysyx_24070014_top_module (
   wire [1:0] writeback_sel;
   wire [2:0] imm_sel;
   wire [4:0] alu_sel;
-  ysyx_24070014_Decode #(`ysyx_24070014_WORD_LEN) decode (
+  ysyx_24070014_Decode decoder (
     .inst(inst),
     .branch_equal(0),
     .branch_lessthan(0),
@@ -50,13 +49,13 @@ module ysyx_24070014_top_module (
   );
 
   // PC+4
-  wire [`ysyx_24070014_WORD_LEN-1:0] pc_plus_4 = pc + 32'h4;
+  wire [`ysyx_24070014_ADDR_LEN-1:0] pc_plus_4 = pc + 32'h4;
   // ALU output
-  wire [`ysyx_24070014_WORD_LEN-1:0] alu_out;
+  wire [`ysyx_24070014_DATA_LEN-1:0] alu_out;
 
   // Next PC
   wire [31:0] next_pc;
-  ysyx_24070014_Mux21 #(`ysyx_24070014_WORD_LEN) mux_pc (
+  ysyx_24070014_Mux21 #(`ysyx_24070014_INST_LEN) mux_pc (
     .sel(pc_sel),
     .in0(pc_plus_4),                      // PC+4
     .in1(alu_out),                        // Branch target
@@ -68,16 +67,16 @@ module ysyx_24070014_top_module (
   end
 
   // Immediate generator
-  wire [`ysyx_24070014_WORD_LEN-1:0] imm;
-  ysyx_24070014_ImmGen #(`ysyx_24070014_WORD_LEN) imm_gen (
+  wire [`ysyx_24070014_DATA_LEN-1:0] imm;
+  ysyx_24070014_ImmGen #(`ysyx_24070014_DATA_LEN) imm_gen (
     .inst(inst),
     .imm_sel(imm_sel),
     .imm(imm)
   );
 
-  // Register file, with 32 registers each of `WORD_LEN` bits
-  wire [`ysyx_24070014_WORD_LEN-1:0] reg_data_rs1, reg_data_rs2, reg_data_write;
-  ysyx_24070014_RegisterFile #(5, `ysyx_24070014_WORD_LEN) regfile (
+  // Register file, with 32 registers each of `DATA_LEN` bits
+  wire [`ysyx_24070014_DATA_LEN-1:0] reg_data_rs1, reg_data_rs2, reg_data_write;
+  ysyx_24070014_RegisterFile #(5, `ysyx_24070014_DATA_LEN) regfile (
     .clk(clk),
     .reset(reset),
     .raddr1(inst_rs1),
@@ -91,20 +90,20 @@ module ysyx_24070014_top_module (
   );
 
   // ALU
-  wire [`ysyx_24070014_WORD_LEN-1:0] alu_in_1, alu_in_2;
-  ysyx_24070014_Mux21 #(`ysyx_24070014_WORD_LEN) mux_alu_in_1 (
+  wire [`ysyx_24070014_DATA_LEN-1:0] alu_in_1, alu_in_2;
+  ysyx_24070014_Mux21 #(`ysyx_24070014_DATA_LEN) mux_alu_in_1 (
     .sel(operand_a_sel),
     .in0(reg_data_rs1),   // Register rs1
     .in1(pc),             // PC
     .out(alu_in_1)
   );
-  ysyx_24070014_Mux21 #(`ysyx_24070014_WORD_LEN) mux_alu_in_2 (
+  ysyx_24070014_Mux21 #(`ysyx_24070014_DATA_LEN) mux_alu_in_2 (
     .sel(operand_b_sel),
     .in0(reg_data_rs2),   // Register rs2
     .in1(imm),            // Immediate
     .out(alu_in_2)
   );
-  ysyx_24070014_ALU #(`ysyx_24070014_WORD_LEN) alu (
+  ysyx_24070014_ALU alu (
     .in0(alu_in_1),
     .in1(alu_in_2),
     .alu_op(alu_sel),
@@ -113,7 +112,8 @@ module ysyx_24070014_top_module (
 
   // Memory
   // Currently use top signal to access
-  wire [`ysyx_24070014_WORD_LEN-1:0] mem_addr, mem_data_read, mem_data_write;
+  wire [`ysyx_24070014_ADDR_LEN-1:0] mem_addr;
+  wire [`ysyx_24070014_DATA_LEN-1:0] mem_data_read, mem_data_write;
   assign mem_addr = alu_out;
   assign top_signal_mem_addr = mem_addr;
   assign mem_data_read = top_signal_mem_data_read;
@@ -121,7 +121,7 @@ module ysyx_24070014_top_module (
   assign top_signal_mem_write_en = mem_write_en;
 
   // Register write-back
-  ysyx_24070014_Mux31 #(`ysyx_24070014_WORD_LEN) mux_writeback (
+  ysyx_24070014_Mux31 #(`ysyx_24070014_DATA_LEN) mux_writeback (
     .sel(writeback_sel),
     .in0(mem_data_read),                    // Memory
     .in1(alu_out),                          // ALU

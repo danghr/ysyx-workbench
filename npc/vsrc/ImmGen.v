@@ -1,3 +1,5 @@
+`include "vsrc/DEFINITION.v"
+
 /**
   * Module `ImmGen`
   *
@@ -15,8 +17,8 @@
   *   - 3'b5: U-type
   * - Output `imm`: Immediate generated from `inst`.
   */
-module ysyx_24070014_ImmGen #(WORD_LEN = 32) (
-  input [31:0] inst,
+module ysyx_24070014_ImmGen #(WORD_LEN = `ysyx_24070014_DATA_LEN) (
+  input [`ysyx_24070014_INST_LEN-1:0] inst,
   input [2:0] imm_sel,
   output [WORD_LEN-1:0] imm
 );
@@ -47,7 +49,6 @@ module ysyx_24070014_ImmGen #(WORD_LEN = 32) (
   ysyx_24070014_SignExtension #(WORD_LEN, 21) sext_j (imm_J_inst, imm_J);
 
   // Use a mux to select the correct immediate
-  `include "vsrc/imm_def.v"
   ysyx_24070014_MuxKeyWithDefault #(5, 3, WORD_LEN) mux (imm, imm_sel, 32'b0, {
     // opcode, immediate
     `ysyx_24070014_imm_I, imm_I,
