@@ -199,13 +199,13 @@ SIMULATE_END:
 
     int return_status = 1;
     if (npc_status == NPC_EXIT) {
-        printf("Simulation finished successfully\n");
+        printf("Simulation finished successfully.\n");
         return_status = 0;
     } else if (npc_status == NPC_ASSERTION_FAIL) {
-        printf("Simulation failed due to assertion failure\n");
+        printf("Simulation failed due to assertion failure.\n");
         return_status = 1;
     } else {
-        printf("Simulation failed due to unknown reason\n");
+        printf("Simulation failed due to unknown reason.\n");
         return_status = 1;
     }
     return return_status;
