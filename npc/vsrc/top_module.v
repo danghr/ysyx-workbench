@@ -21,11 +21,6 @@ module ysyx_24070014_top_module (
   output [`ysyx_24070014_DATA_LEN-1:0] top_signal_regfile[2**`ysyx_24070014_REG_ADDR_WIDTH-1:0]
 );
 
-  initial begin
-    $display("NPC: Top module initialized");
-    ysyx_24070014_ebreak();
-  end
-
   /******************************
    * STATE 1: Instruction Fetch *
    ******************************/
@@ -165,6 +160,8 @@ module ysyx_24070014_top_module (
   );
 
   // Ecall and ebreak
-
+  always @(posedge clk ) begin
+    if (ebreak) ysyx_24070014_ebreak();
+  end
 
 endmodule
