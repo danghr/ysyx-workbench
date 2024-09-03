@@ -8,6 +8,12 @@
 #include "misc.h"
 #include "regs.h"
 
+#ifndef CONFIG_RV64
+typedef uint32_t word_t;
+#else
+typedef uint64_t word_t;
+#endif
+
 typedef enum {
     NPC_STOPPED = 0,
     NPC_RUNNING = 1,
