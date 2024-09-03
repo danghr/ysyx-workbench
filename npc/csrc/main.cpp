@@ -146,11 +146,9 @@ extern "C" void ysyx_24070014_ecall() {
     printf("Calling ecall\n");
     printf("Not implemented\n");
     ASSERT(0);
-    return ;
 }
 
 extern "C" void ysyx_24070014_ebreak() {
     printf("Calling ebreak\n");
     npc_status = NPC_EXIT;
-    return ;
 }
