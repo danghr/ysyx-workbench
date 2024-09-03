@@ -56,7 +56,7 @@ void reset(int n) {
 #define SIMULATE_LOOP SIMULATE_UNTIL(0)
 
 
-uint32_t memory(uint32_t addr) {
+word_t memory(word_t addr) {
     uint32_t insts[] = {
         0x00100093,     // addi x1, x0, 1
         0x00108113,     // addi x2, x1, 1

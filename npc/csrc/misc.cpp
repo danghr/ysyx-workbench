@@ -9,7 +9,7 @@
  * @param bits: The number of bits of the result in the circuit
  */
 template <typename T>
-uint64_t convert_2s_complement_to_unsigned(T number, int bits) {
+word_t convert_2s_complement_to_unsigned(T number, int bits) {
     // Convert to unsigned integer to avoid distraction
     // from signed bit
     uint64_t number_conv = static_cast<uint64_t>(number);
@@ -19,7 +19,7 @@ uint64_t convert_2s_complement_to_unsigned(T number, int bits) {
     number_conv >>= (64 - bits);
 
     // return the result
-    return number_conv;
+    return (word_t)number_conv;
 }
 
 /***

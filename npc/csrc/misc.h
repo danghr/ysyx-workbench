@@ -2,7 +2,8 @@
 #define __MISC_H__
 
 #include <stdint.h>
-#include "main.h"
+#include "common.h"
+
 
 // Assertion macro
 #define ASSERT(cond) \
@@ -15,6 +16,6 @@
 template <typename T>
 bool check_2s_complement_bits(T result, T ref, int bits);
 template <typename T>
-uint64_t convert_2s_complement_to_unsigned(T number, int bits);
+word_t convert_2s_complement_to_unsigned(T number, int bits);
 
 #endif

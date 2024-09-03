@@ -1,7 +1,7 @@
 #ifndef __REGS_H__
 #define __REGS_H__
 
-#include "main.h"
+#include "common.h"
 
 
 void isa_reg_display(TOP_NAME *top);
