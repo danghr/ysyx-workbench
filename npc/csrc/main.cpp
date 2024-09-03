@@ -105,6 +105,8 @@ SIMULATE_BEGIN:
         ASSERT(isa_reg_str2val(top, "x0", &reg_success) == 0);
         ASSERT(reg_success = true);
     }
+    isa_reg_display(top);
+    printf("\n");
 
     // =============================
     // ==== End simulation body ====
