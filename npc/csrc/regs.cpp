@@ -11,8 +11,6 @@ const char *regs[] = {
   "s8", "s9", "s10", "s11", "t3", "t4", "t5", "t6"
 };
 
-
-
 void isa_reg_display(TOP_NAME *top) {
   uint32_t *gpr = top->top_signal_regfile;
   uint32_t pc = top->top_signal_pc;

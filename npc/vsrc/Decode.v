@@ -12,7 +12,9 @@ module ysyx_24070014_Decode (
   output operand_b_sel,
   output [4:0] alu_sel,
   output mem_write_en,
-  output [1:0] writeback_sel
+  output [1:0] writeback_sel,
+  output ecall,
+  output ebreak
 );
 
   // pc_sel
@@ -127,5 +129,9 @@ module ysyx_24070014_Decode (
   //   7'0110111, 2'b1,  // `lui`
   //   7'1110011, 2'b0   // System instructions, e.g., `ecall` and `ebreak`
   // });
+
+  // ecall
+  assign ecall = (inst == 32'h00000073);
+  assign ebreak = (inst == 32'h00100073);
     
 endmodule

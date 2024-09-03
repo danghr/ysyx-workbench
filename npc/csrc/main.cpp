@@ -1,9 +1,4 @@
-#include <nvboard.h>
-#include TOP_NAME_H_FILE    // Defined in npc/Makefile
-#include "verilated.h"
-#include "verilated_vcd_c.h"
-#include "regs.h"
-
+#include "main.h"
 
 // Configuration of whether use tracing, sequential logic, or NVBoard
 #define _DO_TRACE
@@ -11,26 +6,19 @@
 // #define _NVBOARD
 
 
-// Assertion macro
-// Use GOTO to save the waveform when an assertion fails
-bool ASSERTION_FAILED = false;
-#define ASSERT(cond) \
-    if (!(cond)) { \
-        printf("Assertion failed at %s:%d\n", __FILE__, __LINE__); \
-        ASSERTION_FAILED = true; \
-        goto EXIT; \
-    }
+NPC_Status npc_status = NPC_STOPPED; 
+static TOP_NAME *top;   // Defined in npc/Makefile
+VerilatedContext* contextp;
+VerilatedVcdC* tfp;
 
-#define MAX_CYCLES 5
+
+// Define a maximum simulation time and cycles
+#define MAX_CYCLES 1e9
 #ifdef _SEQUENTIAL_LOGIC
 const int MAX_SIM_TIME = (MAX_CYCLES) * 2;
 #else
 const int MAX_SIM_TIME = (MAX_CYCLES);
 #endif
-
-static TOP_NAME *top;   // Defined in npc/Makefile
-VerilatedContext* contextp;
-VerilatedVcdC* tfp;
 
 #ifdef _NVBOARD
 void nvboard_bind_all_pins(TOP_NAME *top);
@@ -68,66 +56,16 @@ void reset(int n) {
 #define SIMULATE_LOOP SIMULATE_UNTIL(0)
 
 
-/***
- * Convert 2's complement representation to unsigned integer, with all bits
- * higher than the given bits set to 0.
- * T must be integer or unsigned integer, and the number of bits must be
- * less than or equal to the number of bits of T.
- * @param number: The number to be converted
- * @param bits: The number of bits of the result in the circuit
- */
-template <typename T>
-uint64_t convert_2s_complement_to_unsigned(T number, int bits) {
-    // Convert to unsigned integer to avoid distraction
-    // from signed bit
-    uint64_t number_conv = static_cast<uint64_t>(number);
-
-    // Shift left to remove extra bits, then shift back to restore the value
-    number_conv <<= (64 - bits);
-    number_conv >>= (64 - bits);
-
-    // return the result
-    return number_conv;
-}
-
-/***
- * Check if the result matches the reference value in the form of the 2's
- * complement representation within the given bits.
- * T must be integer or unsigned integer, and the number of bits must be
- * less than or equal to the number of bits of T.
- * @param result: The result to be checked
- * @param ref: The reference value
- * @param bits: The number of bits of the result in the circuit
- */
-template <typename T>
-bool check_2s_complement_bits(T result, T ref, int bits) {
-    // Convert to unsigned integer to avoid distraction
-    // from signed bit
-    uint64_t result_conv = convert_2s_complement_to_unsigned<T>(result, bits);
-    uint64_t ref_conv = convert_2s_complement_to_unsigned<T>(ref, bits);
-
-    // Return comparison result
-    return result_conv == ref_conv;
-}
-
-
-uint32_t memory(uint32_t addr) {
+word_t memory(word_t addr) {
     uint32_t insts[] = {
         0x00100093,     // addi x1, x0, 1
         0x00108113,     // addi x2, x1, 1
         0x00a10a13,     // addi x20, x2, 10
         0x00108093,     // addi x1, x1, 1
         0x00108093,     // addi x1, x1, 1
+        0x00100073,     // ebreak
     };
     return insts[(addr - 0x80000000) / 4];
-}
-
-void ysyx_24070014_ecall() {
-    return ;
-}
-
-void ysyx_24070014_ebreak() {
-    return ;
 }
 
 
@@ -149,6 +87,8 @@ int main(int argc, char **argv)
     nvboard_init();
 #endif
 
+    npc_status = NPC_RUNNING;
+
 #ifdef _SEQUENTIAL_LOGIC
     reset(3);
 #endif
@@ -157,20 +97,22 @@ int main(int argc, char **argv)
     // === Begin simulation body ===
     // =============================
 
-    int sim_cycle = 0;
-    while (sim_cycle++ < MAX_CYCLES) {
+SIMULATE_BEGIN:
+    SIMULATE_UNTIL(npc_status != NPC_RUNNING) {
         top->top_signal_inst = memory(top->top_signal_pc);    // addi x1, x0, 1
         single_cycle();
-        printf("Cycle %d\n", sim_cycle);
-        isa_reg_display(top);
-        printf("\n");
+        bool reg_success = false;
+        ASSERT(isa_reg_str2val(top, "x0", &reg_success) == 0);
+        ASSERT(reg_success = true);
     }
+    isa_reg_display(top);
+    printf("\n");
 
     // =============================
     // ==== End simulation body ====
     // =============================
 
-EXIT:
+SIMULATE_END:
     // An extra cycle to dump the trace of the last signal
     status_change();
 #ifdef _DO_TRACE
@@ -182,6 +124,31 @@ EXIT:
 #ifdef _NVBOARD
     nvboard_quit();
 #endif
-    printf("Simulation done.\n");
-    return ASSERTION_FAILED ? 1 : 0;
+
+    int return_status = 1;
+    if (npc_status == NPC_EXIT) {
+        printf("Simulation finished successfully.\n");
+        return_status = 0;
+    } else if (npc_status == NPC_ASSERTION_FAIL) {
+        printf("Simulation failed due to assertion failure.\n");
+        return_status = 1;
+    } else {
+        printf("Simulation failed due to unknown reason.\n");
+        return_status = 1;
+    }
+    return return_status;
+}
+
+
+// Miscaellaneous functions
+// ecall and ebreak
+extern "C" void ysyx_24070014_ecall() {
+    printf("Calling ecall\n");
+    printf("Not implemented\n");
+    ASSERT(0);
+}
+
+extern "C" void ysyx_24070014_ebreak() {
+    printf("Calling ebreak\n");
+    npc_status = NPC_EXIT;
 }
