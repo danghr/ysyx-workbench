@@ -1,6 +1,7 @@
 `include "vsrc/DEFINITION.v"
 
 // DPI-C functions
+import "DPI-C" function void ysyx_24070014_ecall();
 import "DPI-C" function void ysyx_24070014_ebreak();
 
 module ysyx_24070014_top_module (
@@ -161,6 +162,7 @@ module ysyx_24070014_top_module (
 
   // Ecall and ebreak
   always @(posedge clk ) begin
+    if (ecall) ysyx_24070014_ecall();
     if (ebreak) ysyx_24070014_ebreak();
   end
 
