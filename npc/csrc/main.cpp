@@ -138,7 +138,7 @@ extern "C" void ysyx_24070014_ecall() {
 
 extern "C" void ysyx_24070014_ebreak() {
     printf("Calling ebreak\n");
-    npc_status = NPC_EXIT;
+    npc_status = NPC_STOPPED;
     return ;
 }
 
@@ -175,8 +175,6 @@ SIMULATE_BEGIN:
     SIMULATE_UNTIL(npc_status != NPC_RUNNING) {
         top->top_signal_inst = memory(top->top_signal_pc);    // addi x1, x0, 1
         single_cycle();
-        // isa_reg_display(top);
-        printf("\n");
         bool reg_success = false;
         ASSERT(isa_reg_str2val(top, "x0", &reg_success) == 0);
         ASSERT(reg_success = true);
