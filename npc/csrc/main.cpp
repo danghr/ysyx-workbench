@@ -3,6 +3,7 @@
 #include "verilated.h"
 #include "verilated_vcd_c.h"
 #include "regs.h"
+#include "npc_status.h"
 
 
 // Configuration of whether use tracing, sequential logic, or NVBoard
@@ -11,26 +12,29 @@
 // #define _NVBOARD
 
 
+NPC_Status npc_status = NPC_STOPPED; 
 // Assertion macro
 // Use GOTO to save the waveform when an assertion fails
-bool ASSERTION_FAILED = false;
+bool assertion_failed = false;
 #define ASSERT(cond) \
     if (!(cond)) { \
         printf("Assertion failed at %s:%d\n", __FILE__, __LINE__); \
-        ASSERTION_FAILED = true; \
-        goto EXIT; \
+        npc_status = NPC_ASSERTION_FAIL; \
     }
 
-#define MAX_CYCLES 5
+
+static TOP_NAME *top;   // Defined in npc/Makefile
+VerilatedContext* contextp;
+VerilatedVcdC* tfp;
+
+
+// Define a maximum simulation time and cycles
+#define MAX_CYCLES 1e9
 #ifdef _SEQUENTIAL_LOGIC
 const int MAX_SIM_TIME = (MAX_CYCLES) * 2;
 #else
 const int MAX_SIM_TIME = (MAX_CYCLES);
 #endif
-
-static TOP_NAME *top;   // Defined in npc/Makefile
-VerilatedContext* contextp;
-VerilatedVcdC* tfp;
 
 #ifdef _NVBOARD
 void nvboard_bind_all_pins(TOP_NAME *top);
@@ -122,11 +126,10 @@ uint32_t memory(uint32_t addr) {
     return insts[(addr - 0x80000000) / 4];
 }
 
-void ysyx_24070014_ecall() {
-    return ;
-}
 
-void ysyx_24070014_ebreak() {
+extern "C" void ysyx_24070014_ebreak() {
+    printf("Calling ebreak\n");
+    npc_status = NPC_EXIT;
     return ;
 }
 
@@ -149,6 +152,8 @@ int main(int argc, char **argv)
     nvboard_init();
 #endif
 
+    npc_status = NPC_RUNNING;
+
 #ifdef _SEQUENTIAL_LOGIC
     reset(3);
 #endif
@@ -157,20 +162,22 @@ int main(int argc, char **argv)
     // === Begin simulation body ===
     // =============================
 
-    int sim_cycle = 0;
-    while (sim_cycle++ < MAX_CYCLES) {
+SIMULATE_BEGIN:
+    SIMULATE_UNTIL(npc_status != NPC_RUNNING) {
         top->top_signal_inst = memory(top->top_signal_pc);    // addi x1, x0, 1
         single_cycle();
-        printf("Cycle %d\n", sim_cycle);
         isa_reg_display(top);
         printf("\n");
+        bool reg_success = false;
+        ASSERT(isa_reg_str2val(top, "x0", &reg_success) == 0);
+        ASSERT(reg_success = true);
     }
 
     // =============================
     // ==== End simulation body ====
     // =============================
 
-EXIT:
+SIMULATE_END:
     // An extra cycle to dump the trace of the last signal
     status_change();
 #ifdef _DO_TRACE
@@ -182,6 +189,5 @@ EXIT:
 #ifdef _NVBOARD
     nvboard_quit();
 #endif
-    printf("Simulation done.\n");
-    return ASSERTION_FAILED ? 1 : 0;
+    return npc_status == NPC_EXIT ? 0 : 1;
 }

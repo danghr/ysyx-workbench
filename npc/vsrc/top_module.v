@@ -1,8 +1,7 @@
 `include "vsrc/DEFINITION.v"
 
 // DPI-C functions
-// import "DPI-C" function void ysyx_24070014_ecall();
-// import "DPI-C" function void ysyx_24070014_ebreak();
+import "DPI-C" function void ysyx_24070014_ebreak();
 
 module ysyx_24070014_top_module (
   input clk,
@@ -21,6 +20,11 @@ module ysyx_24070014_top_module (
   // Signal to access regfile
   output [`ysyx_24070014_DATA_LEN-1:0] top_signal_regfile[2**`ysyx_24070014_REG_ADDR_WIDTH-1:0]
 );
+
+  initial begin
+    $display("NPC: Top module initialized");
+    ysyx_24070014_ebreak();
+  end
 
   /******************************
    * STATE 1: Instruction Fetch *
