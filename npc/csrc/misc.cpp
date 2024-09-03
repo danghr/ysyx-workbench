@@ -9,17 +9,18 @@
  * @param bits: The number of bits of the result in the circuit
  */
 template <typename T>
-word_t convert_2s_complement_to_unsigned(T number, int bits) {
-    // Convert to unsigned integer to avoid distraction
-    // from signed bit
-    uint64_t number_conv = static_cast<uint64_t>(number);
+word_t convert_2s_complement_to_unsigned(T number, int bits)
+{
+  // Convert to unsigned integer to avoid distraction
+  // from signed bit
+  uint64_t number_conv = static_cast<uint64_t>(number);
 
-    // Shift left to remove extra bits, then shift back to restore the value
-    number_conv <<= (64 - bits);
-    number_conv >>= (64 - bits);
+  // Shift left to remove extra bits, then shift back to restore the value
+  number_conv <<= (64 - bits);
+  number_conv >>= (64 - bits);
 
-    // return the result
-    return (word_t)number_conv;
+  // return the result
+  return (word_t)number_conv;
 }
 
 /***
@@ -32,12 +33,13 @@ word_t convert_2s_complement_to_unsigned(T number, int bits) {
  * @param bits: The number of bits of the result in the circuit
  */
 template <typename T>
-bool check_2s_complement_bits(T result, T ref, int bits) {
-    // Convert to unsigned integer to avoid distraction
-    // from signed bit
-    uint64_t result_conv = convert_2s_complement_to_unsigned<T>(result, bits);
-    uint64_t ref_conv = convert_2s_complement_to_unsigned<T>(ref, bits);
+bool check_2s_complement_bits(T result, T ref, int bits)
+{
+  // Convert to unsigned integer to avoid distraction
+  // from signed bit
+  uint64_t result_conv = convert_2s_complement_to_unsigned<T>(result, bits);
+  uint64_t ref_conv = convert_2s_complement_to_unsigned<T>(ref, bits);
 
-    // Return comparison result
-    return result_conv == ref_conv;
+  // Return comparison result
+  return result_conv == ref_conv;
 }

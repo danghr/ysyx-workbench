@@ -8,10 +8,11 @@ typedef uint64_t word_t;
 #endif
 
 // Assertion macro
-#define ASSERT(cond) \
-    if (!(cond)) { \
-        printf("Assertion failed at %s:%d\n", __FILE__, __LINE__); \
-        npc_status = NPC_ASSERTION_FAIL; \
-    }
+#define ASSERT(cond)                                           \
+  if (!(cond))                                                 \
+  {                                                            \
+    printf("Assertion failed at %s:%d\n", __FILE__, __LINE__); \
+    npc_status = NPC_ASSERTION_FAIL;                           \
+  }
 
 #endif

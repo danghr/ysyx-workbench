@@ -4,7 +4,6 @@
 #include <stdint.h>
 #include "common.h"
 
-
 template <typename T>
 bool check_2s_complement_bits(T result, T ref, int bits);
 template <typename T>
