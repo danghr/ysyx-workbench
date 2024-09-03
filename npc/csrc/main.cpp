@@ -122,6 +122,7 @@ uint32_t memory(uint32_t addr) {
         0x00a10a13,     // addi x20, x2, 10
         0x00108093,     // addi x1, x1, 1
         0x00108093,     // addi x1, x1, 1
+        0x00100073,     // ebreak
     };
     return insts[(addr - 0x80000000) / 4];
 }
