@@ -97,7 +97,7 @@ void *memmove(void *dst, const void *src, size_t n) {
   // and then copy the content to `dst`
   
   // We haven't implemented malloc yet, so we use a static buffer here
-  const int BUFFER_SIZE = 4096;
+  const int BUFFER_SIZE = 16384;
   assert(n < BUFFER_SIZE);
   char buffer[BUFFER_SIZE];
   memcpy((void *)&buffer, src, n);
