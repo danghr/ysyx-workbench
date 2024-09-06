@@ -96,8 +96,8 @@ void *memmove(void *dst, const void *src, size_t n) {
   // According to man 3, we need to create a buffer to store the content of `src`
   // and then copy the content to `dst`
   void *buffer = malloc(n);
-  memcpy(buffer, src, n);
-  memcpy(dst, buffer, n);
+  // memcpy(buffer, src, n);
+  // memcpy(dst, buffer, n);
   free(buffer);
   return dst;
 }
