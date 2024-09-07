@@ -91,6 +91,7 @@ void *memset(void *s, int c, size_t n) {
   return s;
 }
 
+// TODO: NOT CORRECT
 void *memmove(void *dst, const void *src, size_t n) {
   // Note that this handles the case when `src` and `dst` overlap
   // According to man 3, we need to create a buffer to store the content of `src`
@@ -106,6 +107,7 @@ void *memmove(void *dst, const void *src, size_t n) {
   return dst;
 }
 
+// TODO: NOT CORRECT
 void *memcpy(void *out, const void *in, size_t n) {
   for (size_t i = 0; i < n; i++)
     ((char *)in)[i] = ((char *)out)[i];
