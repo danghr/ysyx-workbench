@@ -17,6 +17,7 @@ int printf(const char *fmt, ...) {
 }
 
 int vsprintf(char *out, const char *fmt, va_list ap) {
+  putstr("Calling vsprintf\n");
   // Read the format string
   const int ERROR_RETURN = -1;
   int out_count = 0;
