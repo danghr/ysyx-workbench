@@ -7,9 +7,6 @@
 
 void putchar_printf(char ch, char *out, int *out_count) {
   out[(*out_count)++] = ch;
-  putstr("Printing character ");
-  putch(ch);
-  putch('\n');
 }
 
 int printf(const char *fmt, ...) {
@@ -17,7 +14,6 @@ int printf(const char *fmt, ...) {
 }
 
 int vsprintf(char *out, const char *fmt, va_list ap) {
-  putstr("Calling vsprintf\n");
   // Read the format string
   const int ERROR_RETURN = -1;
   int out_count = 0;
@@ -56,10 +52,10 @@ int vsprintf(char *out, const char *fmt, va_list ap) {
         putchar_printf(buf[i], out, &out_count);
       }
     } else if (*(p + 1) == '\0') {
-      putstr("Invalid format specifier \%\n");
+      // putstr("Invalid format specifier \%\n");
       return ERROR_RETURN;
     } else {
-      putstr("Invalid format specifier \%");
+      // putstr("Invalid format specifier \%");
       putch(*(p + 1));
       putch('\n');
       return ERROR_RETURN;
