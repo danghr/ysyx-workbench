@@ -52,10 +52,10 @@ int vsprintf(char *out, const char *fmt, va_list ap) {
         putchar_printf(buf[i], out, &out_count);
       }
     } else if (*(p + 1) == '\0') {
-      // putstr("Invalid format specifier \%\n");
+      putstr("Invalid format specifier \%\n");
       return ERROR_RETURN;
     } else {
-      // putstr("Invalid format specifier \%");
+      putstr("Invalid format specifier \%");
       putch(*(p + 1));
       putch('\n');
       return ERROR_RETURN;
