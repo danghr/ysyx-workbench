@@ -48,6 +48,7 @@ int vsprintf(char *out, const char *fmt, va_list ap) {
         out[out_count++] = buf[i];
       }
     } else {
+      halt(2);
       return ERROR_RETURN;
     }
   }
