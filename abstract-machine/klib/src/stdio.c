@@ -5,23 +5,18 @@
 
 #if !defined(__ISA_NATIVE__) || defined(__NATIVE_USE_KLIB__)
 
-void putchar_printf(char ch, char *out, int *out_count) {
-  out[(*out_count)++] = ch;
-}
-
 int printf(const char *fmt, ...) {
   panic("Not implemented");
 }
 
 int vsprintf(char *out, const char *fmt, va_list ap) {
   // Read the format string
-  putch('\n');
   const int ERROR_RETURN = -1;
   int out_count = 0;
   for (const char *p = fmt; *p != '\0'; p++) {
     // Handle normal characters
     if (*p != '%') {
-      putchar_printf(*p, out, &out_count);
+      out[out_count++] = *p;
       continue;
     }
     // Handle format specifiers
@@ -29,14 +24,14 @@ int vsprintf(char *out, const char *fmt, va_list ap) {
     if (*(p + 1) == 's') {
       const char *s = va_arg(ap, const char *);
       while (*s != '\0') {
-        putchar_printf(*(s++), out, &out_count);
+        out[out_count++] = *(s++);
       }
     } else if (*(p + 1) == 'd') {
       int n = va_arg(ap, int);
       // We cannot use `stoi` here as we are implementing a library function
       // Output a negative symbol
       if (n < 0) {
-        putchar_printf('-', out, &out_count);
+        out[out_count++] = '-';
         n = -n;
       }
       // Use a buffer to store the digits
@@ -50,15 +45,9 @@ int vsprintf(char *out, const char *fmt, va_list ap) {
       }
       // Output the digits
       for (int i = loc + 1; i < 10; i++) {
-        putchar_printf(buf[i], out, &out_count);
+        out[out_count++] = buf[i];
       }
-    } else if (*(p + 1) == '\0') {
-      putstr("Invalid format specifier \%\n");
-      return ERROR_RETURN;
     } else {
-      putstr("Invalid format specifier \%");
-      putch(*(p + 1));
-      putch('\n');
       return ERROR_RETURN;
     }
   }
