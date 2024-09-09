@@ -15,6 +15,7 @@ int printf(const char *fmt, ...) {
 
 int vsprintf(char *out, const char *fmt, va_list ap) {
   // Read the format string
+  putch('\n');
   const int ERROR_RETURN = -1;
   int out_count = 0;
   for (const char *p = fmt; *p != '\0'; p++) {
