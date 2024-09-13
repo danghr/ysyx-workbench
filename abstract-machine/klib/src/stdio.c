@@ -26,6 +26,7 @@ int vsprintf(char *out, const char *fmt, va_list ap) {
       while (*s != '\0') {
         out[out_count++] = *(s++);
       }
+      p++;
     } else if (*(p + 1) == 'd') {
       int n = va_arg(ap, int);
       // We cannot use `stoi` here as we are implementing a library function
@@ -47,6 +48,7 @@ int vsprintf(char *out, const char *fmt, va_list ap) {
       for (int i = loc + 1; i < 10; i++) {
         out[out_count++] = buf[i];
       }
+      p++;
     } else {
       return ERROR_RETURN;
     }
