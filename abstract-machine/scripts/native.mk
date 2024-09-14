@@ -14,6 +14,7 @@ AM_SRCS := native/trm.c \
 
 CFLAGS  += -fpie
 ASFLAGS += -fpie -pie
+CFLAGS += -g
 comma = ,
 LDFLAGS_CXX = $(addprefix -Wl$(comma), $(LDFLAGS))
 
