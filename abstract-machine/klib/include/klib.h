@@ -9,7 +9,8 @@
 extern "C" {
 #endif
 
-//#define __NATIVE_USE_KLIB__
+// Use this macro to use this klib implementation in the `native` platform
+#define __NATIVE_USE_KLIB__
 
 // string.h
 void  *memset    (void *s, int c, size_t n);
