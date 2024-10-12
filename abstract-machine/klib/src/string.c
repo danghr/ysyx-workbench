@@ -70,7 +70,7 @@ int strncmp(const char *s1, const char *s2, size_t n) {
   // Return the difference of the first different characters
   // i.e., s1[i] - s2[i]
   // Note that this is not the definition of `strncmp`, but the common implementation.
-  for (size_t i = 0; i < n; i++) {
+  for (int i = 0; i < n; i++) {
     // First difference
     // It also handles the case when either string ends or when `n` is reached
     if ((s1[i] != s2[i]) || i == n - 1)
@@ -84,10 +84,12 @@ int strncmp(const char *s1, const char *s2, size_t n) {
   return 0;
 }
 
+// Inspired by the implementation of glibc
+typedef unsigned char byte;
+
 void *memset(void *s, int c, size_t n) {
-  // Maybe we should treat `c` as `unsigned char`?
-  for (size_t i = 0; i < n; i++)
-    ((char *)s)[i] = (unsigned char)c;
+  for (int i = 0; i < n; i++)
+    ((byte *)s)[i] = (byte)c;
   return s;
 }
 
@@ -96,26 +98,45 @@ void *memmove(void *dst, const void *src, size_t n) {
   // Note that this handles the case when `src` and `dst` overlap
   // According to man 3, we need to create a buffer to store the content of `src`
   // and then copy the content to `dst`
-  
-  // We haven't implemented malloc yet, so we use a static buffer here
-  const int BUFFER_SIZE = 16384;
-  assert(n < BUFFER_SIZE);
-  char buffer[BUFFER_SIZE];
-  memcpy((void *)&buffer, src, n);
-  memcpy(dst, (void *)&buffer, n);
-  // free(buffer);
+
+  // Inspired by implementation of libc, we adjust the direction of copying to
+  // avoid the overlap problem
+  if (src == dst) {
+    // Do nothing
+    return dst;
+  } else if (src < dst) {
+    // |-------src-------|
+    //              |-------dst-------|
+    // It is alwasy safe to copy from the end to the beginning
+    for (int i = n - 1; i >= 0; i--)
+      ((byte *)dst)[i] = ((byte *)src)[i];
+  } else {
+    //              |-------src-------|
+    // |-------dst-------|
+    // It is always safe to copy from the beginning to the end
+    for (int i = 0; i < n; i++)
+      ((byte *)dst)[i] = ((byte *)src)[i];
+  }
   return dst;
 }
 
-// TODO: NOT CORRECT
 void *memcpy(void *out, const void *in, size_t n) {
-  for (size_t i = 0; i < n; i++)
-    ((char *)in)[i] = ((char *)out)[i];
-  return out;
+  // `memmove` can safely handle all the cases when `src` and `dst` does not overlap
+  return memmove(out, in, n);
 }
 
 int memcmp(const void *s1, const void *s2, size_t n) {
-  return strncmp((char *)s1, (char *)s2, n);
+  // Compare the two memory areas character by character
+  // Stop at the first difference or the end of either string
+  // Return the difference of the first different characters
+  for (int i = 0; i < n; i++) {
+    // First difference
+    // It also handles the case when either string ends or when `n` is reached
+    if (((byte *)s1)[i] != ((byte *)s2)[i])
+      return (int)(((byte *)s1)[i] - ((byte *)s2)[i]);
+  }
+  // No difference
+  return 0;
 }
 
 #endif
