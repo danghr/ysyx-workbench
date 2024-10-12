@@ -70,7 +70,7 @@ int strncmp(const char *s1, const char *s2, size_t n) {
   // Return the difference of the first different characters
   // i.e., s1[i] - s2[i]
   // Note that this is not the definition of `strncmp`, but the common implementation.
-  for (size_t i = 0; i < n; i++) {
+  for (int i = 0; i < n; i++) {
     // First difference
     // It also handles the case when either string ends or when `n` is reached
     if ((s1[i] != s2[i]) || i == n - 1)
@@ -88,7 +88,7 @@ int strncmp(const char *s1, const char *s2, size_t n) {
 typedef unsigned char byte;
 
 void *memset(void *s, int c, size_t n) {
-  for (size_t i = 0; i < n; i++)
+  for (int i = 0; i < n; i++)
     ((byte *)s)[i] = (byte)c;
   return s;
 }
@@ -101,17 +101,20 @@ void *memmove(void *dst, const void *src, size_t n) {
 
   // Inspired by implementation of libc, we adjust the direction of copying to
   // avoid the overlap problem
-  if (src < dst) {
+  if (src == dst) {
+    // Do nothing
+    return dst;
+  } else if (src < dst) {
     // |-------src-------|
     //              |-------dst-------|
     // It is alwasy safe to copy from the end to the beginning
-    for (size_t i = n - 1; i >= 0; i--)
+    for (int i = n - 1; i >= 0; i--)
       ((byte *)dst)[i] = ((byte *)src)[i];
   } else {
     //              |-------src-------|
     // |-------dst-------|
     // It is always safe to copy from the beginning to the end
-    for (size_t i = 0; i < n; i++)
+    for (int i = 0; i < n; i++)
       ((byte *)dst)[i] = ((byte *)src)[i];
   }
   return dst;
@@ -126,7 +129,7 @@ int memcmp(const void *s1, const void *s2, size_t n) {
   // Compare the two memory areas character by character
   // Stop at the first difference or the end of either string
   // Return the difference of the first different characters
-  for (size_t i = 0; i < n; i++) {
+  for (int i = 0; i < n; i++) {
     // First difference
     // It also handles the case when either string ends or when `n` is reached
     if (((byte *)s1)[i] != ((byte *)s2)[i])

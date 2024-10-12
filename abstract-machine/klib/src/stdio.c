@@ -6,7 +6,10 @@
 #if !defined(__ISA_NATIVE__) || defined(__NATIVE_USE_KLIB__)
 
 int printf(const char *fmt, ...) {
-  panic("Not implemented");
+  // In order not to disrupt the execution of `assertion`
+  // we directly return 0 for this function
+  return 0;
+  // panic("Not implemented");
 }
 
 int vsprintf(char *out, const char *fmt, va_list ap) {
