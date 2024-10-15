@@ -4,6 +4,10 @@
 
 #if !defined(__ISA_NATIVE__) || defined(__NATIVE_USE_KLIB__)
 
+static int max(int a, int b) {
+  return a >= b ? a : b;
+}
+
 size_t strlen(const char *s) {
   char *p = (char *)s;
   size_t cnt = 0;
@@ -14,10 +18,10 @@ size_t strlen(const char *s) {
 }
 
 char *strcpy(char *dst, const char *src) {
-  // Let's use `strncpy` to implement strcpy
-  // Note that `strncpy` automatically stops at the null terminator
-  // so we can safely set the length to maximum integer
-  return strncpy(dst, src, INT32_MAX);
+  // Let's use `strncpy` and `strlen` to implement strcpy
+  // Note that we need to copy the null terminator
+  // so the actual bytes copied is `strlen(src) + 1`
+  return strncpy(dst, src, strlen(src) + 1);
 }
 
 char *strncpy(char *dst, const char *src, size_t n) {
@@ -28,10 +32,7 @@ char *strncpy(char *dst, const char *src, size_t n) {
   size_t i;
   for (i = 0; i < n && src[i] != '\0'; i++)
     dst[i] = src[i];
-  if (src[i] != '\0') // Not enough characters in `src`
-    for (; i < n; i++)
-      dst[i] = '\0';
-  else // Enough characters in `src`
+  for (; i < n; i++)
     dst[i] = '\0';
   return dst;
 }
@@ -61,7 +62,8 @@ char *strncat(char *dst, const char *src, size_t n) {
 }
 
 int strcmp(const char *s1, const char *s2) {
-  return strncmp(s1, s2, INT32_MAX);
+  // Note the null terminator
+  return strncmp(s1, s2, max(strlen(s1), strlen(s2)) + 1);
 }
 
 int strncmp(const char *s1, const char *s2, size_t n) {
