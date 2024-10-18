@@ -28,18 +28,12 @@ void iringbuf_put(IRingBuf *iringbuf, Decode *s) {
 }
 
 void iringbuf_print(IRingBuf *iringbuf) {
-  printf("Recently execued %d instructions:\n", iringbuf->one_loop ? IRINGBUF_SIZE : iringbuf->now_at);
-  int start = iringbuf->now_at;
-  if (iringbuf->one_loop) {
-    for (int i = start; i != start; i = (i + 1) % IRINGBUF_SIZE) {
-      print_decode(&iringbuf->decode[i]);
-    }
-  } else {
-    for (int i = 0; i < start; i++) {
-      print_decode(&iringbuf->decode[i]);
-    }
-  }
-  
+  printf("Recently executed %d instructions:\n", iringbuf->one_loop ? IRINGBUF_SIZE : iringbuf->now_at);
+  int i = iringbuf->one_loop ? iringbuf->now_at : 0;
+  do {
+    print_decode(&iringbuf->decode[i]);
+    i = (i + 1) % IRINGBUF_SIZE;
+  } while (i != iringbuf->now_at);
 }
 
 #endif
