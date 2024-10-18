@@ -32,6 +32,23 @@ int vsprintf(char *out, const char *fmt, va_list ap) {
       p++;
     } else if (*(p + 1) == 'd') {
       int n = va_arg(ap, int);
+      if (n == -2147483648) {
+        // Specially handle this case
+        // as the following method cannot convert -2147483648 to a positive number
+        out[out_count++] = '-';
+        out[out_count++] = '2';
+        out[out_count++] = '1';
+        out[out_count++] = '4';
+        out[out_count++] = '7';
+        out[out_count++] = '4';
+        out[out_count++] = '8';
+        out[out_count++] = '3';
+        out[out_count++] = '6';
+        out[out_count++] = '4';
+        out[out_count++] = '8';
+        p++;
+        continue;
+      }
       // We cannot use `stoi` here as we are implementing a library function
       // Output a negative symbol
       if (n < 0) {
@@ -43,10 +60,27 @@ int vsprintf(char *out, const char *fmt, va_list ap) {
       char buf[11];
       buf[10] = '\0';
       int loc = 9;
-      while (n > 0) {
+      do {
         buf[loc--] = n % 10 + '0';
         n /= 10;
+      } while (n > 0);
+      // Output the digits
+      for (int i = loc + 1; i < 10; i++) {
+        out[out_count++] = buf[i];
       }
+      p++;
+    } else if (*(p + 1) == 'u') {
+      unsigned int n = va_arg(ap, unsigned int);
+      // We cannot use `stoi` here as we are implementing a library function
+      // Use a buffer to store the digits
+      // Max: 4294967295, 10 digits
+      char buf[11];
+      buf[10] = '\0';
+      int loc = 9;
+      do {
+        buf[loc--] = n % 10 + '0';
+        n /= 10;
+      } while (n > 0);
       // Output the digits
       for (int i = loc + 1; i < 10; i++) {
         out[out_count++] = buf[i];

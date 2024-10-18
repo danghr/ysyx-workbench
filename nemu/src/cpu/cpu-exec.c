@@ -17,6 +17,7 @@
 #include <cpu/decode.h>
 #include <cpu/difftest.h>
 #include <cpu/watchpoint_check.h>
+#include <cpu/iringbuf.h>
 #include <locale.h>
 
 /* The assembly code of instructions executed is only output to the screen
@@ -30,6 +31,8 @@ CPU_state cpu = {};
 uint64_t g_nr_guest_inst = 0;
 static uint64_t g_timer = 0; // unit: us
 static bool g_print_step = false;
+
+IRingBuf iringbuf;
 
 void device_update();
 
@@ -84,6 +87,7 @@ static void exec_once(Decode *s, vaddr_t pc) {
 #else
   p[0] = '\0'; // the upstream llvm does not support loongarch32r
 #endif
+  iringbuf_put(&iringbuf, s);
 #endif
 }
 
@@ -140,6 +144,7 @@ void cpu_exec(uint64_t n) {
             ANSI_FMT("HIT BAD TRAP", ANSI_FG_RED))),
           nemu_state.halt_pc);
       // fall through
+      iringbuf_print(&iringbuf);
     case NEMU_QUIT: statistic();
   }
 }
