@@ -10,6 +10,7 @@
 typedef struct
 {
   int now_at;
+  bool one_loop;
   Decode decode[IRINGBUF_SIZE];
 } IRingBuf;
 

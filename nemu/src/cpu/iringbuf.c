@@ -16,19 +16,30 @@ static void print_decode(Decode *s) {
 
 void iringbuf_init(IRingBuf *iringbuf) {
   iringbuf->now_at = 0;
+  iringbuf->one_loop = false;
 }
 
 void iringbuf_put(IRingBuf *iringbuf, Decode *s) {
   iringbuf->decode[iringbuf->now_at++] = *s;
+  if (iringbuf->now_at == IRINGBUF_SIZE) {
+    iringbuf->one_loop = true;
+  }
   iringbuf->now_at %= IRINGBUF_SIZE;
 }
 
 void iringbuf_print(IRingBuf *iringbuf) {
   printf("Recently execued %d instructions:\n", IRINGBUF_SIZE);
   int start = iringbuf->now_at;
-  for (int i = start; i != start; i = (i + 1) % IRINGBUF_SIZE) {
-    print_decode(&iringbuf->decode[i]);
+  if (iringbuf->one_loop) {
+    for (int i = start; i != start; i = (i + 1) % IRINGBUF_SIZE) {
+      print_decode(&iringbuf->decode[i]);
+    }
+  } else {
+    for (int i = 0; i < start; i++) {
+      print_decode(&iringbuf->decode[i]);
+    }
   }
+  
 }
 
 #endif
