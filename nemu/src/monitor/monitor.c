@@ -17,7 +17,9 @@
 #include <memory/paddr.h>
 #include <cpu/iringbuf.h>
 
+#ifdef CONFIG_ITRACE
 extern IRingBuf iringbuf;
+#endif
 
 void init_rand();
 void init_log(const char *log_file);
@@ -121,7 +123,7 @@ void init_monitor(int argc, char *argv[]) {
   IFDEF(CONFIG_DEVICE, init_device());
 
   /* Initialize IRingBuf. */
-  iringbuf_init(&iringbuf);
+  IFDEF(CONFIG_ITRACE, iringbuf_init(&iringbuf));
 
   /* Perform ISA dependent initialization. */
   init_isa();

@@ -32,7 +32,9 @@ uint64_t g_nr_guest_inst = 0;
 static uint64_t g_timer = 0; // unit: us
 static bool g_print_step = false;
 
+#ifdef CONFIG_ITRACE
 IRingBuf iringbuf;
+#endif
 
 void device_update();
 
@@ -96,7 +98,7 @@ static void execute(uint64_t n) {
     exec_once(&s, cpu.pc);
     g_nr_guest_inst ++;
     trace_and_difftest(&s, cpu.pc);
-    iringbuf_put(&iringbuf, &s);
+    IFDEF(CONFIG_ITRACE, iringbuf_put(&iringbuf, &s));
     if (nemu_state.state != NEMU_RUNNING) break;
     IFDEF(CONFIG_DEVICE, device_update());
   }
@@ -143,8 +145,10 @@ void cpu_exec(uint64_t n) {
            (nemu_state.halt_ret == 0 ? ANSI_FMT("HIT GOOD TRAP", ANSI_FG_GREEN) :
             ANSI_FMT("HIT BAD TRAP", ANSI_FG_RED))),
           nemu_state.halt_pc);
+#ifdef CONFIG_ITRACE
       if (nemu_state.state == NEMU_ABORT || nemu_state.halt_ret != 0)
         iringbuf_print(&iringbuf);
+#endif
       // fall through
     case NEMU_QUIT: statistic();
   }
