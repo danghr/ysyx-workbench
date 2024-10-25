@@ -17,7 +17,9 @@
 #include <memory/paddr.h>
 #include <cpu/iringbuf.h>
 
+#ifdef CONFIG_ITRACE
 extern IRingBuf iringbuf;
+#endif
 
 void init_rand();
 void init_log(const char *log_file);
@@ -29,6 +31,7 @@ void init_disasm(const char *triple);
 
 static void welcome() {
   Log("Trace: %s", MUXDEF(CONFIG_TRACE, ANSI_FMT("ON", ANSI_FG_GREEN), ANSI_FMT("OFF", ANSI_FG_RED)));
+  Log("Watchpoint: %s", MUXDEF(CONFIG_WATCHPOINT, ANSI_FMT("ON", ANSI_FG_GREEN), ANSI_FMT("OFF", ANSI_FG_RED)));
   IFDEF(CONFIG_TRACE, Log("If trace is enabled, a log file will be generated "
         "to record the trace. This may lead to a large log file. "
         "If it is not necessary, you can disable it in menuconfig"));
@@ -121,7 +124,7 @@ void init_monitor(int argc, char *argv[]) {
   IFDEF(CONFIG_DEVICE, init_device());
 
   /* Initialize IRingBuf. */
-  iringbuf_init(&iringbuf);
+  IFDEF(CONFIG_ITRACE, iringbuf_init(&iringbuf));
 
   /* Perform ISA dependent initialization. */
   init_isa();
