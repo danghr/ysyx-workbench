@@ -30,7 +30,7 @@ paddr_t host_to_guest(uint8_t *haddr) { return haddr - pmem + CONFIG_MBASE; }
 static word_t pmem_read(paddr_t addr, int len) {
   word_t ret = host_read(guest_to_host(addr), len);
 #ifdef CONFIG_MTRACE
-  log_write("Reading %d bytes from physical memory address " FMT_WORD " with value " FMT_WORD, len, addr, ret);
+  log_write("Reading %d bytes from physical memory address " FMT_WORD " with value " FMT_WORD "\n", len, addr, ret);
 #endif
   return ret;
 }
@@ -38,7 +38,7 @@ static word_t pmem_read(paddr_t addr, int len) {
 static void pmem_write(paddr_t addr, int len, word_t data) {
   host_write(guest_to_host(addr), len, data);
 #ifdef CONFIG_MTRACE
-  log_write("Writing %d bytes to physical memory address " FMT_WORD " with value " FMT_WORD, len, addr, data);
+  log_write("Writing %d bytes to physical memory address " FMT_WORD " with value " FMT_WORD "\n", len, addr, data);
 #endif
 }
 
@@ -58,7 +58,7 @@ void init_mem() {
 
 word_t paddr_read(paddr_t addr, int len) {
 #ifdef CONFIG_MTRACE
-  log_write("Reading %d bytes from address " FMT_WORD, len, addr);
+  log_write("Reading %d bytes from address " FMT_WORD "\n", len, addr);
 #endif
   if (likely(in_pmem(addr))) return pmem_read(addr, len);
   IFDEF(CONFIG_DEVICE, return mmio_read(addr, len));
@@ -68,7 +68,7 @@ word_t paddr_read(paddr_t addr, int len) {
 
 void paddr_write(paddr_t addr, int len, word_t data) {
 #ifdef CONFIG_MTRACE
-  log_write("Writing %d bytes to address " FMT_WORD " with value " FMT_WORD, len, addr, data);
+  log_write("Writing %d bytes to address " FMT_WORD " with value " FMT_WORD "\n", len, addr, data);
 #endif
   if (likely(in_pmem(addr))) { pmem_write(addr, len, data); return; }
   IFDEF(CONFIG_DEVICE, mmio_write(addr, len, data); return);
