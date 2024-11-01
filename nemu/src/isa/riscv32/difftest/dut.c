@@ -17,8 +17,22 @@
 #include <cpu/difftest.h>
 #include "../local-include/reg.h"
 
+// CPU state for NEMU
+extern CPU_state cpu;
+
 bool isa_difftest_checkregs(CPU_state *ref_r, vaddr_t pc) {
-  return false;
+  // ref_r: State copied from Spike
+  // pc: PC of the current instruction
+
+  for (int i = 0; i < MUXDEF(CONFIG_RV32E, 16, 32); i++) {
+    if (ref_r->gpr[i] != cpu.gpr[i]) {
+      Log("%s Different value in register %s at pc = " FMT_WORD ". Reference = " FMT_WORD " / NEMU = " FMT_WORD,
+          ANSI_FMT("Difftest Error:", ANSI_FG_RED), reg_name(i), pc, ref_r->gpr[i], cpu.gpr[i]);
+      return false;
+    }
+  }
+
+  return true;
 }
 
 void isa_difftest_attach() {
