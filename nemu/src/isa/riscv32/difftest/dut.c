@@ -26,7 +26,7 @@ bool isa_difftest_checkregs(CPU_state *ref_r, vaddr_t pc) {
 
   for (int i = 0; i < MUXDEF(CONFIG_RV32E, 16, 32); i++) {
     if (ref_r->gpr[i] != cpu.gpr[i]) {
-      Log("%s Different value in register %s at pc = " FMT_WORD ", reference = " FMT_WORD ", NEMU = " FMT_WORD,
+      Log("%s Different value in register %s at pc = " FMT_WORD ". Reference = " FMT_WORD " / NEMU = " FMT_WORD,
           ANSI_FMT("Difftest Error:", ANSI_FG_RED), reg_name(i), pc, ref_r->gpr[i], cpu.gpr[i]);
       return false;
     }
