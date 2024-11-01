@@ -25,7 +25,7 @@ $(SRC_AUTO_BIND): $(NXDC_FILES)
 	python3 $(NVBOARD_HOME)/scripts/auto_pin_bind.py $^ $@
 
 # Remote server for yosys-sta
-YOSYS_STA_SERVER = yosys@console.danghr.com
+YOSYS_STA_SERVER = yosys@server.danghr.com
 
 # Project source
 VSRCS = $(shell find $(abspath ./vsrc) -name "*.v")
@@ -69,6 +69,8 @@ sta: $(BIN)
 		mkdir -p yosys-sta/top && \
 		cd yosys-sta/top && \
 		tar -xvf ~/top.tar && \
+		mkdir vsrc && \
+		mv DEFINITION.v vsrc/ && \
 		rm -rf ~/top.tar && \
 		cd .. && \
 		make sta DESIGN=$(TOPNAME) && \
