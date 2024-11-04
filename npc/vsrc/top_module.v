@@ -37,8 +37,6 @@ module ysyx_24070014_top_module (
   always @(posedge clk ) begin
     if (reset) pc <= `ysyx_24070014_INIT_PC;
     else pc <= next_pc;
-    $display("Reset: %d", reset);
-    $display("PC: %h", pc);
   end
 
 

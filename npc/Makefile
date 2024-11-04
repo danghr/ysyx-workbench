@@ -40,6 +40,7 @@ INCFLAGS = $(addprefix -I, $(INC_PATH))
 CXXFLAGS += $(INCFLAGS) -DTOP_NAME="\"V$(TOPNAME)\""
 CXXFLAGS += -DTRACE_NAME="\"\\\"$(TRACE_DIR)/$(TOPNAME).vcd\\\"\""		# TRACE_NAME defined here
 CXXFLAGS += -DTOP_NAME_H_FILE="\"\\\"V$(TOPNAME).h\\\"\""				# TOP_NAME_H_FILE defined here
+CXXFLAGS += -g
 
 # Target for $(BIN)
 $(BIN): $(VSRCS) $(CSRCS) $(NVBOARD_ARCHIVE)
