@@ -81,7 +81,7 @@ int main(int argc, char **argv)
 	npc_status = NPC_RUNNING;
 
 #ifdef _SEQUENTIAL_LOGIC
-	reset(3);
+	reset(20);
 #endif
 
 	// =============================
