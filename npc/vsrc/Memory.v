@@ -22,7 +22,7 @@ module ysyx_24070014_MemoryRW #(ADDR_WIDTH = 32, WORD_LEN = 32) (
     // Note that we should exclude invalid access here
     // Do nothing on address smaller than ysyx_24070014_MBASE or larger than ysyx_24070014_MBASE + ysyx_24070014_MSIZE
 
-    wire valid_access = (addr >= `ysyx_24070014_MBASE) && (addr < (`ysyx_24070014_MBASE + `ysyx_24070014_MSIZE));
+    wire valid_access = (addr >= `ysyx_24070014_MBASE) && (addr < (`ysyx_24070014_MBASE + `ysyx_24070014_MSIZE)) && ~reset;
     assign rdata = valid_access ? ysyx_24070014_paddr_read(addr) : {`ysyx_24070014_WORD_LEN{1'b0}};
     always @(posedge clk) begin
         if (reset) begin
@@ -40,6 +40,8 @@ endmodule
   * Template for a read-only memory access module with address width `ADDR_WIDTH` and data width `WORD_LEN`.
   */
 module ysyx_24070014_MemoryR #(ADDR_WIDTH = 32, WORD_LEN = 32) (
+    input clk,
+    input reset,
     input [ADDR_WIDTH-1:0] addr,
     output [WORD_LEN-1:0] rdata
 );
@@ -48,6 +50,6 @@ module ysyx_24070014_MemoryR #(ADDR_WIDTH = 32, WORD_LEN = 32) (
     // Note that we should exclude invalid access here
     // Do nothing on address smaller than ysyx_24070014_MBASE or larger than ysyx_24070014_MBASE + ysyx_24070014_MSIZE
 
-    wire valid_access = (addr >= `ysyx_24070014_MBASE) && (addr < (`ysyx_24070014_MBASE + `ysyx_24070014_MSIZE));
+    wire valid_access = (addr >= `ysyx_24070014_MBASE) && (addr < (`ysyx_24070014_MBASE + `ysyx_24070014_MSIZE)) && ~reset;
     assign rdata = valid_access ? ysyx_24070014_paddr_read(addr) : {`ysyx_24070014_WORD_LEN{1'b0}};
 endmodule

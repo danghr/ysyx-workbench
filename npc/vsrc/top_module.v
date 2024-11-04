@@ -19,6 +19,8 @@ module ysyx_24070014_top_module (
   reg [`ysyx_24070014_ADDR_LEN-1:0] pc;
   wire [`ysyx_24070014_INST_LEN-1:0] inst;
   ysyx_24070014_MemoryR #(`ysyx_24070014_ADDR_LEN, `ysyx_24070014_INST_LEN) inst_mem (
+    .clk(clk),
+    .reset(reset),
     .addr(pc),
     .rdata(inst)
   );
