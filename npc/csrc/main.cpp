@@ -1,12 +1,21 @@
-#include <main.h>
-#include <memory.h>
+#include <nvboard.h>
+#include TOP_NAME_H_FILE // Defined in npc/Makefile
+#include "verilated.h"
+#include "verilated_vcd_c.h"
+#include <regs.h>
+#include <memory/paddr.h>
+#include <utils.h>
+#include <state.h>
+#include <debug.h>
 
 // Configuration of whether use tracing, sequential logic, or NVBoard
 #define _DO_TRACE
 #define _SEQUENTIAL_LOGIC
 // #define _NVBOARD
 
-NPC_Status npc_status = NPC_STOPPED;
+void init_monitor(int, char *[]);
+
+extern NPCState npc_state;
 static TOP_NAME *top; // Defined in npc/Makefile
 VerilatedContext *contextp;
 VerilatedVcdC *tfp;
@@ -62,6 +71,9 @@ void reset(int n)
 
 int main(int argc, char **argv)
 {
+	// ========================
+	// === Simulation Setup ===
+	// ========================
 	contextp = new VerilatedContext;
 	contextp->commandArgs(argc, argv);
 	top = new TOP_NAME{contextp};
@@ -78,7 +90,15 @@ int main(int argc, char **argv)
 	nvboard_init();
 #endif
 
-	npc_status = NPC_RUNNING;
+	// ==================================
+	// === Environment Initialization ===
+	// ==================================
+
+	npc_state_init();
+	init_monitor(argc, argv);
+
+	// Restart by setting the initial program counter
+  	top->top_signal_pc = RESET_VECTOR;
 
 #ifdef _SEQUENTIAL_LOGIC
 	reset(20);
@@ -89,13 +109,17 @@ int main(int argc, char **argv)
 	// =============================
 
 SIMULATE_BEGIN:
-	SIMULATE_UNTIL(npc_status != NPC_RUNNING)
+	npc_state_run();
+	printf("NPC now running\n");
+	SIMULATE_UNTIL(npc_state.state != NPC_RUNNING || SIMULATE_FINISHED)
 	{
-		top->top_signal_inst = memory(top->top_signal_pc); // addi x1, x0, 1
+		printf("Reading instruction at PC 0x%08x\n", top->top_signal_pc);
+		top->top_signal_inst = paddr_read(top->top_signal_pc); // addi x1, x0, 1
+		printf("Instruction: 0x%08x\n", top->top_signal_inst);
 		single_cycle();
 		bool reg_success = false;
-		ASSERT(isa_reg_str2val(top, "x0", &reg_success) == 0);
-		ASSERT(reg_success = true);
+		assert(isa_reg_str2val(top, "x0", &reg_success) == 0);
+		assert(reg_success = true);
 	}
 	isa_reg_display(top);
 	printf("\n");
@@ -118,22 +142,32 @@ SIMULATE_END:
 #endif
 
 	int return_status = 1;
-	if (npc_status == NPC_EXIT)
+	if (npc_state.state == NPC_EXIT)
 	{
 		printf("Simulation finished successfully.\n");
 		return_status = 0;
 	}
-	else if (npc_status == NPC_ASSERTION_FAIL)
+	else if (npc_state.state == NPC_STOPPED)
+	{
+		printf("Simulation stopped.\n");
+		return_status = 0;
+	}
+	else if (npc_state.state == NPC_ASSERTION_FAIL)
 	{
 		printf("Simulation failed due to assertion failure.\n");
 		return_status = 1;
 	}
 	else
 	{
-		printf("Simulation failed due to unknown reason.\n");
+		printf("Simulation failed due to unknown reason. NEMU_STATE: %d\n", npc_state.state);
 		return_status = 1;
 	}
 	return return_status;
+}
+
+void assert_fail_msg() {
+  isa_reg_display(top);
+//   statistic();
 }
 
 // Miscaellaneous functions
@@ -142,11 +176,11 @@ extern "C" void ysyx_24070014_ecall()
 {
 	printf("Calling ecall\n");
 	printf("Not implemented\n");
-	ASSERT(0);
+	Assert(0, "ecall not implemented");
 }
 
 extern "C" void ysyx_24070014_ebreak()
 {
 	printf("Calling ebreak\n");
-	npc_status = NPC_EXIT;
+	npc_state_exit();
 }

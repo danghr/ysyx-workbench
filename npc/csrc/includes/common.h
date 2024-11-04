@@ -2,19 +2,18 @@
 #define __COMMON_H__
 
 #include <cstdint>
+#include <cinttypes>
+#include "config.h"
+#include "macro.h"
+#include "utils.h"
 
-#ifndef CONFIG_RV64
 typedef uint32_t word_t;
-#else
-typedef uint64_t word_t;
-#endif
+typedef int32_t sword_t;
+#define FMT_WORD MUXDEF(CONFIG_ISA64, "0x%016" PRIx64, "0x%08" PRIx32)
 
-// Assertion macro
-#define ASSERT(cond)                                           \
-  if (!(cond))                                                 \
-  {                                                            \
-    printf("Assertion failed at %s:%d\n", __FILE__, __LINE__); \
-    npc_status = NPC_ASSERTION_FAIL;                           \
-  }
+typedef uint32_t paddr_t;
+#define FMT_PADDR MUXDEF(PMEM64, "0x%016" PRIx64, "0x%08" PRIx32)
+
+typedef uint8_t byte;
 
 #endif
