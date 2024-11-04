@@ -113,9 +113,9 @@ SIMULATE_BEGIN:
 	printf("NPC now running\n");
 	SIMULATE_UNTIL(npc_state.state == NPC_RUNNING);
 	{
-		printf("Reading instruction at PC %08x\n", top->top_signal_pc);
+		printf("Reading instruction at PC 0x%08x\n", top->top_signal_pc);
 		top->top_signal_inst = paddr_read(top->top_signal_pc); // addi x1, x0, 1
-		printf("Instruction: %08x\n", top->top_signal_inst);
+		printf("Instruction: 0x%08x\n", top->top_signal_inst);
 		single_cycle();
 		bool reg_success = false;
 		assert(isa_reg_str2val(top, "x0", &reg_success) == 0);
