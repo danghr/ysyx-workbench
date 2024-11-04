@@ -144,6 +144,11 @@ SIMULATE_END:
 		printf("Simulation finished successfully.\n");
 		return_status = 0;
 	}
+	else if (npc_state.state == NPC_STOPPED)
+	{
+		printf("Simulation stopped.\n");
+		return_status = 0;
+	}
 	else if (npc_state.state == NPC_ASSERTION_FAIL)
 	{
 		printf("Simulation failed due to assertion failure.\n");
