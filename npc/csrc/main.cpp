@@ -156,7 +156,7 @@ SIMULATE_END:
 	}
 	else
 	{
-		printf("Simulation failed due to unknown reason.\n");
+		printf("Simulation failed due to unknown reason. NEMU_STATE: %d\n", npc_state.state);
 		return_status = 1;
 	}
 	return return_status;
