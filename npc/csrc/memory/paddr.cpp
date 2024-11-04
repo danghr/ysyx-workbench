@@ -75,6 +75,7 @@ void paddr_write(paddr_t addr, word_t data, byte mask) {
 }
 
 extern "C" int ysyx_24070014_paddr_read(int addr) {
+  printf("Addr: %d\n", addr);
   return (int)paddr_read((paddr_t)addr);
 }
 
