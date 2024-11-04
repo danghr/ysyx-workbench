@@ -36,7 +36,8 @@ module ysyx_24070014_top_module (
     .out(next_pc)
   );
   always @(posedge clk ) begin
-    pc <= next_pc;
+    if (reset) pc <= `ysyx_24070014_INIT_PC;
+    else pc <= next_pc;
   end
 
 
