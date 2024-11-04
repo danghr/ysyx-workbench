@@ -8,6 +8,7 @@
 #include "common.h"
 #include "misc.h"
 #include "regs.h"
+#include "memory.h"
 
 typedef enum
 {
