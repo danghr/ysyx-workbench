@@ -20,7 +20,6 @@ module ysyx_24070014_top_module (
 
   reg [`ysyx_24070014_ADDR_LEN-1:0] pc;
   wire [`ysyx_24070014_INST_LEN-1:0] inst;
-  assign inst = ysyx_24070014_paddr_read(pc);
 
   // PC+4
   wire [`ysyx_24070014_ADDR_LEN-1:0] pc_plus_4 = pc + 32'h4;
@@ -39,6 +38,7 @@ module ysyx_24070014_top_module (
     if (reset) pc <= `ysyx_24070014_INIT_PC;
     else pc <= next_pc;
   end
+  assign inst = ysyx_24070014_paddr_read(pc);
 
 
   /***********************************************

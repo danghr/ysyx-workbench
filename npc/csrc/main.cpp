@@ -99,7 +99,7 @@ int main(int argc, char **argv)
 	init_monitor(argc, argv);
 
 	// Restart by setting the initial program counter
-  	// top->TOP_PC = RESET_VECTOR;
+  	top->TOP_PC = RESET_VECTOR;
 
 #ifdef _SEQUENTIAL_LOGIC
 	reset(20);
