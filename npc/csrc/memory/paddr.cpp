@@ -59,7 +59,7 @@ void init_mem() {
   Log("physical memory area [" FMT_PADDR ", " FMT_PADDR "]", PMEM_LEFT, PMEM_RIGHT);
 }
 
-word_t paddr_read(paddr_t addr) {
+extern "C" word_t paddr_read(paddr_t addr) {
   int len = 4;
 #ifdef CONFIG_MTRACE
   log_write("Reading %d bytes from address " FMT_WORD "\n", len, addr);
@@ -69,7 +69,7 @@ word_t paddr_read(paddr_t addr) {
   return 0;
 }
 
-void paddr_write(paddr_t addr, word_t data, byte mask) {
+extern "C" void paddr_write(paddr_t addr, word_t data, byte mask) {
   if (likely(in_pmem(addr))) { pmem_write(addr, data, mask); return; }
   out_of_bound(addr);
 }

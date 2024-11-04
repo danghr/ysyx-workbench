@@ -49,12 +49,16 @@ $(BIN): $(VSRCS) $(CSRCS) $(NVBOARD_ARCHIVE)
 		$(addprefix -CFLAGS , $(CXXFLAGS)) $(addprefix -LDFLAGS , $(LDFLAGS)) \
 		--Mdir $(OBJ_DIR) --exe -o $(abspath $(BIN))
 
+# Command to execute NEMU
+IMG ?=
+NPC_EXEC := $(BIN) $(ARGS) $(IMG)
+
 all:
 	@echo "Write this Makefile by your self."
 
 sim: $(BIN)
 	$(call git_commit, "sim RTL") # DO NOT REMOVE THIS LINE!!!
-	@$^
+	$(NPC_EXEC)
 
 sta: $(BIN)
 	rm -rf $(STAT_DIR)
