@@ -99,7 +99,7 @@ int main(int argc, char **argv)
 	init_monitor(argc, argv);
 
 	// Restart by setting the initial program counter
-  	top->TOP_PC = RESET_VECTOR;
+  	// top->TOP_PC = RESET_VECTOR;
 
 #ifdef _SEQUENTIAL_LOGIC
 	reset(20);
@@ -114,7 +114,7 @@ SIMULATE_BEGIN:
 	printf("NPC now running\n");
 	SIMULATE_UNTIL(npc_state.state != NPC_RUNNING || SIMULATE_FINISHED)
 	{
-		printf("Reading instruction at PC 0x%08x\n", top->rootp->ysyx_24070014_top_module__DOT__pc);
+		printf("Reading instruction at PC 0x%08x\n", top->TOP_PC);
 		single_cycle();
 		bool reg_success = false;
 		assert(isa_reg_str2val(top, "x0", &reg_success) == 0);
