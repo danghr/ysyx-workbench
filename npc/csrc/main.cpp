@@ -22,7 +22,7 @@ VerilatedContext *contextp;
 VerilatedVcdC *tfp;
 
 // Define a maximum simulation time and cycles
-#define MAX_CYCLES 1e9
+#define MAX_CYCLES 1e2
 #ifdef _SEQUENTIAL_LOGIC
 const int MAX_SIM_TIME = (MAX_CYCLES) * 2;
 #else
