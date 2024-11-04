@@ -15,19 +15,20 @@ module ysyx_24070014_MemoryRW #(ADDR_WIDTH = 32, WORD_LEN = 32) (
     input [WORD_LEN-1:0] wdata,
     input wen,
     input [3:0] mask,
-    output [WORD_LEN-1:0] rdata
+    output reg [WORD_LEN-1:0] rdata
 );
-
     // We only pass the arguments to DPI-C functions here
     // Note that we should exclude invalid access here
     // Do nothing on address smaller than ysyx_24070014_MBASE or larger than ysyx_24070014_MBASE + ysyx_24070014_MSIZE
 
     wire valid_access = (addr >= `ysyx_24070014_MBASE) && (addr < (`ysyx_24070014_MBASE + `ysyx_24070014_MSIZE)) && ~reset;
-    assign rdata = valid_access ? ysyx_24070014_paddr_read(addr) : {`ysyx_24070014_WORD_LEN{1'b0}};
     always @(posedge clk) begin
-        if (reset) begin
-            // Do nothing
-        end else if (wen && valid_access) begin
+        if (~reset & valid_access) begin
+            rdata <= ysyx_24070014_paddr_read(addr);
+        end
+    end
+    always @(posedge clk) begin
+        if (~reset & valid_access & wen) begin
             ysyx_24070014_paddr_write(addr, wdata, {4'b0, mask});
         end
     end
@@ -43,13 +44,17 @@ module ysyx_24070014_MemoryR #(ADDR_WIDTH = 32, WORD_LEN = 32) (
     input clk,
     input reset,
     input [ADDR_WIDTH-1:0] addr,
-    output [WORD_LEN-1:0] rdata
+    output reg [WORD_LEN-1:0] rdata
 );
-
     // We only pass the arguments to DPI-C functions here
     // Note that we should exclude invalid access here
     // Do nothing on address smaller than ysyx_24070014_MBASE or larger than ysyx_24070014_MBASE + ysyx_24070014_MSIZE
 
     wire valid_access = (addr >= `ysyx_24070014_MBASE) && (addr < (`ysyx_24070014_MBASE + `ysyx_24070014_MSIZE)) && ~reset;
-    assign rdata = valid_access ? ysyx_24070014_paddr_read(addr) : {`ysyx_24070014_WORD_LEN{1'b0}};
+    always @(posedge clk) begin
+        if (~reset & valid_access) begin
+            rdata <= ysyx_24070014_paddr_read(addr);
+        end
+    end
+
 endmodule
