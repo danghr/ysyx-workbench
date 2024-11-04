@@ -3,20 +3,12 @@
 // DPI-C functions
 import "DPI-C" function void ysyx_24070014_ecall();
 import "DPI-C" function void ysyx_24070014_ebreak();
+import "DPI-C" function int ysyx_24070014_paddr_read(int addr);
+import "DPI-C" function void ysyx_24070014_paddr_write(int addr, int data, int mask);
 
 module ysyx_24070014_top_module (
   input clk,
   input reset,
-
-  // Signal to access the memory for instruction fetch
-  output reg [`ysyx_24070014_WORD_LEN-1:0] top_signal_pc,
-  input [31:0] top_signal_inst,
-
-  // Signal to access main mamory
-  output [`ysyx_24070014_WORD_LEN-1:0] top_signal_mem_addr,
-  input [`ysyx_24070014_WORD_LEN-1:0] top_signal_mem_data_read,
-  output [`ysyx_24070014_WORD_LEN-1:0] top_signal_mem_data_write,
-  output top_signal_mem_write_en,
 
   // Signal to access regfile
   output [`ysyx_24070014_DATA_LEN-1:0] top_signal_regfile[2**`ysyx_24070014_REG_ADDR_WIDTH-1:0]
@@ -28,8 +20,7 @@ module ysyx_24070014_top_module (
 
   reg [`ysyx_24070014_ADDR_LEN-1:0] pc;
   wire [`ysyx_24070014_INST_LEN-1:0] inst;
-  assign inst = top_signal_inst;
-  assign top_signal_pc = pc;
+  assign inst = ysyx_24070014_paddr_read(pc);
 
   // PC+4
   wire [`ysyx_24070014_ADDR_LEN-1:0] pc_plus_4 = pc + 32'h4;
@@ -45,8 +36,7 @@ module ysyx_24070014_top_module (
     .out(next_pc)
   );
   always @(posedge clk ) begin
-    if (reset) pc <= `ysyx_24070014_INIT_PC;
-    else pc <= next_pc;
+    pc <= next_pc;
   end
 
 
@@ -141,10 +131,11 @@ module ysyx_24070014_top_module (
   wire [`ysyx_24070014_ADDR_LEN-1:0] mem_addr;
   wire [`ysyx_24070014_DATA_LEN-1:0] mem_data_read, mem_data_write;
   assign mem_addr = alu_out;
-  assign top_signal_mem_addr = mem_addr;
-  assign mem_data_read = top_signal_mem_data_read;
-  assign top_signal_mem_data_write = mem_data_write;
-  assign top_signal_mem_write_en = mem_write_en;
+  assign mem_data_write = reg_data_rs2;
+  always @(posedge clk) begin
+    if (mem_write_en) ysyx_24070014_paddr_write(mem_addr, mem_data_write, 0);
+  end
+  assign mem_data_read = ysyx_24070014_paddr_read(mem_addr);
 
 
   /**********************

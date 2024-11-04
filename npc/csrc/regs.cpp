@@ -13,7 +13,7 @@ const char *regs[] = {
 void isa_reg_display(TOP_NAME *top)
 {
   uint32_t *gpr = top->top_signal_regfile;
-  uint32_t pc = top->top_signal_pc;
+  uint32_t pc = top->TOP_PC;
 
   for (int i = 0; i < 32; i++)
   {
@@ -35,7 +35,7 @@ void isa_reg_display(TOP_NAME *top)
 word_t isa_reg_str2val(TOP_NAME *top, const char *s, bool *success)
 {
   uint32_t *gpr = top->top_signal_regfile;
-  uint32_t pc = top->top_signal_pc;
+  uint32_t pc = top->TOP_PC;
 
   // We can accept both `$name` and `name` as register names.
   // We can accept both `$ra` and `$x1` as register names.
