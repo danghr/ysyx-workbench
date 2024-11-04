@@ -3,8 +3,6 @@
 // DPI-C functions
 import "DPI-C" function void ysyx_24070014_ecall();
 import "DPI-C" function void ysyx_24070014_ebreak();
-import "DPI-C" function int ysyx_24070014_paddr_read(int addr);
-import "DPI-C" function void ysyx_24070014_paddr_write(int addr, int data, int mask);
 
 module ysyx_24070014_top_module (
   input clk,
@@ -20,6 +18,10 @@ module ysyx_24070014_top_module (
 
   reg [`ysyx_24070014_ADDR_LEN-1:0] pc;
   wire [`ysyx_24070014_INST_LEN-1:0] inst;
+  ysyx_24070014_MemoryR #(`ysyx_24070014_ADDR_LEN, `ysyx_24070014_INST_LEN) inst_mem (
+    .addr(pc),
+    .rdata(inst)
+  );
 
   // PC+4
   wire [`ysyx_24070014_ADDR_LEN-1:0] pc_plus_4 = pc + 32'h4;
@@ -48,6 +50,7 @@ module ysyx_24070014_top_module (
   wire pc_sel, reg_write_en, branch_unsigned, operand_a_sel, operand_b_sel, mem_write_en;
   wire [1:0] writeback_sel;
   wire [2:0] imm_sel;
+  wire [3:0] mem_write_mask;
   wire [4:0] alu_sel;
   wire ecall, ebreak;
   ysyx_24070014_Decode decoder (
@@ -62,6 +65,7 @@ module ysyx_24070014_top_module (
     .operand_b_sel(operand_b_sel),
     .alu_sel(alu_sel),
     .mem_write_en(mem_write_en),
+    .mem_write_mask(mem_write_mask),
     .writeback_sel(writeback_sel),
     .ecall(ecall),
     .ebreak(ebreak)
@@ -132,10 +136,15 @@ module ysyx_24070014_top_module (
   wire [`ysyx_24070014_DATA_LEN-1:0] mem_data_read, mem_data_write;
   assign mem_addr = alu_out;
   assign mem_data_write = reg_data_rs2;
-  always @(posedge clk) begin
-    if (mem_write_en) ysyx_24070014_paddr_write(mem_addr, mem_data_write, 0);
-  end
-  assign mem_data_read = ysyx_24070014_paddr_read(mem_addr);
+  ysyx_24070014_MemoryRW #(`ysyx_24070014_ADDR_LEN, `ysyx_24070014_DATA_LEN) mem (
+    .clk(clk),
+    .reset(reset),
+    .addr(mem_addr),
+    .wdata(mem_data_write),
+    .wen(mem_write_en),
+    .mask(mem_write_mask),
+    .rdata(mem_data_read)
+  );
 
 
   /**********************
