@@ -73,3 +73,11 @@ void paddr_write(paddr_t addr, word_t data, byte mask) {
   if (likely(in_pmem(addr))) { pmem_write(addr, data, mask); return; }
   out_of_bound(addr);
 }
+
+extern "C" int ysyx_24070014_paddr_read(int addr) {
+  return (int)paddr_read((paddr_t)addr);
+}
+
+extern "C" void ysyx_24070014_paddr_write(int addr, int data, byte mask) {
+  paddr_write((paddr_t)addr, (word_t)data, (byte)mask);
+}

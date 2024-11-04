@@ -2,6 +2,7 @@
 #include TOP_NAME_H_FILE // Defined in npc/Makefile
 #include "verilated.h"
 #include "verilated_vcd_c.h"
+#include "Vysyx_24070014_top_module___024root.h"
 #include <regs.h>
 #include <memory/paddr.h>
 #include <utils.h>
@@ -55,10 +56,12 @@ void single_cycle()
 
 void reset(int n)
 {
+	printf("Doing reset\n");
 	top->reset = 1;
 	while (n-- > 0)
 		single_cycle();
 	top->reset = 0;
+	printf("Reset completed\n");
 }
 #endif
 
@@ -98,7 +101,7 @@ int main(int argc, char **argv)
 	init_monitor(argc, argv);
 
 	// Restart by setting the initial program counter
-  	top->top_signal_pc = RESET_VECTOR;
+  	top->TOP_PC = RESET_VECTOR;
 
 #ifdef _SEQUENTIAL_LOGIC
 	reset(20);
@@ -113,10 +116,9 @@ SIMULATE_BEGIN:
 	printf("NPC now running\n");
 	SIMULATE_UNTIL(npc_state.state != NPC_RUNNING || SIMULATE_FINISHED)
 	{
-		printf("Reading instruction at PC 0x%08x\n", top->top_signal_pc);
-		top->top_signal_inst = paddr_read(top->top_signal_pc); // addi x1, x0, 1
-		printf("Instruction: 0x%08x\n", top->top_signal_inst);
+		printf("Reading instruction at PC 0x%08x\n", top->TOP_PC);
 		single_cycle();
+		printf("Instruction: 0x%08x\n", top->TOP_INST);
 		bool reg_success = false;
 		assert(isa_reg_str2val(top, "x0", &reg_success) == 0);
 		assert(reg_success = true);

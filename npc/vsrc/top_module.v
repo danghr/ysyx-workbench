@@ -8,16 +8,6 @@ module ysyx_24070014_top_module (
   input clk,
   input reset,
 
-  // Signal to access the memory for instruction fetch
-  output reg [`ysyx_24070014_WORD_LEN-1:0] top_signal_pc,
-  input [31:0] top_signal_inst,
-
-  // Signal to access main mamory
-  output [`ysyx_24070014_WORD_LEN-1:0] top_signal_mem_addr,
-  input [`ysyx_24070014_WORD_LEN-1:0] top_signal_mem_data_read,
-  output [`ysyx_24070014_WORD_LEN-1:0] top_signal_mem_data_write,
-  output top_signal_mem_write_en,
-
   // Signal to access regfile
   output [`ysyx_24070014_DATA_LEN-1:0] top_signal_regfile[2**`ysyx_24070014_REG_ADDR_WIDTH-1:0]
 );
@@ -28,8 +18,12 @@ module ysyx_24070014_top_module (
 
   reg [`ysyx_24070014_ADDR_LEN-1:0] pc;
   wire [`ysyx_24070014_INST_LEN-1:0] inst;
-  assign inst = top_signal_inst;
-  assign top_signal_pc = pc;
+  ysyx_24070014_MemoryR #(`ysyx_24070014_ADDR_LEN, `ysyx_24070014_INST_LEN) inst_mem (
+    .clk(clk),
+    .reset(reset),
+    .addr(pc),
+    .rdata(inst)
+  );
 
   // PC+4
   wire [`ysyx_24070014_ADDR_LEN-1:0] pc_plus_4 = pc + 32'h4;
@@ -58,6 +52,7 @@ module ysyx_24070014_top_module (
   wire pc_sel, reg_write_en, branch_unsigned, operand_a_sel, operand_b_sel, mem_write_en;
   wire [1:0] writeback_sel;
   wire [2:0] imm_sel;
+  wire [3:0] mem_write_mask;
   wire [4:0] alu_sel;
   wire ecall, ebreak;
   ysyx_24070014_Decode decoder (
@@ -72,6 +67,7 @@ module ysyx_24070014_top_module (
     .operand_b_sel(operand_b_sel),
     .alu_sel(alu_sel),
     .mem_write_en(mem_write_en),
+    .mem_write_mask(mem_write_mask),
     .writeback_sel(writeback_sel),
     .ecall(ecall),
     .ebreak(ebreak)
@@ -141,10 +137,16 @@ module ysyx_24070014_top_module (
   wire [`ysyx_24070014_ADDR_LEN-1:0] mem_addr;
   wire [`ysyx_24070014_DATA_LEN-1:0] mem_data_read, mem_data_write;
   assign mem_addr = alu_out;
-  assign top_signal_mem_addr = mem_addr;
-  assign mem_data_read = top_signal_mem_data_read;
-  assign top_signal_mem_data_write = mem_data_write;
-  assign top_signal_mem_write_en = mem_write_en;
+  assign mem_data_write = reg_data_rs2;
+  ysyx_24070014_MemoryRW #(`ysyx_24070014_ADDR_LEN, `ysyx_24070014_DATA_LEN) mem (
+    .clk(clk),
+    .reset(reset),
+    .addr(mem_addr),
+    .wdata(mem_data_write),
+    .wen(mem_write_en),
+    .mask(mem_write_mask),
+    .rdata(mem_data_read)
+  );
 
 
   /**********************

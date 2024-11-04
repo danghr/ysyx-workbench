@@ -1,5 +1,9 @@
 #include <memory/init_image.h>
 #include <memory/paddr.h>
+#include "Vysyx_24070014_top_module.h"
+#include "Vysyx_24070014_top_module__Syms.h"
+#include "verilated_vcd_c.h"
+#include "verilated_dpi.h"
 
 // this is not consistent with uint8_t
 // but it is ok since we do not access the array directly

@@ -12,6 +12,7 @@ module ysyx_24070014_Decode (
   output operand_b_sel,
   output [4:0] alu_sel,
   output mem_write_en,
+  output [3:0] mem_write_mask,
   output [1:0] writeback_sel,
   output ecall,
   output ebreak
@@ -113,6 +114,10 @@ module ysyx_24070014_Decode (
   //   7'0110111, 1'b0,  // `lui`
   //   7'1110011, 1'b0   // System instructions, e.g., `ecall` and `ebreak`
   // });
+
+  // mem_write_mask
+  // Set to 0x1, 0x3 and 0xf for byte, half-word and word respectively.
+  assign mem_write_mask = 4'hf;
 
   // writeback_sel
   // Set to 0 for `mem`, 1 for `alu_out`, 2 for `pc + 4`.
