@@ -1,6 +1,8 @@
 #ifndef __COMMON_H__
 #define __COMMON_H__
 
+#include <cstdint>
+
 #ifndef CONFIG_RV64
 typedef uint32_t word_t;
 #else
