@@ -1,4 +1,4 @@
-#include "misc.h"
+#include <common.h>
 
 /***
  * Convert 2's complement representation to unsigned integer, with all bits
