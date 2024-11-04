@@ -110,6 +110,7 @@ int main(int argc, char **argv)
 
 SIMULATE_BEGIN:
 	npc_state_run();
+	printf("NPC now running\n");
 	SIMULATE_UNTIL(npc_state.state == NPC_RUNNING || SIMULATE_FINISHED);
 	{
 		top->top_signal_inst = paddr_read(top->top_signal_pc); // addi x1, x0, 1
