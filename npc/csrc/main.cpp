@@ -114,6 +114,7 @@ SIMULATE_BEGIN:
 	SIMULATE_UNTIL(npc_state.state == NPC_RUNNING || SIMULATE_FINISHED);
 	{
 		top->top_signal_inst = paddr_read(top->top_signal_pc); // addi x1, x0, 1
+		printf("Instruction: %08x\n", top->top_signal_inst);
 		single_cycle();
 		bool reg_success = false;
 		assert(isa_reg_str2val(top, "x0", &reg_success) == 0);
