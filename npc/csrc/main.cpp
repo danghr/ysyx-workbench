@@ -118,6 +118,7 @@ SIMULATE_BEGIN:
 	{
 		printf("Reading instruction at PC 0x%08x\n", top->TOP_PC);
 		single_cycle();
+		printf("Instruction: 0x%08x\n", top->TOP_INST);
 		bool reg_success = false;
 		assert(isa_reg_str2val(top, "x0", &reg_success) == 0);
 		assert(reg_success = true);
