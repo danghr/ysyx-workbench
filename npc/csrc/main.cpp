@@ -56,10 +56,12 @@ void single_cycle()
 
 void reset(int n)
 {
+	printf("Doing reset\n");
 	top->reset = 1;
 	while (n-- > 0)
 		single_cycle();
 	top->reset = 0;
+	printf("Reset completed\n");
 }
 #endif
 
