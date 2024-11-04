@@ -19,7 +19,7 @@ module ysyx_24070014_top_module (
    ******************************/
 
   reg [`ysyx_24070014_ADDR_LEN-1:0] pc;
-  reg [`ysyx_24070014_INST_LEN-1:0] inst;
+  wire [`ysyx_24070014_INST_LEN-1:0] inst;
 
   // PC+4
   wire [`ysyx_24070014_ADDR_LEN-1:0] pc_plus_4 = pc + 32'h4;
@@ -35,13 +35,9 @@ module ysyx_24070014_top_module (
     .out(next_pc)
   );
   always @(posedge clk ) begin
-    if (reset) begin
-      pc <= `ysyx_24070014_INIT_PC;
-      inst <= 32'h0;
-    end else begin
-      pc <= next_pc;
-      inst <= ysyx_24070014_paddr_read(pc);
-    end
+    if (reset) pc <= `ysyx_24070014_INIT_PC;
+    else pc <= next_pc;
+    $display("PC: %h", pc);
   end
 
 
