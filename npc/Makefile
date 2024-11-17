@@ -3,7 +3,7 @@ TOPNAME = ysyx_24070014_top_module
 # Constraint file
 NXDC_FILES = constr/top.nxdc
 # Include path for verilator
-INC_PATH ?= $(NPC_HOME)/csrc/includes
+INC_PATH ?= $(NPC_HOME)/csrc/include
 
 # Verilator command and flags
 VERILATOR = verilator
